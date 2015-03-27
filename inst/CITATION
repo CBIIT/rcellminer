@@ -1,0 +1,18 @@
+citHeader("To cite rcellminer:")
+
+citEntry(entry="article",
+  author =      "Reinhold WC, Sunshine M, Liu H, Varma S, Kohn KW, Morris J, Doroshow J, Pommier Y",
+  title =       "{{C}ell{M}iner: a web-based suite of genomic and pharmacologic tools to explore transcript and drug patterns in the {N}{C}{I}-60 cell line set}",
+  journal =     "Cancer Res.",
+  year =        "2012",
+  volume =      "72",
+  number =      "2",
+  pages =       "3499-511",
+  month =       "Jul",
+  textVersion = paste("Reinhold WC et al. CellMiner: a web-based suite of genomic and pharmacologic tools to explore transcript and drug patterns in the NCI-60 cell line set. Cancer Res. 2012 Jul 15;72(14):3499-511. http://www.ncbi.nlm.nih.gov/pubmed/22802077"))
+
+citFooter("This free open-source software implements academic research
+by the authors. Its development took a large amount of extra time and
+effort. If you use it, please support the project by citing the listed
+journal articles.")
+

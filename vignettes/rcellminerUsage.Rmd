@@ -1,0 +1,247 @@
+---
+title: "Using rcellminer"
+output:
+  BiocStyle::html_document:
+    toc: true
+---
+
+<!--
+%\VignetteEngine{knitr::rmarkdown}
+%\VignetteIndexEntry{Using rcellminer}
+%\VignetteKeywords{rcellminer}
+%\VignetteDepends{rcellminer}
+%\VignettePackage{rcellminer}
+-->
+
+```{r knitrSetup, include=FALSE}
+library(knitr)
+opts_chunk$set(out.extra='style="display:block; margin: auto"', fig.align="center", tidy=FALSE)
+```
+
+# Overview
+The NCI-60 cancer cell line panel has been used over the course of several decades as an anti-cancer drug screen. This panel was developed as part of the Developmental Therapeutics Program (DTP, http://dtp.nci.nih.gov/) of the U.S. National Cancer Institute (NCI). Thousands of compounds have been tested on the NCI-60, which have been extensively characterized by many platforms for gene and protein expression, copy number, mutation, and others (Reinhold, et al., 2012). The purpose of the CellMiner project (http://discover.nci.nih.gov/cellminer) has been to integrate data from multiple platforms used to analyze the NCI-60 and to provide a powerful suite of tools for exploration of NCI-60 data. 
+
+# Basics 
+
+## Installation 
+
+```{r install, eval=FALSE}
+source("http://bioconductor.org/biocLite.R")
+biocLite("rcellminer")
+biocLite("rcellminerData")
+```
+
+## Getting Started 
+
+Load **rcellminer** and **rcellminerData** packages: 
+
+```{r loadLibrary, message=FALSE, warning=FALSE}
+library(rcellminer)
+library(rcellminerData)
+```
+
+A list of all accessible vignettes and methods is available with the following command. 
+
+```{r searchHelp, eval=FALSE, tidy=FALSE}
+help.search("rcellminer")
+```
+
+# Data Visualization
+
+**rcellminer** provides several methods for the visualization of CellMiner data. The package provides methods to 
+
+## Drug Visualization 
+
+Because the values of within **rcellminer** have been z-score transformed this allows different data within the package to be compared. Often, it is useful for researchers to visualize multiple data profiles next to each other in order to visually identify patterns. Below are examples for the visualization of various profiles: single drugs and multiple drugs, as well as, molecular profiles and combinations of drug and molecular profiles. 
+
+```{r plotCellminer}
+# Get Cellminer data
+drugAct <- exprs(getAct(rcellminerData::drugData))
+molData <- getMolDataMatrices()
+
+# Two drugs 
+nsc <- c("3284", "739")
+plots <- c("drug", "drug") 
+plotCellMiner(drugAct, molData, plots, nsc, NULL)
+
+# Just drug
+nsc <- "94600"
+plots <- c("drug") 
+plotCellMiner(drugAct, molData, plots, nsc, NULL)
+
+# Just expression
+gene <- "TP53"
+plots <- c("exp") 
+plotCellMiner(drugAct, molData, plots, NULL, gene)
+
+# Two genes 
+# NOTE: subscript out of bounds Errors likely mean the gene is not present for that data type
+gene <- c("TP53", "MDM2")
+plots <- c("exp", "mut", "exp") 
+plotCellMiner(drugAct, molData, plots, NULL, gene)
+
+# Gene and drug to plot 
+nsc <- "94600"
+gene <- "TP53"
+plots <- c("mut", "drug", "cop") 
+plotCellMiner(drugAct, molData, plots, nsc, gene)
+```
+
+### Visualizing Drug Sets 
+
+For similar drugs, it is often useful to visualize the set of drugs collectively. **rcellminer** allows you to plot the average of the z-scores for a set of drugs quickly and with 1 standard deviation bars. 
+
+```{r plotDrugSets}
+# Get CellMiner data
+drugAct <- exprs(getAct(rcellminerData::drugData))
+
+# Select drugs using NSC IDs
+drugs <- "26273 39367 39368 105546 120958 255523 284751 289900 736740 743891 752330"
+
+drugs <- strsplit(drugs, " ")[[1]]
+drugAct <- drugAct[drugs,]
+mainLabel <- paste("Drug Set: 1, Drugs:", length(drugs), sep=" ")
+
+plotDrugSets(drugAct, drugs, mainLabel) 
+```
+
+## Structure Visualization
+
+The structures of the CellMiner compounds are visualized using the **plotStructuresFromNscs** method. This is a basic method that is a wrapper for functionality in the **rcdk** package. The first parameter is a user-defined string that will serve as a label for the compound, and the second parameter is a SMILES string for the componud of interest. Here we use the **getSmiles** method to retrieve the SMILES string for topotecan, a well-known topoisomerase inhibitor. 
+
+```{r plotStructures}
+plotStructuresFromNscs("Topotecan", getSmiles("609699"))
+```
+
+# Finding Similar Compounds
+
+## Generate drug set
+
+Generate a set of drugs to be pairwise compared. Here we will compare a set of 100 compounds to a drug of interest MK2206 (an AKT inhibitor). We provide a name "MK2206" and the SMILES-based structure [retrieved from PubChem](https://pubchem.ncbi.nlm.nih.gov/compound/46930998?from=summary#section=Canonical-SMILES). 
+
+```{r compareFingerPrints, results='hide', message=FALSE, warning=FALSE}
+# Load sqldf
+library(sqldf)
+
+# Set up necessary data
+## Compound annotations
+df <- as(featureData(getAct(rcellminerData::drugData)), "data.frame")
+## Drug activities 
+drugAct <- exprs(getAct(rcellminerData::drugData))
+## Molecular profiling data
+molData <- getMolDataMatrices() 
+
+# Example filter on particular properties of the compounds
+tmpDf <- sqldf("SELECT NSC, SMILES 
+							 FROM df 
+							 WHERE SMILES != ''")
+
+# Compare against the 100 NSCs for demonstration
+ids <- head(tmpDf$NSC, 100)
+smiles <- head(tmpDf$SMILES, 100)
+
+# All public
+#ids <- tmpDf$nsc
+#smiles <- tmpDf$smiles
+
+drugOfInterest <- "MK2206"
+smilesOfInterest <- "C1CC(C1)(C2=CC=C(C=C2)C3=C(C=C4C(=N3)C=CN5C4=NNC5=O)C6=CC=CC=C6)N"
+
+# Make a vector of all the compounds to be pairwise compared 
+ids <- c(drugOfInterest, ids)
+smiles <- c(smilesOfInterest, smiles)
+```
+
+## Run the comparison
+
+```{r runComparison, results='hide', message=FALSE}
+# Run fingerprint comparison 
+results <- compareFingerprints(ids, smiles)
+```
+
+## Visualize structures 
+
+View the similar structures. The first drug in the results will be the drug of interest and the subsequent drugs will compounds related by structure in decreasing similarity. 
+
+**NOTE:** All compounds in CellMiner are uniquely identified by **NSC** identifiers. 
+
+```{r plotSimilarStructures}
+# Plot top 2 results 
+resultsIdx <- sapply(names(results)[2:3], function(x) { which(tmpDf$NSC == x) })
+resultsIds <- names(results)[2:3]
+resultsSmiles <- tmpDf$SMILES[resultsIdx]
+
+resultsIds <- c(drugOfInterest, resultsIds)
+resultsSmiles <- c(smilesOfInterest, resultsSmiles)
+
+plotStructuresFromNscs(resultsIds, resultsSmiles, 
+											 titleCex=0.5, mainLabel="Fingerprint Results")
+```
+
+## Visualize drug activity
+
+Plot the activity of the compounds across the NCI-60
+
+```{r plotCellMiner}
+nscs <- names(results)[2:3]
+plotCellMiner(drugAct=drugAct, molData=molData, plots=rep("drug", length(nscs)), nscs, NULL)
+```
+
+# Working with Additional Drug Information
+
+## Mechanism of action (MOA)
+
+**rcellminer** provides information on the mechanism of action (MOA) for a number of compounds in the database. This information gives users information on the specific biochemical interactions that a given compound participates in to produce its effect. 
+
+### Get MOA information
+
+Find known MOA drugs and organize their essential information in a table.
+
+```{r makeDrugInfoTable, results='hide', message=FALSE}
+drugAnnot <- as(featureData(getAct(rcellminerData::drugData)), "data.frame")
+
+knownMoaDrugs <- unique(c(getMoaToCompounds(), recursive = TRUE))
+
+knownMoaDrugInfo <- data.frame(NSC=knownMoaDrugs, stringsAsFactors = FALSE)
+
+knownMoaDrugInfo$Name <- drugAnnot[knownMoaDrugInfo$NSC, "NAME"]
+
+knownMoaDrugInfo$MOA <- vapply(knownMoaDrugInfo$NSC, getMoaStr, character(1))
+
+# Order drugs by mechanism of action.
+knownMoaDrugInfo <- knownMoaDrugInfo[order(knownMoaDrugInfo$MOA), ]
+```
+
+## Working with GI50 (Growth Inhibition 50) data
+
+Additionally, **rcellminer** provides GI50 (growth inhibition 50%) values for the compounds in the database. GI50 values are similar to IC50 values, which are the concentrations that cause 50% growth inhibition, but have been renamed to emphasize the correction for the cell count at time zero. Further discussion on the assay used  available on the [DTP website](http://dtp.nci.nih.gov/docs/compare/compare_methodology.html).
+
+### Get GI50 values
+
+Compute GI50 data matrix for known MOA drugs.
+
+```{r computeGI50Data, results='hide', message=FALSE}
+negLogGI50Data <- getDrugActivityData(nscSet = knownMoaDrugInfo$NSC)
+
+gi50Data <- 10^(-negLogGI50Data)
+```
+
+Construct integrated data table (drug information and NCI-60 GI50 activity).
+
+```{r makeIntegratedTable, results='hide', message=FALSE}
+knownMoaDrugAct <- as.data.frame(cbind(knownMoaDrugInfo, gi50Data), stringsAsFactors = FALSE)
+
+# This table can be written out to a file
+#write.table(knownMoaDrugAct, file="knownMoaDrugAct.txt", quote=FALSE, sep="\t", row.names=FALSE, col.names=TRUE, na="NA")
+```
+
+# Session Information
+
+```{r sessionInfo}
+sessionInfo()
+```
+
+# References
+
+* Reinhold, W.C., et al. (2012) CellMiner: a web-based suite of genomic and pharmacologic tools to explore transcript and drug patterns in the NCI-60 cell line set, Cancer research, 72, 3499-3511
+
