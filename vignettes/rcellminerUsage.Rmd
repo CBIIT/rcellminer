@@ -235,6 +235,34 @@ knownMoaDrugAct <- as.data.frame(cbind(knownMoaDrugInfo, gi50Data), stringsAsFac
 #write.table(knownMoaDrugAct, file="knownMoaDrugAct.txt", quote=FALSE, sep="\t", row.names=FALSE, col.names=TRUE, na="NA")
 ```
 
+# Accessing rcellminer Shiny Apps 
+
+Several [Shiny-based](http://shiny.rstudio.com/) applications have been embedded into rcellminer to simplify exploration of the CellMiner data. 
+
+## Plot Comparison Application 
+
+The "Comparison" application allows users to plot any two variables from the CellMiner data against each other. It additionally allows users to search for compound NSC IDs using names and mechanisms of action. 
+
+```{r comparePlots, eval=FALSE}
+runShinyComparePlots()
+```
+
+## Compound Browser Application
+
+The "Compound Browser"" application allows users to see information about each compound, including structures and any repeat assay information. 
+
+```{r compoundBrowser, eval=FALSE}
+runShinyCompoundBrowser()
+```
+
+## Structure Comparison Application
+
+The "Structure Comparison"" application allows users to identify similar compounds within the dataset either by NSC ID or SMILES string. 
+
+```{r compareStructures, eval=FALSE}
+runShinyCompareStructures()
+```
+
 # Session Information
 
 ```{r sessionInfo}
