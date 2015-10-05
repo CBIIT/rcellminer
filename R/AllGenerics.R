@@ -74,6 +74,20 @@ setGeneric(name="getSampleData",
            def=function(object, ...) { standardGeneric("getSampleData") })
 
 
+#' Returns a list of data frames with feature information.
+#'
+#' @param object Object for which feature data is to be returned.
+#' @param ... Other possible parameters.
+#' @return A list of data frames with feature information.
+#'
+#' @concept rcellminerData
+#' @export
+#' 
+#' @importFrom methods setGeneric
+setGeneric(name="getFeatureAnnot",
+					 def=function(object, ...) { standardGeneric("getFeatureAnnot") })
+
+
 #' Returns an eSet object with drug activity data.
 #'
 #' @param object Object for which drug activity data is to be returned.

@@ -111,3 +111,19 @@ setMethod("getSampleData", signature = "MolData", function(object) {
 	as.data.frame(do.call(cbind, samples(object@sampleData)), stringsAsFactors=FALSE)
 })
 
+#' Returns a list of data frames with feature information.
+#'
+#' @param object MolData object for which feature data is to be returned.
+#' @return A named list of data frames with feature information for 
+#'  available molecular data types.
+#'
+#' @concept rcellminerData
+#' @export
+#' 
+#' @importFrom methods setMethod
+setMethod("getFeatureAnnot", signature = "MolData", function(object) {
+	featureDat <- lapply(getESetList(object), FUN = function(x) { 
+			as(featureData(x), "data.frame") 
+		})
+	return(featureDat)
+})

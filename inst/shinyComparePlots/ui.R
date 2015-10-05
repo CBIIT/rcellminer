@@ -19,6 +19,9 @@ if (require(ccleData)){
 if (require(cgpData)){
   dataSourceChoices <- c(dataSourceChoices, "CGP" = "cgp")
 }
+if (require(gdscData)){
+	dataSourceChoices <- c(dataSourceChoices, "GDSC" = "gdsc")
+}
 
 # NOTE: Size is not automatically set for rChartsAlternative output
 plotHeight <- 800
@@ -55,6 +58,7 @@ shinyUI(fluidPage(
                 textInput("yId", "ID: (e.g. 94600 or SLFN11); Case-Sensitive", "94600"), 
                 
                 checkboxInput("showColor", "Show Color?", value=TRUE),
+        				checkboxInput("selectedTissuesOnly", "Selected Tissues Only?", value=FALSE),
                 
                 #selectInput("showColorTissues", "Color Specific Tissues?", 
                 #						choices=c("all", unique(colorSet$tissues)), multiple=TRUE, selected="all"),

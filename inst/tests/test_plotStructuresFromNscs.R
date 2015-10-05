@@ -1,9 +1,9 @@
-test_that("getAlterationsInCBioPortal", {
+test_that("plotStructuresFromNscs", {
 	drugAnnot <- as(featureData(getAct(rcellminerData::drugData)), "data.frame")
 	file <- tempfile() 
 	
 	pdf(file)
-	plotStructuresFromNscs("94600", drugAnnot["94600","SMILES"])
+	plotStructuresFromNscs("94600")
 	dev.off()
 	
 	expect_true(file.exists(file))
@@ -11,7 +11,7 @@ test_that("getAlterationsInCBioPortal", {
 	file <- tempfile() 
 	
 	pdf(file)
-	plotStructuresFromNscs(c("609699", "94600"), drugAnnot[c("609699", "94600"),"SMILES"])
+	plotStructuresFromNscs(c("609699", "94600"))
 	dev.off()
 	
 	expect_true(file.exists(file))

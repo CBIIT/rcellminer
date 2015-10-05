@@ -1,6 +1,7 @@
 library(rcellminer)
 library(sqldf)
 library(shiny)
+library(fingerprint)
 
 shinyServer(function(input, output, session) {
 		drugAnnot <- as(featureData(getAct(rcellminerData::drugData)), "data.frame")
@@ -38,7 +39,7 @@ shinyServer(function(input, output, session) {
 									 min=1, max=length(tmpFingerprintList), {
 			 	for(i in seq_along(tmpFingerprintList)) {
 			 		setProgress(value=i, detail=paste0(floor(i*100/length(tmpFingerprintList)), "%"))
-			 		tmp <- distance(tmpFingerprintList[[i]], tmpFingerprintList[[1]])
+			 		tmp <- fingerprint::distance(tmpFingerprintList[[i]], tmpFingerprintList[[1]])
 			 		results <- c(results, tmp)
 			 	}
 			 	

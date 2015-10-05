@@ -146,6 +146,12 @@ if (require(cgpData)){
 }
 #----------------------------------------------------------------------------------------
 
+#----[gdscData]--------------------------------------------------------------------------
+if (require(gdscData)){  
+	srcContent[["gdsc"]] <- loadSourceContent("gdscData")
+}
+#----------------------------------------------------------------------------------------
+
 
 #--------------------------------------------------------------------------------------------------
 # Helper functions.
@@ -182,8 +188,16 @@ getFeatureData <- function(prefix, id, dataSource) {
 	return(results)
 }
 
+getTissueTypeSamples <- function(tissueTypes, dataSource, srcContent){
+	matchedSamples <- c(lapply(tissueTypes, function(tissue){
+		srcContent[[dataSource]]$tissueToSamplesMap[[tissue]]
+	}), recursive=TRUE)
+	return(unique(matchedSamples))
+}
 
-getPlotData <- function(xData, yData, showColor, showColorTissues, dataSource=NULL){
+
+getPlotData <- function(xData, yData, showColor, showColorTissues, dataSource=NULL,
+												selectedTissuesOnly){
 	if (is.null(dataSource)){
 		dataSource <- xData$dataSource
 	}
@@ -218,22 +232,20 @@ getPlotData <- function(xData, yData, showColor, showColorTissues, dataSource=NU
   
   # NOTE: making assumption that tissue type sets are disjoint, which may not hold
   # once hierarchy of tissue types is introduced (OK, i.e., disjoint at OncoTree1 level).
-	if(showColor) {
-	  if("all" %in% showColorTissues) {
+	if (showColor) {
+	  if (("all" %in% showColorTissues) || selectedTissuesOnly) {
 	    sampleTissueTypes <- srcContent[[dataSource]]$sampleData[rownames(df), "OncoTree1"]
 	    colorsToUse <- srcContent[[dataSource]]$tissueColorMap[sampleTissueTypes]
 	  } else {
-	    colorsToUse <- rep("rgba(0,0,255,0.5)", nrow(df)) #blue
+	    colorsToUse <- rep("rgba(0,0,255,0.3)", nrow(df)) #blue
 	    names(colorsToUse) <- rownames(df)
-      
-      for (tissueType in showColorTissues){
-        matchedSamples <- intersect(srcContent[[dataSource]]$tissueToSamplesMap[[tissueType]],
-        														rownames(df))
-        colorsToUse[matchedSamples] <- "rgba(255,0,0,0.7)" # red
-      }
+	    
+	    matchedSamples <- getTissueTypeSamples(showColorTissues, dataSource, srcContent)
+	    matchedSamples <- intersect(matchedSamples, rownames(df))
+	    colorsToUse[matchedSamples] <- "rgba(255,0,0,0.7)" # red
 	  }
 	} else{
-	  colorsToUse <- rep("rgba(0,0,255,0.5)", nrow(df)) #blue
+	  colorsToUse <- rep("rgba(0,0,255,0.3)", nrow(df)) #blue
 	}
 	
 	df$color <- colorsToUse
@@ -241,13 +253,20 @@ getPlotData <- function(xData, yData, showColor, showColorTissues, dataSource=NU
 	# Restrict to rows with no NAs in either column x or column y.
 	notNaData <- (!is.na(df[, xData$uniqName])) & (!is.na(df[, yData$uniqName]))
 	df <- df[notNaData, ]
+	
+	if (selectedTissuesOnly){
+		if((length(showColorTissues) > 0) && (!("all" %in% showColorTissues))){
+			matchedSamples <- getTissueTypeSamples(showColorTissues, dataSource, srcContent)
+			df <- df[intersect(matchedSamples, rownames(df)), ]
+		}
+	}
   	
 	return(df)
 }
 
 
-makePlot <- function(xData, yData, showColor, showColorTissues, dataSource) {
-	df <- getPlotData(xData, yData, showColor, showColorTissues, dataSource)
+makePlot <- function(xData, yData, showColor, showColorTissues, dataSource, selectedTissuesOnly) {
+	df <- getPlotData(xData, yData, showColor, showColorTissues, dataSource, selectedTissuesOnly)
 
 	# Scatter plot
 	h1 <- rCharts::Highcharts$new()
@@ -282,8 +301,17 @@ makePlot <- function(xData, yData, showColor, showColorTissues, dataSource) {
 									' p=', signif(corResults$p.value, 2))
 
 	h1$title(text=title)
-	h1$xAxis(title=list(enabled=TRUE, text=xData$plotLabel))
-	h1$yAxis(title=list(enabled=TRUE, text=yData$plotLabel))
+	
+	xAxisMin <- min(xData$data, na.rm = TRUE) - 0.25
+	xAxisMax <- max(xData$data, na.rm = TRUE) + 0.25
+	
+	yAxisMin <- min(yData$data, na.rm = TRUE) - 0.25
+	yAxisMax <- max(yData$data, na.rm = TRUE) + 0.25
+		
+	h1$xAxis(title=list(enabled=TRUE, text=xData$plotLabel, style=list(fontSize="20px", fontWeight="bold")),
+					 min=xAxisMin, max=xAxisMax, labels=list(style=list(fontSize="20px")))
+	h1$yAxis(title=list(enabled=TRUE, text=yData$plotLabel, style=list(fontSize="20px", fontWeight="bold")),
+					 min=yAxisMin, max=yAxisMax, labels=list(style=list(fontSize="20px")))
 
 	h1$legend(enabled=FALSE)
 
@@ -312,8 +340,8 @@ makePlot <- function(xData, yData, showColor, showColorTissues, dataSource) {
 }
 
 
-makePlotStatic <- function(xData, yData, showColor, showColorTissues, dataSource) {
-	df <- getPlotData(xData, yData, showColor, showColorTissues, dataSource)
+makePlotStatic <- function(xData, yData, showColor, showColorTissues, dataSource, selectedTissuesOnly=FALSE) {
+	df <- getPlotData(xData, yData, showColor, showColorTissues, dataSource, selectedTissuesOnly=FALSE)
 	
 	corResults <-cor.test(df[,xData$uniqName], df[,yData$uniqName], use="pairwise.complete.obs")
 	
@@ -339,6 +367,9 @@ shinyServer(function(input, output, session) {
     #----[Render 2D Plot in 'Plot Data' Tab]---------------------------------------------
     if(require(rCharts)) {
 			output$rCharts <- renderChart({
+				if (input$selectedTissuesOnly){
+					validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
+				}
 				if (!require(rcellminerUtils)){
 					validate(need(input$xDataset == input$yDataset,
 								   "ERROR: x and y axis data sets must be the same."))
@@ -353,13 +384,17 @@ shinyServer(function(input, output, session) {
 				xData <- getFeatureData(input$xPrefix, input$xId, input$xDataset)
 				yData <- getFeatureData(input$yPrefix, input$yId, input$yDataset)
 				
-				h1 <- makePlot(xData, yData, input$showColor, input$showColorTissues, input$xDataset)
+				h1 <- makePlot(xData, yData, input$showColor, input$showColorTissues, input$xDataset, 
+											 input$selectedTissuesOnly)
 				#return(h1)
 			})
     }
 		
 		# Alternative plotting
 		output$rChartsAlternative <- renderPlot({
+			if (input$selectedTissuesOnly){
+				validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
+			}
 			if (!require(rcellminerUtils)){
 				validate(need(input$xDataset == input$yDataset,
 											"ERROR: x and y axis data sets must be the same."))
@@ -374,13 +409,17 @@ shinyServer(function(input, output, session) {
 			xData <- getFeatureData(input$xPrefix, input$xId, input$xDataset)
 			yData <- getFeatureData(input$yPrefix, input$yId, input$yDataset)
 			
-			makePlotStatic(xData, yData, input$showColor, input$showColorTissues, input$xDataset)
+			makePlotStatic(xData, yData, input$showColor, input$showColorTissues, input$xDataset,
+										 input$selectedTissuesOnly)
 		})
 		#--------------------------------------------------------------------------------------
     
     #----[Render Data Table in 'Download Data' Tab]----------------------------------------
     # Generate an HTML table view of the data
     output$table <- renderDataTable({
+    	if (input$selectedTissuesOnly){
+    		validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
+    	}
     	if (!require(rcellminerUtils)){
     		validate(need(input$xDataset == input$yDataset, "ERROR: x and y axis data sets must be the same."))
     	}
@@ -391,7 +430,8 @@ shinyServer(function(input, output, session) {
     	yData <- getFeatureData(input$yPrefix, input$yId, input$yDataset)
 			
     	# Column selection below is to restrict to cell line, x, y features, and tissue type.
-    	getPlotData(xData, yData, input$showColor, input$showColorTissues)[, 1:4] 
+    	getPlotData(xData, yData, input$showColor, input$showColorTissues, input$xDataset,
+    							input$selectedTissuesOnly)[, 1:4] 
     }, options = list(paging=FALSE))
 		#--------------------------------------------------------------------------------------
     
@@ -429,6 +469,9 @@ shinyServer(function(input, output, session) {
     
 		#----[Render Data Table in 'Compare Patterns' Tab]-------------------------------------
 		output$patternComparison <- renderDataTable({
+			if (input$selectedTissuesOnly){
+				validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
+			}
 			if (!require(rcellminerUtils)){
 				validate(need(input$xDataset == input$yDataset, "ERROR: x and y axis data sets must be the same."))
 			}
@@ -439,8 +482,16 @@ shinyServer(function(input, output, session) {
 				matchedLinesTab <- getMatchedCellLines(c(input$xDataset, input$yDataset))
 				dat$data <- dat$data[matchedLinesTab[, 1]]
 			}
+			
+			if (input$selectedTissuesOnly){
+				if ((length(input$showColorTissues) > 0) && (!("all" %in% input$showColorTissues))){
+					matchedSamples <- getTissueTypeSamples(input$showColorTissues, input$xDataset, srcContent)
+					dat$data <- dat$data[intersect(matchedSamples, names(dat$data))]
+				}
+			}
+			
 		  selectedLines <- names(dat$data)
-		  
+			
 		  if(input$patternComparisonType == "drug") {
 		    results <- patternComparison(dat$data, 
 		    														 srcContent[[input$xDataset]][["molPharmData"]][["act"]][, selectedLines])
@@ -463,6 +514,15 @@ shinyServer(function(input, output, session) {
 		    # Reorder columns
 		    results <- results[, c("ids", "molDataType", "gene", "COR", "PVAL")]
 		    colnames(results) <- c("ID", "Data Type", "Gene", "Correlation", "P-Value")
+		    
+		    if (require(rcellminerUtils)){
+		    	chromLocs <- character(nrow(results))		    	
+		    	haveLoc <- results$Gene %in% names(geneToChromBand)
+		    	chromLocs[haveLoc] <- geneToChromBand[results$Gene[haveLoc]]
+		    	
+		    	results$Location <- chromLocs
+		    	results <- results[, c("ID", "Data Type", "Gene", "Location", "Correlation", "P-Value")]
+		    }
 		  }
 		  
 		  results
@@ -563,8 +623,12 @@ shinyServer(function(input, output, session) {
   
   # TO DO: Clean up code duplication below (xPrefixUi, yPrefixUi, etc.)
   output$xPrefixUi <- renderUI({
-    if ((input$xDataset == "ccle") || (input$xDataset == "cgp")){
+    if (input$xDataset == "cgp"){
       prefixChoices <- c("Expression"="exp", "Drug"="act")
+    } else if (input$xDataset == "gdsc"){
+    	prefixChoices <- c("Expression"="exp", "Drug"="act")
+    } else if (input$xDataset == "ccle"){
+    	prefixChoices <- c("Expression"="exp", "Mutations"="mut", "Drug"="act")
     } else{
       prefixChoices <- c("Expression (Z-Score)"="exp", "Expression (Avg. log2 Int.)"="xai",
                          "Mutations"="mut", "Copy Number"="cop", 
@@ -579,14 +643,19 @@ shinyServer(function(input, output, session) {
     switch(input$xDataset,
          "nci60" = selectInput("xPrefix", "x-Axis Type", choices=prefixChoices, selected="exp"),
          "ccle" = selectInput("xPrefix", "x-Axis Type", choices=prefixChoices, selected="exp"),
-         "cgp" = selectInput("xPrefix", "x-Axis Type", choices=prefixChoices, selected="exp")
+         "cgp" = selectInput("xPrefix", "x-Axis Type", choices=prefixChoices, selected="exp"),
+    		 "gdsc" = selectInput("xPrefix", "x-Axis Type", choices=prefixChoices, selected="exp")
     )
   })
 
   output$yPrefixUi <- renderUI({
-    if ((input$yDataset == "ccle") || (input$yDataset == "cgp")){
-      prefixChoices <- c("Expression"="exp", "Drug"="act")
-    } else{
+  	if (input$yDataset == "cgp"){
+  		prefixChoices <- c("Expression"="exp", "Drug"="act")
+  	} else if (input$yDataset == "gdsc"){
+  		prefixChoices <- c("Expression"="exp", "Drug"="act")
+  	} else if (input$yDataset == "ccle"){
+  		prefixChoices <- c("Expression"="exp", "Mutations"="mut", "Drug"="act")
+  	} else{
       prefixChoices <- c("Expression (Z-Score)"="exp", "Expression (Avg. log2 Int.)"="xai",
                          "Mutations"="mut", "Copy Number"="cop", 
                          "Drug"="act", "MicroRNA"="mir", "Metadata"="mda", 
@@ -600,7 +669,8 @@ shinyServer(function(input, output, session) {
     switch(input$yDataset,
           "nci60" = selectInput("yPrefix", "y-Axis Type", choices=prefixChoices, selected="act"),
           "ccle" = selectInput("yPrefix", "y-Axis Type", choices=prefixChoices, selected="act"),
-          "cgp" = selectInput("yPrefix", "y-Axis Type", choices=prefixChoices, selected="act")
+          "cgp" = selectInput("yPrefix", "y-Axis Type", choices=prefixChoices, selected="act"),
+    			"gdsc" = selectInput("yPrefix", "y-Axis Type", choices=prefixChoices, selected="act")
     )
   })
 
@@ -609,6 +679,8 @@ shinyServer(function(input, output, session) {
       tissueTypes <- names(srcContent[["ccle"]][["tissueToSamplesMap"]])
     } else if (input$xDataset == "cgp"){
       tissueTypes <- names(srcContent[["cgp"]][["tissueToSamplesMap"]])
+    } else if (input$xDataset == "gdsc"){
+    	tissueTypes <- names(srcContent[["gdsc"]][["tissueToSamplesMap"]])
     } else{
     	tissueTypes <- names(srcContent[["nci60"]][["tissueToSamplesMap"]])
     }
@@ -619,7 +691,9 @@ shinyServer(function(input, output, session) {
           "ccle" = selectInput("showColorTissues", "Color Specific Tissues?", 
                                choices=c("all", unique(tissueTypes)), multiple=TRUE, selected="all"),
           "cgp" = selectInput("showColorTissues", "Color Specific Tissues?", 
-                               choices=c("all", unique(tissueTypes)), multiple=TRUE, selected="all")
+                               choices=c("all", unique(tissueTypes)), multiple=TRUE, selected="all"),
+    			"gdsc" = selectInput("showColorTissues", "Color Specific Tissues?", 
+    			 										choices=c("all", unique(tissueTypes)), multiple=TRUE, selected="all")
     )
   })
 

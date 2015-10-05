@@ -29,7 +29,7 @@ compareFingerprints <- function(ids=NULL, smiles=NULL, fpType="standard",
 	found <- NULL 
 	
 	if(is.null(fingerprint.list)) {
-		fingerprint.list <- getFingerprintList(ids, smiles, fpType="standard", verbose)
+		fingerprint.list <- getFingerprintList(ids, smiles, fpType=fpType, verbose)
 	}
 	
 	tmp <- sapply(names(fingerprint.list), function(x) {!is.null(fingerprint.list[[x]])})

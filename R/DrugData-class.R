@@ -12,6 +12,7 @@
 #' @concept rcellminerData
 #' 
 #' @importFrom methods setClass
+#' @importFrom Biobase samples
 .DrugData <- setClass(Class="DrugData",
 										 slots=c(act = "eSet",
 										 				repeatAct = "eSet",

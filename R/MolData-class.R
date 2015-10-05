@@ -9,6 +9,7 @@
 #' @concept rcellminerData
 #' 
 #' @importFrom methods setClass
+#' @importFrom Biobase samples
 .MolData <- setClass(Class="MolData",
 										slots=c(eSetList = "list",
 														sampleData = "MIAxE"),

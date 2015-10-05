@@ -61,6 +61,23 @@ setMethod("getSampleData", signature = "DrugData", function(object) {
 	as.data.frame(do.call(cbind, samples(object@sampleData)), stringsAsFactors=FALSE)
 })
 
+#' Returns a list of data frames with feature information.
+#'
+#' @param object DrugData object for which feature data is to be returned.
+#' @return A named list of data frames with feature information for drugs
+#'  and drug repeat experiments.
+#'
+#' @concept rcellminerData
+#' @export
+#' 
+#' @importFrom methods setMethod
+setMethod("getFeatureAnnot", signature = "DrugData", function(object) {
+	featureDat <- list()
+	featureDat$drug <- as(featureData(getAct(object)), "data.frame")
+	featureDat$drugRepeat <- as(featureData(getRepeatAct(object)), "data.frame")
+	return(featureDat)
+})
+
 #' Returns an eSet object with drug activity data.
 #'
 #' @param object DrugData object for which drug activity data is to be returned.
@@ -87,3 +104,6 @@ setMethod("getAct", signature = "DrugData", function(object) {
 setMethod("getRepeatAct", signature = "DrugData", function(object) {
 	object@repeatAct
 })
+
+
+
