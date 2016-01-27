@@ -26,9 +26,9 @@
 #' @export
 #' 
 #' @importFrom rcdk parse.smiles
-plotStructures <- function(nscs, smiles, titleCex=1, 
+plotStructures <- function(ids, smiles, titleCex=1, 
 													 structSize=300, structAnnotPos=50, 
-													 mainLabel="", rows=1, cols=length(nscs)) {  
+													 mainLabel="", rows=1, cols=length(ids)) {  
 	#   # Pre-process SMILES 
 	#   # Remove Cl groups
 	#   #smiles <- sub("^\\[Cl-\\]\\.", "", smiles)
@@ -53,6 +53,6 @@ plotStructures <- function(nscs, smiles, titleCex=1,
 	par(mfrow=c(rows,cols))
 	
 	for(i in seq_along(tmp)) {
-		rcdkplot(tmp[[i]], width=structSize, height=structSize, main=nscs[i])			
+		rcdkplot(tmp[[i]], width=structSize, height=structSize, main=ids[i])			
 	}
 }

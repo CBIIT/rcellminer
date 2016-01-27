@@ -1,157 +1,29 @@
 library(shiny)
 library(rcellminer)
 library(rcellminerData)
+library(jsonlite)
+
+# Note: The jsonlite package has a validate() function whose name clashes with a 
+# validate() function provided by the shiny package. 
+# shiny::validate() must be used in the following code.
 
 #--------------------------------------------------------------------------------------------------
-# FUNCTIONS (INITIAL REFACTORING, TO BE MOVED ELSEWHERE AS APPROPRIATE).
+# LOAD CONFIGURATION AND CONSTRUCT APP (MOLECULAR + DRUG) DATA.
 #--------------------------------------------------------------------------------------------------
+source(system.file("shinyComparePlots", "functions.R", package="rcellminer"))
+config <- jsonlite::fromJSON(system.file("shinyComparePlots", "config.json", package="rcellminer"))
 
-
-getTissueToSamplesMap <- function(sampleData, typeLevelSeparator = ":"){
-	stopifnot(all(!duplicated(sampleData$Name)))
-	rownames(sampleData) <- sampleData$Name
-	tissueToSamples <- list()
-	ocLevels <- paste0("OncoTree", 1:4)
-		
-	for (sample in rownames(sampleData)){
-		sampleOcTypes <- as.character(sampleData[sample, ocLevels])
-		typeName <- sampleOcTypes[1]
-		if (is.na(typeName)){
-			next
-		}
-		
-		tissueToSamples[[typeName]] <- c(tissueToSamples[[typeName]], sample)
-		for (i in (2:4)){
-			if (is.na(sampleOcTypes[i])){
-				break
-			}
-			typeName <- paste0(typeName, typeLevelSeparator, sampleOcTypes[i])
-			tissueToSamples[[typeName]] <- c(tissueToSamples[[typeName]], sample)
-		}
-	}
-	
-	# ----[test]------------------------------------------------------------------
-# 	stopifnot(identical(sort(unique(c(tissueToSamples, recursive = TRUE))),
-# 						sort(rownames(sampleData))))
-# 	for (typeName in names(tissueToSamples)){
-# 		ocTypes <- str_split(typeName, pattern = typeLevelSeparator)[[1]]
-# 		
-# 		for (sample in tissueToSamples[[typeName]]){
-# 			sampleOcTypes <- as.character(sampleData[sample, ocLevels])
-# 			stopifnot(identical(sampleOcTypes[1:length(ocTypes)], ocTypes))
-# 		}
-# 	}
-	# ----------------------------------------------------------------------------
-	
-	return(tissueToSamples)
+srcContent <- lapply(config, loadSourceContent)
+isLoadedSrc <- vapply(srcContent, function(x) { !is.null(x) }, logical(1))
+if (any(!isLoadedSrc)){
+	srcContent <- srcContent[isLoadedSrc]
 }
 
-
-loadSourceContent <- function(dataPkgName){
-	if (!require(dataPkgName, character.only = TRUE)){
-		stop(paste0("Package '", dataPkgName, "' is not available."))
-	}
-	srcEnv <- new.env()
-	data("molData", package=dataPkgName, verbose=TRUE, envir=srcEnv)
-	data("drugData", package=dataPkgName, verbose=TRUE, envir=srcEnv)
-	
-	src <- list()
-	src$molPharmData <- getAllFeatureData(srcEnv$molData)
-	src$molPharmData[["act"]] <- exprs(getAct(srcEnv$drugData))
-	
-	for (featureType in names(src$molPharmData)){
-		rownames(src$molPharmData[[featureType]]) <- 
-			paste0(featureType, rownames(src$molPharmData[[featureType]]))
-	}
-		
-	# TO DO: Update to obtain this information from featureData(getAct(srcEnv$drugData))
-	src$drugInfo <- data.frame(ID = rownames(exprs(getAct(srcEnv$drugData))), stringsAsFactors = FALSE)
-	src$drugInfo$NAME <- src$drugInfo$ID
-	src$drugInfo$MOA <- character(nrow(src$drugInfo))
-	
-	stopifnot(identical(unname(removeMolDataType(rownames(src$molPharmData$act))), 
-											src$drugInfo$ID))
-	rownames(src$drugInfo) <- rownames(src$molPharmData$act)
-	
-	src$sampleData <- getSampleData(srcEnv$molData)
-	rownames(src$sampleData) <- src$sampleData$Name
-	
-	# TO DO: Check whether spaces in tissue sample names creates any problems.
-	src$tissueToSamplesMap <- getTissueToSamplesMap(src$sampleData)
-	
-	# TO DO: Properly define color map.
-	src$tissueColorMap <- rep("rgba(0,0,255,0.5)", length(src$tissueToSamplesMap))
-	names(src$tissueColorMap) <- names(src$tissueToSamplesMap)
-	
-	return(src)
-}
-
-#--------------------------------------------------------------------------------------------------
-# Molecular data and drug activity database set up.
-#--------------------------------------------------------------------------------------------------
-
-srcContent <- list()
-
-#----[nci60]-----------------------------------------------------------------------------
-nci60Env <- new.env()
-data("molData", package="rcellminerData", verbose=TRUE, envir=nci60Env)
-data("drugData", package="rcellminerData", verbose=TRUE, envir=nci60Env)
-
-nci60 <- list()
-
-nci60MolDataTypes <- c("exp", "xai", "mut", "cop", "mir", "mda", "pro")
-nci60$molPharmData <- getMolDataMatrices(getAllFeatureData(nci60Env$molData))[nci60MolDataTypes]
-
-if (require(nci60imsb)){
-  nci60$molPharmData[["swa"]] <- as.matrix(nci60imsbData$pro_swathms)
-  rownames(nci60$molPharmData$swa) <- paste0("swa", rownames(nci60$molPharmData$swa))
-}
-
-nci60$molPharmData[["act"]] <- exprs(getAct(nci60Env$drugData))
-rownames(nci60$molPharmData$act) <- paste0("act", rownames(nci60$molPharmData$act))
-
-nci60$drugInfo <- as(featureData(getAct(nci60Env$drugData)), "data.frame")[, c("NSC", "NAME", "MOA")]
-colnames(nci60$drugInfo) <- c("ID", "NAME", "MOA")
-nci60$drugInfo$ID <- as.character(nci60$drugInfo$ID)
-# Handle uncommon characters
-nci60$drugInfo$NAME <- iconv(enc2utf8(nci60$drugInfo$NAME), sub="byte")
-
-stopifnot(identical(unname(removeMolDataType(rownames(nci60$molPharmData$act))), 
-										nci60$drugInfo$ID))
-rownames(nci60$drugInfo) <- rownames(nci60$molPharmData$act)
-
-nci60$sampleData <- getSampleData(nci60Env$molData)
-rownames(nci60$sampleData) <- nci60$sampleData$Name
-
-nci60$tissueToSamplesMap <- getTissueToSamplesMap(getSampleData(nci60Env$molData))
-
-
+# For NCI-60, replace default color map to use CellMiner tissue type colors.
 nci60ColorTab <- loadNciColorSet(returnDf=TRUE)
-nci60ColorTab$OncoTree1 <- nci60$sampleData$OncoTree1
-nci60$tissueColorMap <- c(by(nci60ColorTab, nci60ColorTab$OncoTree1, FUN = function(x) unique(x$colors)))
-
-srcContent[["nci60"]] <- nci60
-#----------------------------------------------------------------------------------------
-
-#----[ccleData]--------------------------------------------------------------------------
-if (require(ccleData)){  
-  srcContent[["ccle"]] <- loadSourceContent("ccleData")
-}
-#----------------------------------------------------------------------------------------
-
-
-#----[cgpData]--------------------------------------------------------------------------
-if (require(cgpData)){  
-  srcContent[["cgp"]] <- loadSourceContent("cgpData")
-}
-#----------------------------------------------------------------------------------------
-
-#----[gdscData]--------------------------------------------------------------------------
-if (require(gdscData)){  
-	srcContent[["gdsc"]] <- loadSourceContent("gdscData")
-}
-#----------------------------------------------------------------------------------------
-
+nci60ColorTab$OncoTree1 <- srcContent$nci60$sampleData$OncoTree1
+srcContent$nci60$tissueColorMap <- c(by(nci60ColorTab, nci60ColorTab$OncoTree1, 
+																		FUN = function(x) unique(x$colors)))
 
 #--------------------------------------------------------------------------------------------------
 # Helper functions.
@@ -260,6 +132,20 @@ getPlotData <- function(xData, yData, showColor, showColorTissues, dataSource=NU
 			df <- df[intersect(matchedSamples, rownames(df)), ]
 		}
 	}
+	
+	# Add OncoTree tissue type information, and guaranteed non-NA tissue type for 
+	# use in plotting code, etc.
+	df$OncoTree1 <- srcContent[[dataSource]]$sampleData[rownames(df), "OncoTree1"]
+	df$OncoTree2 <- srcContent[[dataSource]]$sampleData[rownames(df), "OncoTree2"]
+	df$OncoTree3 <- srcContent[[dataSource]]$sampleData[rownames(df), "OncoTree3"]
+	df$OncoTree4 <- srcContent[[dataSource]]$sampleData[rownames(df), "OncoTree4"]
+	df$PlotTissueType <- ifelse(is.na(df$tissues),
+															paste0(df$OncoTree1, ifelse(is.na(df$OncoTree2), "", 
+																													paste0(":", df$OncoTree2))), 
+															df$tissues)
+	if (any(is.na(df$PlotTissueType))){
+		df$PlotTissueType[which(is.na(df$PlotTissueType))] <- "TISSUE_TYPE_NA"
+	}
   	
 	return(df)
 }
@@ -273,14 +159,14 @@ makePlot <- function(xData, yData, showColor, showColorTissues, dataSource, sele
 
 	# Divide the dataset, split by category and put into list() format
 	# From: http://rcharts.io/viewer/?5735146#.VF6NS4W1Fy4
-	series <- lapply(split(df, df$tissues), function(x) {
+	series <- lapply(split(df, df$PlotTissueType), function(x) {
 		res <- lapply(split(x, rownames(x)), as.list)
 		names(res) <- NULL
 		return(res)
 	})
 
 	invisible(sapply(series, function(x) {
-		h1$series(data=x, type="scatter", name=x[[1]]$tissues)
+		h1$series(data=x, type="scatter", name=x[[1]]$PlotTissueType)
 	}
 	))
 
@@ -368,13 +254,13 @@ shinyServer(function(input, output, session) {
     if(require(rCharts)) {
 			output$rCharts <- renderChart({
 				if (input$selectedTissuesOnly){
-					validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
+					shiny::validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
 				}
 				if (!require(rcellminerUtils)){
-					validate(need(input$xDataset == input$yDataset,
+					shiny::validate(need(input$xDataset == input$yDataset,
 								   "ERROR: x and y axis data sets must be the same."))
 				}
-				validate(
+				shiny::validate(
 		            need(validateEntry(input$xPrefix, input$xId, input$xDataset), 
                      paste("ERROR:", paste0(input$xPrefix, input$xId), "not found.")),
 		            need(validateEntry(input$yPrefix, input$yId, input$yDataset), 
@@ -393,13 +279,13 @@ shinyServer(function(input, output, session) {
 		# Alternative plotting
 		output$rChartsAlternative <- renderPlot({
 			if (input$selectedTissuesOnly){
-				validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
+				shiny::validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
 			}
 			if (!require(rcellminerUtils)){
-				validate(need(input$xDataset == input$yDataset,
+				shiny::validate(need(input$xDataset == input$yDataset,
 											"ERROR: x and y axis data sets must be the same."))
 			}
-			validate(
+			shiny::validate(
 				need(validateEntry(input$xPrefix, input$xId, input$xDataset), 
 						 paste("ERROR:", paste0(input$xPrefix, input$xId), "not found.")),
 				need(validateEntry(input$yPrefix, input$yId, input$yDataset), 
@@ -418,20 +304,23 @@ shinyServer(function(input, output, session) {
     # Generate an HTML table view of the data
     output$table <- renderDataTable({
     	if (input$selectedTissuesOnly){
-    		validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
+    		shiny::validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
     	}
     	if (!require(rcellminerUtils)){
-    		validate(need(input$xDataset == input$yDataset, "ERROR: x and y axis data sets must be the same."))
+    		shiny::validate(need(input$xDataset == input$yDataset, "ERROR: x and y axis data sets must be the same."))
     	}
-      validate(need(validateEntry(input$xPrefix, input$xId, input$xDataset), "ERROR: x-Axis Entry Not Found."))
-      validate(need(validateEntry(input$yPrefix, input$yId, input$yDataset), "ERROR: y-Axis Entry Not Found."))
+      shiny::validate(need(validateEntry(input$xPrefix, input$xId, input$xDataset), "ERROR: x-Axis Entry Not Found."))
+      shiny::validate(need(validateEntry(input$yPrefix, input$yId, input$yDataset), "ERROR: y-Axis Entry Not Found."))
 
     	xData <- getFeatureData(input$xPrefix, input$xId, input$xDataset)
     	yData <- getFeatureData(input$yPrefix, input$yId, input$yDataset)
 			
-    	# Column selection below is to restrict to cell line, x, y features, and tissue type.
-    	getPlotData(xData, yData, input$showColor, input$showColorTissues, input$xDataset,
-    							input$selectedTissuesOnly)[, 1:4] 
+    	# Column selection below is to restrict to cell line, x, y features, 
+    	# and tissue type information (source-provided + OncoTree).
+    	dlDataTab <- getPlotData(xData, yData, input$showColor, input$showColorTissues, 
+    													 input$xDataset, input$selectedTissuesOnly)
+    	dlDataTabCols <- c(colnames(dlDataTab)[1:4], paste0("OncoTree", 1:4))
+    	dlDataTab <- dlDataTab[, dlDataTabCols]
     }, options = list(paging=FALSE))
 		#--------------------------------------------------------------------------------------
     
@@ -470,12 +359,12 @@ shinyServer(function(input, output, session) {
 		#----[Render Data Table in 'Compare Patterns' Tab]-------------------------------------
 		output$patternComparison <- renderDataTable({
 			if (input$selectedTissuesOnly){
-				validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
+				shiny::validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
 			}
 			if (!require(rcellminerUtils)){
-				validate(need(input$xDataset == input$yDataset, "ERROR: x and y axis data sets must be the same."))
+				shiny::validate(need(input$xDataset == input$yDataset, "ERROR: x and y axis data sets must be the same."))
 			}
-		  validate(need(validateEntry(input$xPrefix, input$xId, input$xDataset), "ERROR: x-Axis Entry Not Found."))
+		  shiny::validate(need(validateEntry(input$xPrefix, input$xId, input$xDataset), "ERROR: x-Axis Entry Not Found."))
 		  
 		  dat <- getFeatureData(input$xPrefix, input$xId, input$xDataset)
 			if (require(rcellminerUtils)){
@@ -614,87 +503,34 @@ shinyServer(function(input, output, session) {
       	xData <- getFeatureData(input$xPrefix, input$xId, input$xDataset)
       	yData <- getFeatureData(input$yPrefix, input$yId, input$yDataset)
 				
-      	# Column selection below is to restrict to cell line, x, y features, and tissue type.
-      	df <- getPlotData(xData, yData, input$showColor, input$showColorTissues)[,1:4]
+      	df <- getPlotData(xData, yData, input$showColor, input$showColorTissues, 
+      										input$xDataset, input$selectedTissuesOnly)
+      	
+      	# Column selection below is to restrict to cell line, x, y features, 
+      	# and tissue type information (source-provided + OncoTree).
+      	dfCols <- c(colnames(df)[1:4], paste0("OncoTree", 1:4))
+      	df <- df[, dfCols]
 
       	write.table(df, file, quote=FALSE, row.names=FALSE, sep="\t")
       }
     )
   
-  # TO DO: Clean up code duplication below (xPrefixUi, yPrefixUi, etc.)
-  output$xPrefixUi <- renderUI({
-    if (input$xDataset == "cgp"){
-      prefixChoices <- c("Expression"="exp", "Drug"="act")
-    } else if (input$xDataset == "gdsc"){
-    	prefixChoices <- c("Expression"="exp", "Drug"="act")
-    } else if (input$xDataset == "ccle"){
-    	prefixChoices <- c("Expression"="exp", "Mutations"="mut", "Drug"="act")
-    } else{
-      prefixChoices <- c("Expression (Z-Score)"="exp", "Expression (Avg. log2 Int.)"="xai",
-                         "Mutations"="mut", "Copy Number"="cop", 
-                         "Drug"="act", "MicroRNA"="mir", "Metadata"="mda", 
-                         "Protein (RPLA)"="pro")
-      if (require(nci60imsb)){
-        prefixChoices <- c(prefixChoices, 
-                           c("Protein (SWATH-MS)"="swa"))
-      }
-    }
-    
-    switch(input$xDataset,
-         "nci60" = selectInput("xPrefix", "x-Axis Type", choices=prefixChoices, selected="exp"),
-         "ccle" = selectInput("xPrefix", "x-Axis Type", choices=prefixChoices, selected="exp"),
-         "cgp" = selectInput("xPrefix", "x-Axis Type", choices=prefixChoices, selected="exp"),
-    		 "gdsc" = selectInput("xPrefix", "x-Axis Type", choices=prefixChoices, selected="exp")
-    )
+  output$xPrefixUi <- renderUI({          
+  	selectInput("xPrefix", "x-Axis Type", 
+  							choices = srcContent[[input$xDataset]][["featurePrefixes"]], 
+  							selected = srcContent[[input$xDataset]][["defaultFeatureX"]])
   })
 
   output$yPrefixUi <- renderUI({
-  	if (input$yDataset == "cgp"){
-  		prefixChoices <- c("Expression"="exp", "Drug"="act")
-  	} else if (input$yDataset == "gdsc"){
-  		prefixChoices <- c("Expression"="exp", "Drug"="act")
-  	} else if (input$yDataset == "ccle"){
-  		prefixChoices <- c("Expression"="exp", "Mutations"="mut", "Drug"="act")
-  	} else{
-      prefixChoices <- c("Expression (Z-Score)"="exp", "Expression (Avg. log2 Int.)"="xai",
-                         "Mutations"="mut", "Copy Number"="cop", 
-                         "Drug"="act", "MicroRNA"="mir", "Metadata"="mda", 
-                         "Protein (RPLA)"="pro")
-      if (require(nci60imsb)){
-        prefixChoices <- c(prefixChoices, 
-                          c("Protein (SWATH-MS)"="swa"))
-      }
-    }
-  
-    switch(input$yDataset,
-          "nci60" = selectInput("yPrefix", "y-Axis Type", choices=prefixChoices, selected="act"),
-          "ccle" = selectInput("yPrefix", "y-Axis Type", choices=prefixChoices, selected="act"),
-          "cgp" = selectInput("yPrefix", "y-Axis Type", choices=prefixChoices, selected="act"),
-    			"gdsc" = selectInput("yPrefix", "y-Axis Type", choices=prefixChoices, selected="act")
-    )
+  	selectInput("yPrefix", "y-Axis Type", 
+  							choices = srcContent[[input$yDataset]][["featurePrefixes"]], 
+  							selected = srcContent[[input$yDataset]][["defaultFeatureY"]])
   })
 
   output$showColorTissuesUi <- renderUI({
-    if (input$xDataset == "ccle"){
-      tissueTypes <- names(srcContent[["ccle"]][["tissueToSamplesMap"]])
-    } else if (input$xDataset == "cgp"){
-      tissueTypes <- names(srcContent[["cgp"]][["tissueToSamplesMap"]])
-    } else if (input$xDataset == "gdsc"){
-    	tissueTypes <- names(srcContent[["gdsc"]][["tissueToSamplesMap"]])
-    } else{
-    	tissueTypes <- names(srcContent[["nci60"]][["tissueToSamplesMap"]])
-    }
-  
-    switch(input$xDataset,
-          "nci60" = selectInput("showColorTissues", "Color Specific Tissues?", 
-                                choices=c("all", unique(tissueTypes)), multiple=TRUE, selected="all"),
-          "ccle" = selectInput("showColorTissues", "Color Specific Tissues?", 
-                               choices=c("all", unique(tissueTypes)), multiple=TRUE, selected="all"),
-          "cgp" = selectInput("showColorTissues", "Color Specific Tissues?", 
-                               choices=c("all", unique(tissueTypes)), multiple=TRUE, selected="all"),
-    			"gdsc" = selectInput("showColorTissues", "Color Specific Tissues?", 
-    			 										choices=c("all", unique(tissueTypes)), multiple=TRUE, selected="all")
-    )
+  	tissueTypes <- names(srcContent[[input$xDataset]][["tissueToSamplesMap"]])
+  	selectInput("showColorTissues", "Color Specific Tissues?", 
+  							choices=c("all", unique(tissueTypes)), multiple=TRUE, selected="all")
   })
 
 })

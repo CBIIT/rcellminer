@@ -1,0 +1,143 @@
+{
+  "nci60":{
+    "displayName":"NCI-60",
+    "packages":{
+      "rcellminerData":{
+        "MolData":[
+          {
+            "eSetListName":"exp",
+            "featurePrefix":"exp",
+            "displayName":"Expression (Z-Score)"
+          },
+          {
+            "eSetListName":"xai",
+            "featurePrefix":"xai",
+            "displayName":"Expression (Avg. log2 Int.)"
+          },
+          {
+            "eSetListName":"mut",
+            "featurePrefix":"mut",
+            "displayName":"Mutations"
+          },
+          {
+            "eSetListName":"cop",
+            "featurePrefix":"cop",
+            "displayName":"DNA Copy Number"
+          },
+          {
+            "eSetListName":"mir",
+            "featurePrefix":"mir",
+            "displayName":"MicroRNA"
+          },
+          {
+            "eSetListName":"mda",
+            "featurePrefix":"mda",
+            "displayName":"Metadata"
+          },
+          {
+            "eSetListName":"pro",
+            "featurePrefix":"pro",
+            "displayName":"Protein (RPLA)"
+          }
+        ],
+        "DrugData":[
+          {
+            "featurePrefix":"act",
+            "displayName":"Drug Activity",
+            "drugAnnotIdCol":"NSC",
+            "drugAnnotNameCol":"NAME",
+            "drugAnnotMoaCol":"MOA"
+          }
+        ]
+      },
+      "nci60imsb":{
+        "MolData":[
+          {
+            "eSetListName":"swathms_avg",
+            "featurePrefix":"swa",
+            "displayName":"Protein (SWATH-MS)"
+          }
+        ]
+      }
+    }
+  },
+  "ccle":{
+    "displayName":"CCLE",
+    "packages":{
+      "ccleData":{
+        "MolData":[
+          {
+            "eSetListName":"exp",
+            "featurePrefix":"exp",
+            "displayName":"Expression (log2)"
+          },
+          {
+            "eSetListName":"mut",
+            "featurePrefix":"mut",
+            "displayName":"Mutations"
+          },
+          {
+            "eSetListName":"cop",
+            "featurePrefix":"cop",
+            "displayName":"DNA Copy Number"
+          }
+        ],
+        "DrugData":[
+          {
+            "featurePrefix":"act",
+            "displayName":"Drug Activity (-log10[IC50M])",
+            "drugAnnotIdCol":"NA",
+            "drugAnnotNameCol":"NA",
+            "drugAnnotMoaCol":"NA"
+          }
+        ]
+      }
+    }
+  },
+  "gdsc":{
+    "displayName":"GDSC",
+    "packages":{
+      "gdscData":{
+        "MolData":[
+          {
+            "eSetListName":"exp",
+            "featurePrefix":"exp",
+            "displayName":"Expression (log2)"
+          }
+        ],
+        "DrugData":[
+          {
+            "featurePrefix":"act",
+            "displayName":"Drug Activity (-log10[IC50M])",
+            "drugAnnotIdCol":"Name",
+            "drugAnnotNameCol":"Name",
+            "drugAnnotMoaCol":"Targets"
+          }
+        ]
+      }
+    }
+  },
+  "gdscDec15":{
+    "displayName":"GDSC_DEC15",
+    "packages":{
+      "gdscDataDec15":{
+        "MolData":[
+          {
+            "eSetListName":"exp",
+            "featurePrefix":"exp",
+            "displayName":"Expression (log2)"
+          }
+        ],
+        "DrugData":[
+          {
+            "featurePrefix":"act",
+            "displayName":"Drug Activity (-log10[IC50M])",
+            "drugAnnotIdCol":"EXTENDED_NAME",
+            "drugAnnotNameCol":"NAME",
+            "drugAnnotMoaCol":"MOA"
+          }
+        ]
+      }
+    }
+  }
+}

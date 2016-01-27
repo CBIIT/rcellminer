@@ -4,10 +4,12 @@
 \alias{plotStructures}
 \title{Plot Structures}
 \usage{
-plotStructures(nscs, smiles, titleCex = 1, structSize = 300,
-  structAnnotPos = 50, mainLabel = "", rows = 1, cols = length(nscs))
+plotStructures(ids, smiles, titleCex = 1, structSize = 300,
+  structAnnotPos = 50, mainLabel = "", rows = 1, cols = length(ids))
 }
 \arguments{
+\item{ids}{a vector of strings of IDs used as structure titles}
+
 \item{smiles}{a vector of strings where the strings are SMILES structures}
 
 \item{titleCex}{a number, the scaling factor for the title (default: 1)}
@@ -21,8 +23,6 @@ plotStructures(nscs, smiles, titleCex = 1, structSize = 300,
 \item{rows}{number of rows in figure (default: 1)}
 
 \item{cols}{number of columns in figure (default: input structures number)}
-
-\item{ids}{a vector of strings of IDs used as structure titles}
 }
 \value{
 the function does not return anything

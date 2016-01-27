@@ -21,7 +21,7 @@ opts_chunk$set(out.extra='style="display:block; margin: auto"',
 ```
 
 # Overview
-The NCI-60 cancer cell line panel has been used over the course of several decades as an anti-cancer drug screen. This panel was developed as part of the Developmental Therapeutics Program (DTP, http://dtp.nci.nih.gov/) of the U.S. National Cancer Institute (NCI). Thousands of compounds have been tested on the NCI-60, which have been extensively characterized by many platforms for gene and protein expression, copy number, mutation, and others (Reinhold, et al., 2012). The purpose of the CellMiner project (http://discover.nci.nih.gov/cellminer) has been to integrate data from multiple platforms used to analyze the NCI-60 and to provide a powerful suite of tools for exploration of NCI-60 data. While CellMiner is an unmatched resource for online exploration of the NCI-60 data, consideration of more specialized scientific questions often requires custom programming. The **rcellminer** R package complements the functionality of CellMiner, providing programmatic access to its data, together with functions for data visualization and analysis. These functions are approachable for even beginning R users, as illustrated by the initial examples below. The subsequent case studies, inspired by CellMiner-related publications, show how modest amounts of code can script specialized analyses, integrating multiple types of data to yield new scientific insights.   **rcellminer** functions also provide robust building blocks for more extensive tools, as exemplifed by its interactive Shiny applications.
+The NCI-60 cancer cell line panel has been used over the course of several decades as an anti-cancer drug screen. This panel was developed as part of the Developmental Therapeutics Program (DTP, http://dtp.nci.nih.gov/) of the U.S. National Cancer Institute (NCI). Thousands of compounds have been tested on the NCI-60, which have been extensively characterized by many platforms for gene and protein expression, copy number, mutation, and others (Reinhold, et al., 2012). The purpose of the CellMiner project (http://discover.nci.nih.gov/cellminer) has been to integrate data from multiple platforms used to analyze the NCI-60, and to provide a powerful suite of tools for exploration of NCI-60 data. While CellMiner is an unmatched resource for online exploration of the NCI-60 data, consideration of more specialized scientific questions often requires custom programming. The **rcellminer** R package complements the functionality of CellMiner, providing programmatic data access, together with functions for data visualization and analysis. These functions are approachable for even beginning R users, as illustrated by the initial examples below. The subsequent case studies, inspired by CellMiner-related publications, show how modest amounts of code can script specialized analyses, integrating multiple types of data to yield new scientific insights.   **rcellminer** functions also provide robust building blocks for more extensive tools, as exemplifed by the package's interactive Shiny applications.
 
 # Basics 
 
@@ -60,7 +60,7 @@ searchForNscs("nib$")
 
 ## Profile Visualization 
 
-Often, it is useful for researchers to visualize multiple data profiles next to each other in order to visually identify patterns. Below are examples for the visualization of various profiles: single drugs and multiple drugs, as well as, molecular profiles and combinations of drug and molecular profiles. 
+Often, it is useful for researchers to plot multiple data profiles next to each other in order to visually identify patterns. Below are examples for the visualization of various profiles: single drugs and multiple drugs, as well as molecular profiles and combinations of drug and molecular profiles. 
 
 ```{r plotCellminer}
 # Get Cellminer data
@@ -97,7 +97,7 @@ plotCellMiner(drugAct, molData, plots, nsc, gene)
 
 ### Visualizing Drug Sets 
 
-For related drugs, it is often useful to visualize a summary of drug activity. **rcellminer** allows you to easily plot a drug set's average activity z-score pattern over the NCI-60, together with 1 standard deviation error bars to guauge variation in response behavior.
+For related drugs, it is often useful to visualize a summary of drug activity. **rcellminer** allows you to easily plot a drug set's average activity z-score pattern over the NCI-60, together with 1 standard deviation error bars to gauge variation in response behavior.
 
 ```{r plotDrugSets}
 # Get CellMiner data
@@ -148,9 +148,9 @@ knownMoaDrugInfo <- knownMoaDrugInfo[order(knownMoaDrugInfo$MOA), ]
 Drug_MOA_Key[c("A2", "A7"), ]
 ```
 
-## Working with GI50 (Growth Inhibition 50) data
+## Drug Activity
 
-Additionally, **rcellminer** provides GI50 (growth inhibition 50%) values for the compounds in the database. GI50 values are similar to IC50 values, which are the concentrations that cause 50% growth inhibition, but have been renamed to emphasize the correction for the cell count at time zero. Further discussion on the assay used  available on the [DTP website](http://dtp.nci.nih.gov/docs/compare/compare_methodology.html).
+Additionally, **rcellminer** provides GI50 (50% growth inhibition) values for the compounds in the database. GI50 values are similar to IC50 values, which are the concentrations that cause 50% growth inhibition, but have been renamed to emphasize the correction for the cell count at time zero. Further details on the assay used are available on the [DTP website](http://dtp.nci.nih.gov/docs/compare/compare_methodology.html).
 
 ### Get GI50 values
 
@@ -172,11 +172,13 @@ knownMoaDrugAct <- as.data.frame(cbind(knownMoaDrugInfo, gi50Data), stringsAsFac
 ```
 
 # Use Cases
-## Finding Similar Compounds
+## Finding Structurally Similar Compounds
+
+In this example, we show how to identify compounds that are structurally similar to a compound of interest. Both the matching compound structures and their activity patterns can then be plotted.  For speed and illustrative purposes, the set of compounds searched by pairwise structural comparison is restricted to a subset of compounds with known mechanism of action (MOA). The code can, however, be easily adjusted to screen the entire CellMiner compound database. By examining the activity pattern variation across compounds with related structures, insight can be gained toward understanding of structure-activity relationships.
 
 ### Generate drug set
 
-Generate a set of drugs to be pairwise compared. Here we will compare a set of 100 compounds to a drug of interest MK2206 (an AKT inhibitor). We provide a name "MK2206" and the SMILES-based structure [retrieved from PubChem](https://pubchem.ncbi.nlm.nih.gov/compound/46930998?from=summary#section=Canonical-SMILES). 
+Generate a set of 100 drugs for pairwise structural comparison with Camptothecin (a Topoisomerase I inhibitor). We provide a name "Camptothecin" and the SMILES-based structure [retrieved from PubChem](https://pubchem.ncbi.nlm.nih.gov/compound/24360?from=summary#section=Canonical-SMILES). 
 
 ```{r compareFingerPrints, results='hide', message=FALSE, warning=FALSE}
 # Load sqldf
@@ -224,12 +226,12 @@ results[1:5]
 
 ### Visualize structures 
 
-View the similar structures. The first drug in the results will be the drug of interest and the subsequent drugs will compounds related by structure in decreasing similarity. 
+View the similar structures. The first drug in the results will be the drug of interest and the subsequent drugs will compounds related by structure with decreasing similarity. 
 
 **NOTE:** All compounds in CellMiner are uniquely identified by **NSC** identifiers. 
 
 ```{r plotSimilarStructures, fig.height=2, fig.width=8}
-# Plot top 2 results 
+# Plot top 4 results 
 resultsIdx <- sapply(names(results)[2:5], function(x) { which(tmpDf$NSC == x) })
 resultsIds <- names(results)[2:5]
 resultsSmiles <- tmpDf$SMILES[resultsIdx]
@@ -243,14 +245,18 @@ plotStructures(resultsIds, resultsSmiles, titleCex=0.5, mainLabel="Fingerprint R
 
 ### Visualize drug activity
 
-Plot the activity of the compounds across the NCI-60
+Plot the activity of the most structurally similar compounds across the NCI-60
 
-```{r plotCellMiner}
+```{r plotSimilarActivities}
 nscs <- names(results)[2:5]
-plotCellMiner(drugAct=drugAct, molData=molData, plots=rep("drug", length(nscs)), nscs, NULL)
+plotCellMiner(drugAct, molData, rep("drug", length(nscs)), nscs, NULL)
 ```
 
 ## Pattern Comparison 
+
+In this example, we construct and visualize a composite gene inactivation pattern for the
+widely studied PTEN tumor suppressor gene, integrating gene expression, copy, and mutation data.
+The composite pattern is then used to identify compounds with correlated activity patterns.
 
 ```{r reinhold2015}
 # Gene of interest
@@ -295,7 +301,15 @@ sigResults <- results[results$PVAL < 0.01, ]
 getDrugName(rownames(sigResults))
 ```
 
-## Gene Set Comparison 
+## Correlating DNA Copy Number Alteration and Gene Expression
+
+We can assess the extent to which a gene's expression may be regulated by copy gain or loss
+by computing the correlation between its NCI-60 transcript expression and DNA copy number 
+alteration pattern. The overall distribution of such correlations can guide consideration of 
+their significance. In this setting, it is insightful to consider the extent to which particular 
+classes of genes may be regulated by copy alteration. This example illustrates the computation and visualization  of the gene copy number vs. expression correlation distribution, while situating 
+the median correlation for a set of oncogenes within the observed distribution.
+
 ```{r varma2014, fig.height=7.5, fig.width=6}
 molData <- getMolDataMatrices()
 
@@ -341,10 +355,10 @@ text(median(selectedOncogenesCor$cor)+0.02, y=140, adj=0, labels="Median Correla
 rug(selectedOncogenesCor$cor, col="red") 
 ```
 
-## Identifying Drug Response Correlates
+## Assessing Correlative Evidence for a Drug MOA Hypothesis
 
-**rcellminer** makes it easy to consider whether available pharmacogenomic data support 
-hypotheses relating to drug mechanism of action. For example, higher expression of anti-apoptotic 
+**rcellminer** makes it easy to consider whether the available pharmacogenomic data support 
+a hypothesis relating to drug mechanism of action. For example, higher expression of anti-apoptotic 
 genes could plausibly promote cell survival in the face of DNA damage induced by topoisomerase 
 inhibitors, thereby contributing to drug resistance. To explore this further, we can check 
 if the expression of known anti-apoptotic genes is significantly negatively correlated with 
@@ -428,7 +442,7 @@ the heterozygous or homozygous state).
 # getFeatureAnnot() returns a named list of data frames with annotation data 
 # for drugs ("drug") and drug activity repeat experiments ("drugRepeat").
 drugAnnot <- getFeatureAnnot(rcellminerData::drugData)[["drug"]]
-fdaDrugAnnot <- drugAnnot[drugAnnot$FDA_STATUS == "FDA approved", ]
+fdaDrugAnnot <- drugAnnot[which(drugAnnot$FDA_STATUS == "FDA approved"), ]
 
 nci60FdaDrugAct <- getDrugActivityData(nscSet = fdaDrugAnnot$NSC)
 nci60GeneExp <- getAllFeatureData(rcellminerData::molData)[["xai"]]
@@ -546,11 +560,11 @@ text(x=meanActDiff, negLog10Pval, ptLabels, cex=0.9, pos=4, col="red")
 
 # Accessing rcellminer Shiny Apps 
 
-Several [Shiny-based](http://shiny.rstudio.com/) applications have been embedded into rcellminer to simplify exploration of the CellMiner data. 
+Several [Shiny-based](http://shiny.rstudio.com/) applications have been embedded into **rcellminer** to simplify exploration of the CellMiner data. 
 
-## Plot Comparison Application 
+## Comparison Plot Application 
 
-The "Comparison" application allows users to plot any two variables from the CellMiner data against each other. It additionally allows users to search for compound NSC IDs using names and mechanisms of action. 
+The "Comparison Plot" application allows users to plot any two variables from the CellMiner data against each other. It additionally allows users to search for compound NSC IDs using names and mechanisms of action. Pattern comparisons, which correlate the variable plotted on the x-axis with all other variables (drug activity patterns, gene expression profiles, etc.), can be computed to obtain a ranked table of results.  The latter can suggest additional 2D plots for visual exploration.  Tooltips provide information about plotted points (cell line name and tissue of origin).
 
 ```{r comparePlots, eval=FALSE}
 runShinyApp("shinyComparePlots")
@@ -560,7 +574,7 @@ runShinyApp("shinyComparePlots")
 
 ## Compound Browser Application
 
-The "Compound Browser"" application allows users to see information about each compound, including structures and any repeat assay information. 
+The "Compound Browser" application allows users to see information about each compound, including its structure and plots of repeat activity assays over the NCI-60. 
 
 ```{r compoundBrowser, eval=FALSE}
 runShinyApp("shinyReprodPlots")
@@ -570,7 +584,7 @@ runShinyApp("shinyReprodPlots")
 
 ## Structure Comparison Application
 
-The "Structure Comparison"" application allows users to identify similar compounds within the dataset either by NSC ID or SMILES string. 
+The "Structure Comparison" application allows users to identify structurally similar compounds within the dataset, with input compounds specified either by NSC ID or SMILES string. 
 
 ```{r compareStructures, eval=FALSE}
 runShinyApp("shinyCompareStructures")

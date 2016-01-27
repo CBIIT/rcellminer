@@ -1,9 +1,11 @@
-#' Get other features above some threshold (merges results from selectCorrelatedRows, 
-#' invoked for a given Y, and each element in a list of matrices).
+#' Select features that are correlated with a given feature (or one or more features
+#' from a set of features), merging results from multiple candidate feature matrices.
 #' 
 #' @param Y a vector or matrix; rows from each matrix element of X will be correlated with 
 #' Y if Y is a vector or with rows of Y, if Y is a matrix.
-#' @param XList a list of matrices whose rows will be correlated with Y (vector) or rows of Y (matrix)
+#' @param XList a list of matrices whose rows will be correlated with Y (vector) or rows of Y (matrix).
+#' The rownames in each matrix element of XList must be specified to values that are unique with
+#' respect to the total set of rownames (as derived from all matrices in XList).
 #' @param corThreshold the minimum correlation threshold for the row to be returned
 #' @param useAbsCor a logical value indicating whether absolute correlations should be used
 #' (default=TRUE).
@@ -18,11 +20,11 @@
 #' colnames(matList$X1) <- paste0("X1_col_", 1:10)
 #' rownames(matList$X2) <- paste0("X2_row_", 1:10)
 #' colnames(matList$X2) <- paste0("X2_col_", 1:10)
-#' selectCorrelatedRows2(vec, matList)
+#' selectCorrelatedRowsFromMatrices(vec, matList)
 #' 
 #' @concept rcellminer
 #' @export
-selectCorrelatedRows2 <- function(Y, XList, corThreshold=0.10, useAbsCor=TRUE){  
+selectCorrelatedRowsFromMatrices <- function(Y, XList, corThreshold=0.10, useAbsCor=TRUE){  
 	if (!is.list(XList)){
 		stop("Xlist parameter must be set to a list of numeric matrices.")
 	}

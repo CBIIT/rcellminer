@@ -1,4 +1,5 @@
-#' Get other features above some threshold 
+#' Select features that are correlated with a given feature (or one or more features
+#' from a set of features). 
 #' 
 #' @param Y a vector or matrix; rows from X will be correlated with Y if Y is a vector
 #' or with rows of Y, if Y is a matrix.

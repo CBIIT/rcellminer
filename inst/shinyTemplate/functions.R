@@ -304,7 +304,7 @@ makePlot <- function(xData, yData, showColor, showColorTissues, dataSource, srcC
 	
 	# Print chart
 	return(h1)
-	}
+}
 
 
 #' Title

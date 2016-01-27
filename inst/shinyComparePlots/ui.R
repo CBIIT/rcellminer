@@ -1,7 +1,35 @@
 library(shiny)
 library(rcellminer)
 
-# Emulate this to check for SWATH package
+#--------------------------------------------------------------------------------------------------
+# LOAD CONFIGURATION AND REQUIRED DATA SOURCE PACKAGES.
+#--------------------------------------------------------------------------------------------------
+source(system.file("shinyComparePlots", "functions.R", package="rcellminer"))
+config <- jsonlite::fromJSON(system.file("shinyComparePlots", "config.json", package="rcellminer"))
+
+# Construct named character vector mapping displayed data source names to
+# internally used source identifiers.
+dataSourceChoices <- setNames(names(config),
+														  vapply(config, function(x) { x[["displayName"]] }, 
+														  			 character(1)))
+
+for (configSrcId in names(config)){
+	srcName <- config[[configSrcId]][["displayName"]]
+	srcPackages <- names(config[[configSrcId]][["packages"]])
+	
+	for (pkgName in srcPackages){
+		if (!require(pkgName, character.only = TRUE)){
+			dataSourceChoices[srcName] <- NA
+			break
+		}
+	}
+}
+
+if (any(is.na(dataSourceChoices))){
+	stop("Check configuration file: one or more required data source packages must be installed.")
+} 
+#--------------------------------------------------------------------------------------------------
+
 if("rCharts" %in% installed.packages()) {
 	options(RCHART_LIB='highcharts')	
 	library(rCharts)
@@ -11,17 +39,6 @@ if("rCharts" %in% installed.packages()) {
 }
 
 colorSet <- loadNciColorSet(returnDf=TRUE)
-
-dataSourceChoices <- c("NCI-60"="nci60")
-if (require(ccleData)){
-  dataSourceChoices <- c(dataSourceChoices, "CCLE" = "ccle")
-}
-if (require(cgpData)){
-  dataSourceChoices <- c(dataSourceChoices, "CGP" = "cgp")
-}
-if (require(gdscData)){
-	dataSourceChoices <- c(dataSourceChoices, "GDSC" = "gdsc")
-}
 
 # NOTE: Size is not automatically set for rChartsAlternative output
 plotHeight <- 800

@@ -2,7 +2,8 @@
 % Please edit documentation in R/selectCorrelatedRows.R
 \name{selectCorrelatedRows}
 \alias{selectCorrelatedRows}
-\title{Get other features above some threshold}
+\title{Select features that are correlated with a given feature (or one or more features
+from a set of features).}
 \usage{
 selectCorrelatedRows(Y, X, corThreshold = 0.1, useAbsCor = TRUE)
 }
@@ -22,7 +23,8 @@ a matrix of rows of X correlated with Y (if Y is a vector) or correlated with
 at least one row of Y if Y is a matrix or data frame.
 }
 \description{
-Get other features above some threshold
+Select features that are correlated with a given feature (or one or more features
+from a set of features).
 }
 \examples{
 vec <- runif(10)

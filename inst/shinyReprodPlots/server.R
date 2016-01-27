@@ -48,7 +48,7 @@ shinyServer(function(input, output, session) {
         nscs <- rownames(drugAnnot[publicIdx, ])
         smiles <- drugAnnot[publicIdx, "SMILES"]
         
-        plotStructuresFromNscs(nscs, smiles, titleCex=0.5, mainLabel="")
+        plotStructuresFromNscs(nscs)
     }, height=600, width=600, res=150)
     
     output$repeatResults <- renderPlot({

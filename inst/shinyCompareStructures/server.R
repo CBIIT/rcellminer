@@ -116,8 +116,7 @@ shinyServer(function(input, output, session) {
     output$structurePlot <- renderPlot({         
     	tmp <- getSimilarCompounds()
     	labels <- paste0(tmp$ids, "\n", tmp$coef)
-      plotStructuresFromNscs(labels, tmp$smiles, 
-      											 titleCex=0.5, structSize=400)
+      plotStructures(labels, tmp$smiles, titleCex=0.5, structSize=400)
     }, res=150)
 
     output$ui <- renderUI({
