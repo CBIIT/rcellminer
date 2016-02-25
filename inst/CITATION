@@ -1,0 +1,15 @@
+citHeader("To cite rcellminer:")
+
+citEntry(entry="article",
+  author =      "Luna, A  and Rajapakse, VN  and Sousa, FG  and Gao, J  and Schultz, N  and Varma, S  and Reinhold, W  and Sander, C  and Pommier, Y",
+  title =       "{rcellminer: {E}xploring {M}olecular {P}rofiles and {D}rug {R}esponse of the {N}{C}{I}-60 {C}ell {L}ines in {R}}",
+  journal =     "Bioinformatics",
+  year =        "2015",
+  month =       "Dec",
+  textVersion = paste("Luna A et al. rcellminer: Exploring Molecular Profiles and Drug Response of the NCI-60 Cell Lines in R. Bioinformatics. 2015 Dec. http://www.ncbi.nlm.nih.gov/pubmed/26635141"))
+
+citFooter("This free open-source software implements academic research
+by the authors. Its development took a large amount of extra time and
+effort. If you use it, please support the project by citing the listed
+journal articles.")
+

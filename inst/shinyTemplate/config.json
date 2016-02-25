@@ -1,0 +1,24 @@
+{
+  "nci60":{
+    "name":"NCI-60",
+    "packages": ["rcellminer", "ccleData"],
+    "types":{
+      "MolData":[
+        {
+          "Expression (Z-Score)":"exp",
+          "Expression (Avg. log2 Int.)":"xai",
+          "Mutations":"mut",
+          "Copy Number":"cop",
+          "MicroRNA":"mir",
+          "Metadata":"mda",
+          "Protein (RPLA)":"pro"
+        }
+      ],
+      "DrugData":[
+        {
+          "Drug Activity":"act"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,150 @@
+Category	Category_Description	Abbreviation	Definition
+NonCan	Non-cancer drug with FDA approval	Bone	Bone resorption
+NonCan	Non-cancer drug with FDA approval	CardG	Cardiac Glycoside
+NonCan	Non-cancer drug with FDA approval	Cath	Cathartic
+NonCan	Non-cancer drug with FDA approval	Mal	Malaria
+NonCan	Non-cancer drug with FDA approval	Psy	Antipsychotic
+NonCan	Non-cancer drug with FDA approval	Ste	Steroid
+PK	Protein kinase inhibitor	AKT	Akt inhibitor
+PK	Protein kinase inhibitor	ALK	ALK inhibitor
+PK	Protein kinase inhibitor	ATR	ATR inhibitor
+PK	Protein kinase inhibitor	AURK	Aurora kinase inhibitor
+PK	Protein kinase inhibitor	AXL	Axl inhibitor
+PK	Protein kinase inhibitor	BRAF	BRAF inhibitor
+PK	Protein kinase inhibitor	CDK	CDK inhibitor
+PK	Protein kinase inhibitor	CHEK	"CHK inhibitor (CHEK1, CHEK2)"
+PK	Protein kinase inhibitor	EGFR	EGFR inhibitor.
+PK	Protein kinase inhibitor	ERBB2	ERBB2 inhibitor
+PK	Protein kinase inhibitor	ERK	ERK inhibitor
+PK	Protein kinase inhibitor	FAK	FAK inhibitor
+PK	Protein kinase inhibitor	FGFR	FGFR inhibitor
+PK	Protein kinase inhibitor	FLT	"Flt inhibitor (FLT1, FLT3, FLT4)"
+PK	Protein kinase inhibitor	FYN	FYN inhibitor
+PK	Protein kinase inhibitor	GSK3A	GSK3A inhibitor
+PK	Protein kinase inhibitor	GSK3B	GSK3B inhibitor
+PK	Protein kinase inhibitor	IGF1R	IGF1R inhibitor
+PK	Protein kinase inhibitor	JAK	JAK inhibitor
+PK	Protein kinase inhibitor	KIT	c-Kit inhibitor
+PK	Protein kinase inhibitor	MAP2K	MAP2K (MEK) inhibitor
+PK	Protein kinase inhibitor	MAP3K	MAP3K (ERK1) inhibitor
+PK	Protein kinase inhibitor	MAPK14	MAPK14 (p38) inhibitor
+PK	Protein kinase inhibitor	MAPK8	MAPK8 (JNK) inhibitor
+PK	Protein kinase inhibitor	MET	MET inhibitor
+PK	Protein kinase inhibitor	MTOR	MTOR inhibitor
+PK	Protein kinase inhibitor	NTRK	"NTRK1, NTRK2 inhibitor"
+PK	Protein kinase inhibitor	PIK3	Phosphoinositide-3-Kinase
+PK	Protein kinase inhibitor	PRKCA	PRKCA (PRK) inhibitor
+PK	Protein kinase inhibitor	PTK	Protein tyrosine kinase (a gene name)
+PK	Protein kinase inhibitor	RAF	RAF inhibitor
+PK	Protein kinase inhibitor	SRC	SRC inhibitor
+PK	Protein kinase inhibitor	SYK	SYK inhibitor
+PK	Protein kinase inhibitor	VEGF	VEGF inhibitor
+PK	Protein kinase inhibitor	VEGFR	VEGFR inhibitor
+PK	Protein kinase inhibitor	WEE1	WEE1 inhibitor
+-	-	A2	Alkylating at N-2 position of guanine
+-	-	A6	Alkylating at O-6 of guanine
+-	-	A7	Alkylating at N-7 position of guanine
+-	-	Ab	Antibodies
+-	-	AGPAT2	AGPAT2 (LPAATB) inhibitor
+-	-	AlkAg	Alkylating agent
+-	-	AM	Antimetabolite
+-	-	Ang	Angiogenesis
+-	-	Ant	Antibiotic
+-	-	AO	Antioxidant
+-	-	AP	Antiprotozoal
+-	-	APH1	"APH1A, APHiB gamma secretase inhibitors"
+-	-	Apo	Apoptosis inducer
+-	-	AR	Androgen receptor
+-	-	BCL2	BCL2 inhibitor
+-	-	BCR-ABL	BCR-ABL inhibitor
+-	-	BRD	Bromodomain inhibiting
+-	-	CASP	Caspase inhibitor
+-	-	CC	Cell cycle
+-	-	CD133	CD133 inhibitor
+-	-	CDC7	CDC7 inhibitor
+-	-	CDH16	CDH16 (KSP) inhibitor
+-	-	CSF1R	CSF1R inhibitor
+-	-	CTNNB1	Beta catenin inhibior
+-	-	CTSB	Capthepsin inhibitor
+-	-	CXCR4	CXCR4 inhibitor
+-	-	CYP19A1	CYP19A1 (aromatase) inhibitor
+-	-	Db	DNA binder
+-	-	DDR	DNA damage repair
+-	-	Df	"Antifols (impairs the function of folic acids. This inhibits production of DNA, RNA, and proteins)"
+-	-	DNMT	DNA methylttransferase inhibitor
+-	-	DOT1L	DOT1L inhibitor
+-	-	Dr	Ribonucleotide reductase inhibitor
+-	-	Ds	DNA synthesis inhibitor
+-	-	EHMT2	EHMT2 inhibitor
+-	-	EPHA4	EPHA4 inhibitor
+-	-	ER	Selective Estrogen Receptor Modulators
+-	-	ERG	ERG inhibitor
+-	-	ETV	ETV1 inhibitor
+-	-	EZH2	EZH2 inhibitor
+-	-	FAS	FAS inhibitor
+-	-	FGF	FGF inhibitor
+-	-	FRS	Free radical savenger
+-	-	FT	Farnesel transferase inhibitor
+-	-	GARTF	GARTF inhibitor
+-	-	GEMIN2	GEMIN2 (SIP1) inhibitor
+-	-	GSTP1	GSTP1 inhibitor
+-	-	GTPase	"Ras, Raf and other GTPases"
+-	-	HDAC	Histone deacetylase
+-	-	Hg-Smo	Hedgehog-Smoothen - B catenin
+-	-	HIF1	HIF1 inhibitor
+-	-	HK2	hexokinase II inhibitor
+-	-	Ho	hormone
+-	-	HSP90	"HSP90(AA1, AB1)"
+-	-	HYP	Hypoxia
+-	-	IAP	"XIAP, BIRC2,3,5,7,8"
+-	-	IDH1	IDH1 inhibitor
+-	-	IDNARep	Inhibitor of DNA replication
+-	-	IL	Interleukin
+-	-	IL6	IL6 inhibitor
+-	-	IMPDH2	IMPDH2 inhibitor
+-	-	INDO	"Indoleamine 2,3-dioxygenase inhibitor"
+-	-	ITG	integrin affector
+-	-	KIF11	KIF11 (Eg5) inhibitor
+-	-	KLF4	KLF4 inhibitor
+-	-	LDHA	LDHA inhibitor
+-	-	LYN	LYN inhibitor
+-	-	MDM2	MDM2 inhibitor
+-	-	MGLL	MGLL (MAGL) inhibitor
+-	-	Mito	Mitochondria; Warburg effect
+-	-	MYC	c-Myc inhibitor
+-	-	NEDD8	NEDD8 (NAE) inhibitor
+-	-	NFkB	Nuclear factor of kappa light polypeptide gene enhancer in B-cells
+-	-	PARP	Poly(ADP-ribose)polymerase
+-	-	Pase	Phosphatase inhibitor
+-	-	PD	Phosphodiesterase inhibitor
+-	-	PDE6D	PDE6D (PDE delta) inhibitor
+-	-	PDGFR	PDGFR inhibitor
+-	-	PDK1	PDK1 inhibitor
+-	-	Pi	protein synthesis inhibitor
+-	-	PIM1	PIM1 inhibitor
+-	-	PKM	PKM (PKM2) inhibitor
+-	-	PLK1	PLK1 inhibitor
+-	-	PORCN	porcupine inhibitor
+-	-	PPARG	PPARG inhibitor
+-	-	PSM	proteasome inhibitor
+-	-	RAD51	RAD51 inhibitor
+-	-	RAS	RAS inhibitor
+-	-	RHO	RHO inhibitor
+-	-	ROS1	ROS1 inhibitor
+-	-	RP	Radioprotectant
+-	-	Rs	RNA synthesis inhibitor
+-	-	RXR	Retinoic acid receptor
+-	-	SETD8	SETD8 (N-Lysine Methyltransferase) inhibitor
+-	-	SMO	SMO inhibitor
+-	-	STAT	"STAT(3,5) inhibitor"
+-	-	STK	Serine threonine kinase
+-	-	T1	Topoisomerase 1 inhibitor
+-	-	T2	Topoisomerase 2 inhibitor
+-	-	TEK	TEK (TIE2) inhibitor
+-	-	TGFB1	TGFB1 inhibitor
+-	-	TLR8	TLR8 inhibitor
+-	-	TNKS	TNKS inhibitor
+-	-	Tu	Tubulin affecting
+-	-	TXNRD	"TXNRD (1,2,3) inhibitor"
+-	-	Wnt	Wingless-type MMTV integration site family (WNT) inhibitor
+-	-	YK	Tyrosine kinase inhibitor
