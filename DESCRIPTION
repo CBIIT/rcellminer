@@ -15,7 +15,7 @@ Description: The NCI-60 cancer cell line panel has been used over the course of
   (http://discover.nci.nih.gov/cellminer) has been to integrate data
   from multiple platforms used to analyze the NCI-60 and to provide a powerful
   suite of tools for exploration of NCI-60 data.
-License: LGPL-3
+License: LGPL-3 + file LICENSE
 LazyData: true
 Imports:
     stringr,
