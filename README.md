@@ -1,5 +1,5 @@
-[![Travis-CI Build Status](https://travis-ci.org/cannin/paxtoolsr.svg?branch=master)](https://travis-ci.org/cannin/rcellminer)
-[![codecov.io](https://codecov.io/github/cannin/paxtoolsr/coverage.svg?branch=master)](https://codecov.io/github/cannin/rcellminer?branch=master)
+[![Travis-CI Build Status](https://travis-ci.org/cannin/rcellminer.svg?branch=master)](https://travis-ci.org/cannin/rcellminer)
+[![codecov.io](https://codecov.io/github/cannin/rcellminer/coverage.svg?branch=master)](https://codecov.io/github/cannin/rcellminer?branch=master)
 
 # RCellminer
 

@@ -6,6 +6,9 @@ cache: packages
 # Bioconductor
 bioc_required: true
 
+r_packages:
+  - rmarkdown
+
 # On CRAN all warnings are treated as errors; this is not true on Bioconductor.
 warnings_are_errors: false
 
