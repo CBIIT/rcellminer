@@ -29,20 +29,31 @@ loadNciColorSet <- function(returnDf=FALSE) {
 #                      "CNS:SF268", "CNS:SF295", "CNS:SF539", "CNS:SNB19", "CNS:SNB75",
 #                      "BR:MCF7", "BR:MDAMB_231", "BR:HS578T", "BR:BT549", "BR:T47D")    
 
-	abbrCellLines <- c("RE:UO_31", "RE:TK_10", "RE:SN12C", "RE:RXF_393", "RE:CAKI_1", 
-										 "RE:ACHN", "RE:A498", "RE:786_0", "PR:DU_145", "PR:PC_3", 
-										 "OV:NCI_ADR_RES", "OV:SK_OV_3", "OV:OVCAR_8", "OV:OVCAR_5", 
-										 "OV:OVCAR_4", "OV:OVCAR_3", "OV:IGROV1", "LC:NCI_H522", 
-										 "LC:NCI_H460", "LC:NCI_H322M", "LC:NCI_H23", "LC:NCI_H226", 
-										 "LC:HOP_92", "LC:HOP_62", "LC:EKVX", "LC:A549", "ME:MDA_N", 
-										 "ME:MDA_MB_435", "ME:UACC_62", "ME:UACC_257", "ME:SK_MEL_5",
-										 "ME:SK_MEL_28", "ME:SK_MEL_2", "ME:M14", "ME:MALME_3M", 
-										 "ME:LOXIMVI", "LE:SR", "LE:RPMI_8226", "LE:MOLT_4", "LE:K_562",  
-										 "LE:HL_60", "LE:CCRF_CEM", "CO:SW_620", "CO:KM12", "CO:HT29", 
-										 "CO:HCT_15", "CO:HCT_116", "CO:HCC_2998", "CO:COLO205", 
-										 "CNS:U251", "CNS:SNB_75", "CNS:SNB_19", "CNS:SF_539", 
-										 "CNS:SF_295", "CNS:SF_268", "BR:T47D", "BR:BT_549", "BR:HS578T", 
-										 "BR:MDA_MB_231", "BR:MCF7") 
+# 	abbrCellLines <- c("RE:UO_31", "RE:TK_10", "RE:SN12C", "RE:RXF_393", "RE:CAKI_1", 
+# 										 "RE:ACHN", "RE:A498", "RE:786_0", "PR:DU_145", "PR:PC_3", 
+# 										 "OV:NCI_ADR_RES", "OV:SK_OV_3", "OV:OVCAR_8", "OV:OVCAR_5", 
+# 										 "OV:OVCAR_4", "OV:OVCAR_3", "OV:IGROV1", "LC:NCI_H522", 
+# 										 "LC:NCI_H460", "LC:NCI_H322M", "LC:NCI_H23", "LC:NCI_H226", 
+# 										 "LC:HOP_92", "LC:HOP_62", "LC:EKVX", "LC:A549", "ME:MDA_N", 
+# 										 "ME:MDA_MB_435", "ME:UACC_62", "ME:UACC_257", "ME:SK_MEL_5",
+# 										 "ME:SK_MEL_28", "ME:SK_MEL_2", "ME:M14", "ME:MALME_3M", 
+# 										 "ME:LOXIMVI", "LE:SR", "LE:RPMI_8226", "LE:MOLT_4", "LE:K_562",  
+# 										 "LE:HL_60", "LE:CCRF_CEM", "CO:SW_620", "CO:KM12", "CO:HT29", 
+# 										 "CO:HCT_15", "CO:HCT_116", "CO:HCC_2998", "CO:COLO205", 
+# 										 "CNS:U251", "CNS:SNB_75", "CNS:SNB_19", "CNS:SF_539", 
+# 										 "CNS:SF_295", "CNS:SF_268", "BR:T47D", "BR:BT_549", "BR:HS578T", 
+# 										 "BR:MDA_MB_231", "BR:MCF7") 
+	
+	abbrCellLines <- rev(c("BR:MCF7", "BR:MDA-MB-231", "BR:HS 578T", "BR:BT-549", "BR:T-47D",
+			 "CNS:SF-268", "CNS:SF-295", "CNS:SF-539", "CNS:SNB-19", "CNS:SNB-75", "CNS:U251",
+			 "CO:COLO 205", "CO:HCC-2998", "CO:HCT-116", "CO:HCT-15", "CO:HT29", "CO:KM12", "CO:SW-620",
+			 "LE:CCRF-CEM", "LE:HL-60(TB)", "LE:K-562", "LE:MOLT-4", "LE:RPMI-8226", "LE:SR",
+			 "ME:LOX IMVI", "ME:MALME-3M", "ME:M14", "ME:SK-MEL-2", "ME:SK-MEL-28", "ME:SK-MEL-5", "ME:UACC-257",
+			 "ME:UACC-62", "ME:MDA-MB-435", "ME:MDA-N", "LC:A549/ATCC", "LC:EKVX",
+			 "LC:HOP-62", "LC:HOP-92", "LC:NCI-H226", "LC:NCI-H23", "LC:NCI-H322M", "LC:NCI-H460", "LC:NCI-H522",
+			 "OV:IGROV1", "OV:OVCAR-3", "OV:OVCAR-4", "OV:OVCAR-5", "OV:OVCAR-8", "OV:SK-OV-3", "OV:NCI/ADR-RES",
+			 "PR:PC-3", "PR:DU-145",
+			 "RE:786-0", "RE:A498", "RE:ACHN", "RE:CAKI-1", "RE:RXF 393", "RE:SN12C", "RE:TK-10", "RE:UO-31"))
   
   #NCI60 color set
 	colors <- c(rep("red", 8), rep("yellow", 2), rep("purple", 7), rep("steelblue", 9), rep("darkolivegreen", 10), rep("yellowgreen", 6), rep("orange", 7), rep("sienna", 6), rep("darkblue", 5))
