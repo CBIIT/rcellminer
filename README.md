@@ -7,7 +7,7 @@ This R package provide access to the data and functions to analyze data from [Ce
 
 # Installation
 
-## Install from BitBucket
+## Install from GitHub
     setRepositories(ind=1:6)
     options(repos="http://cran.rstudio.com/")
 
@@ -26,17 +26,13 @@ This R package provide access to the data and functions to analyze data from [Ce
     # Optional for interactive plots
     install_github('rCharts', 'ramnathv')
 
-    install_bitbucket("cbio_mskcc/rcellminer/rcellminer",
-                      auth_user="discoverUser",
-                      password="discoverUserPassword",
+    install_github("cannin/rcellminer",
                       build_vignette=FALSE,
                       dependencies=TRUE,
                       args="--no-multiarch",
                       ref="master")
 
-    install_bitbucket("cbio_mskcc/rcellminer/rcellminerData",
-                      auth_user="discoverUser",
-                      password="discoverUserPassword",
+    install_github("github/rcellminerData",
                       build_vignette=FALSE,
                       dependencies=TRUE,
                       args="--no-multiarch",
