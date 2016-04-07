@@ -1,15 +1,16 @@
 test_that("getBinaryMutationData() output is correct", {
-	exoDb <- getESetList(rcellminerData::molData)[["exo"]]
-	exoInfoTab <- as(featureData(exoDb), "data.frame")
-	exoDataMat <- exprs(exoDb)
-	binMutMat <- exprs(getESetList(rcellminerData::molData)[["mut"]])
-	
-	funcResult <- getBinaryMutationData(exoInfoTab, exoDataMat)
+# Note: CellMiner 2.0 mutation data is no longer binary.
+# 	exoDb <- getESetList(rcellminerData::molData)[["exo"]]
+# 	exoInfoTab <- as(featureData(exoDb), "data.frame")
+# 	exoDataMat <- exprs(exoDb)
+# 	binMutMat <- exprs(getESetList(rcellminerData::molData)[["mut"]])
+# 	
+# 	funcResult <- getBinaryMutationData(exoInfoTab, exoDataMat)
 	
 	# NOTE: This test is used because the R CHECK command seems to reorder
 	# the rows of the matrices.
-	expect_true(identical(binMutMat[sort(rownames(binMutMat)), ],
-												funcResult[sort(rownames(funcResult)), ]))
+# 	expect_true(identical(binMutMat[sort(rownames(binMutMat)), ],
+# 												funcResult[sort(rownames(funcResult)), ]))
 	
 # 	binMutMatVals <- as.vector(binMutMat)
 # 	if (length(unique(binMutMatVals)) != 2){
