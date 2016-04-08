@@ -5,7 +5,14 @@ library(rcellminer)
 # LOAD CONFIGURATION AND REQUIRED DATA SOURCE PACKAGES.
 #--------------------------------------------------------------------------------------------------
 config <- jsonlite::fromJSON(system.file("shinyComparePlots", "config.json", package="rcellminer"))
+appConfig <- jsonlite::fromJSON(system.file("shinyComparePlots", "appConfig.json", package="rcellminer"))
 source(system.file("shinyComparePlots", "modal.R", package="rcellminer"))
+
+if (!is.null(appConfig$appName)){
+	appTitle <- appConfig$appName
+} else{
+	appTitle <- "CellMiner"
+}
 
 # Construct named character vector mapping displayed data source names to
 # internally used source identifiers.
@@ -45,7 +52,7 @@ plotHeight <- 800
 plotWidth <- 800
 
 shinyUI(
-	navbarPage("CellMinerCDB",
+	navbarPage(appTitle,
 		inverse=FALSE,
 		tabPanel("Analysis",
 			fluidPage(
