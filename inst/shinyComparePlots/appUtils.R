@@ -155,11 +155,17 @@ makePlot <- function(xData, yData, showColor, showColorTissues, dataSource, sele
 	h1$series(data=list(c(x1,y1), c(x2,y2)), type="line", color="#FF0000",
 						marker=list(enabled=FALSE), enableMouseTracking=FALSE)
 	
-	corResults <-cor.test(df[,xData$uniqName], df[,yData$uniqName], use="pairwise.complete.obs")
+	# corResults <-cor.test(df[,xData$uniqName], df[,yData$uniqName], use="pairwise.complete.obs")
+	# title <- paste0(paste(yData$plotLabel, '~', xData$plotLabel),
+	# 								', r=', round(corResults$estimate, 2),
+	# 								' p=', signif(corResults$p.value, 2))
 	
+	# rbind(y, y) forces more precise pvalue computation.
+	corResults <- crossCors(df[,xData$uniqName], 
+													rbind(df[,yData$uniqName], df[,yData$uniqName]))
 	title <- paste0(paste(yData$plotLabel, '~', xData$plotLabel),
-									', r=', round(corResults$estimate, 2),
-									' p=', signif(corResults$p.value, 2))
+									', r=', signif(corResults$cor[1], digits=3),
+									' p=', signif(corResults$pval[1], digits=3))
 	
 	h1$title(text=title)
 	
