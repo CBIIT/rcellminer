@@ -12,7 +12,7 @@
 #' @concept rcellminer
 #' @export
 loadNciColorSet <- function(returnDf=FALSE) {
-  tissues <- c(rep("renal", 8), rep("prostrate", 2), rep("ovarian", 7), rep("lung", 9), rep("melanoma", 10), rep("leukemia", 6), rep("colon", 7), rep("central nervous system", 6), rep("breast", 5))
+  tissues <- c(rep("renal", 8), rep("prostate", 2), rep("ovarian", 7), rep("lung", 9), rep("melanoma", 10), rep("leukemia", 6), rep("colon", 7), rep("central nervous system", 6), rep("breast", 5))
   
   abbrTissues <- c(rep("RE", 8), rep("PR", 2), rep("OV", 7), rep("LC", 9), rep("ME", 10), rep("LE", 6), rep("CO", 7), rep("CNS", 6), rep("BR", 5))
   
