@@ -45,7 +45,7 @@ plotHeight <- 800
 plotWidth <- 800
 
 shinyUI(
-	navbarPage("CellMiner",
+	navbarPage("CellMinerCDB",
 		inverse=FALSE,
 		tabPanel("Analysis",
 			fluidPage(
