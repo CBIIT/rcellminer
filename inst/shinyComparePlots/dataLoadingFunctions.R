@@ -93,6 +93,22 @@ loadSourceContent <- function(srcConfig){
 				}
 				
 				dat <- pkgMolDataMats[[dataType]]
+				# restrict features ---------------------------------------------------------------------------
+				if (!is.null(pkgMolDataInfo[dataType, "includedFeaturesFile"])){
+					if (!is.na(pkgMolDataInfo[dataType, "includedFeaturesFile"])){
+						inputFile <- system.file("shinyComparePlots",  
+																		 pkgMolDataInfo[dataType, "includedFeaturesFile"],
+																		 package="rcellminer")
+						includedFeatures <- read.table(file=inputFile, header=FALSE, sep = "\t",
+																					 stringsAsFactors=FALSE)[,1]
+						if (!all(includedFeatures %in% rownames(dat))){
+							stop("Check ", pkgName, " MolData included features file for data type ",
+									 dataType, " because some specified features are not in data matrix.")
+						}
+						dat <- dat[includedFeatures, ]
+					}
+				}
+				# ---------------------------------------------------------------------------------------------
 				molFeaturePrefix <- pkgMolDataInfo[dataType, "featurePrefix"]
 				rownames(dat) <- paste0(molFeaturePrefix, rownames(dat))
 				
@@ -179,6 +195,22 @@ loadSourceContent <- function(srcConfig){
 					stop("Check config file: use same drug activity data featurePrefix with all ",
 							 "packages providing drug data for ", srcConfig$displayName, ".")
 				}
+				# restrict features ---------------------------------------------------------------------------
+				if (!is.null(pkgDrugDataInfo[1, "includedFeaturesFile"])){
+					inputFile <- system.file("shinyComparePlots",  
+																	 pkgDrugDataInfo[1, "includedFeaturesFile"],
+																	 package="rcellminer")
+					includedFeatures <- read.table(file=inputFile, header=FALSE, sep = "\t",
+																				 stringsAsFactors=FALSE)[,1]
+					includedFeatures <- as.character(includedFeatures)
+					if (!all(includedFeatures %in% rownames(dat))){
+						stop("Check ", pkgName, " DrugData included features file for data type ",
+								 drugFeaturePrefix, " because some specified features are not in data matrix.")
+					}
+					dat <- dat[includedFeatures, ]
+					annot <- annot[rownames(dat), ]
+				}
+				# ---------------------------------------------------------------------------------------------
 				rownames(dat) <- paste0(drugFeaturePrefix, rownames(dat))
 				rownames(annot) <- rownames(dat)
 			}
