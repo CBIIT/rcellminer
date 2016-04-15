@@ -9,9 +9,10 @@ library(jsonlite)
 #--------------------------------------------------------------------------------------------------
 # LOAD CONFIGURATION AND CONSTRUCT APP (MOLECULAR + DRUG) DATA.
 #--------------------------------------------------------------------------------------------------
-config <- jsonlite::fromJSON(system.file("shinyComparePlots", "config.json", package="rcellminer"))
-source(system.file("shinyComparePlots", "appUtils.R", package="rcellminer"))
-source(system.file("shinyComparePlots", "dataLoadingFunctions.R", package="rcellminer"))
+#config <- jsonlite::fromJSON(system.file("shinyComparePlots", "config.json", package="rcellminer"))
+config <- jsonlite::fromJSON("config.json")
+source("appUtils.R")
+source("dataLoadingFunctions.R")
 #--------------------------------------------------------------------------------------------------
 
 if(file.exists("srcContent.rds")) {

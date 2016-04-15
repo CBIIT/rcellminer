@@ -96,9 +96,7 @@ loadSourceContent <- function(srcConfig){
 				# restrict features ---------------------------------------------------------------------------
 				if (!is.null(pkgMolDataInfo[dataType, "includedFeaturesFile"])){
 					if (!is.na(pkgMolDataInfo[dataType, "includedFeaturesFile"])){
-						inputFile <- system.file("shinyComparePlots",  
-																		 pkgMolDataInfo[dataType, "includedFeaturesFile"],
-																		 package="rcellminer")
+						inputFile <- pkgMolDataInfo[dataType, "includedFeaturesFile"]
 						includedFeatures <- read.table(file=inputFile, header=FALSE, sep = "\t",
 																					 stringsAsFactors=FALSE)[,1]
 						if (!all(includedFeatures %in% rownames(dat))){
@@ -197,9 +195,7 @@ loadSourceContent <- function(srcConfig){
 				}
 				# restrict features ---------------------------------------------------------------------------
 				if (!is.null(pkgDrugDataInfo[1, "includedFeaturesFile"])){
-					inputFile <- system.file("shinyComparePlots",  
-																	 pkgDrugDataInfo[1, "includedFeaturesFile"],
-																	 package="rcellminer")
+					inputFile <- pkgDrugDataInfo[1, "includedFeaturesFile"]
 					includedFeatures <- read.table(file=inputFile, header=FALSE, sep = "\t",
 																				 stringsAsFactors=FALSE)[,1]
 					includedFeatures <- as.character(includedFeatures)

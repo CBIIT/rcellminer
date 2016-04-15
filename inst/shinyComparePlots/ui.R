@@ -4,9 +4,9 @@ library(rcellminer)
 #--------------------------------------------------------------------------------------------------
 # LOAD CONFIGURATION AND REQUIRED DATA SOURCE PACKAGES.
 #--------------------------------------------------------------------------------------------------
-config <- jsonlite::fromJSON(system.file("shinyComparePlots", "config.json", package="rcellminer"))
-appConfig <- jsonlite::fromJSON(system.file("shinyComparePlots", "appConfig.json", package="rcellminer"))
-source(system.file("shinyComparePlots", "modal.R", package="rcellminer"))
+config <- jsonlite::fromJSON("config.json")
+appConfig <- jsonlite::fromJSON("appConfig.json")
+source("modal.R")
 
 if (!is.null(appConfig$appName)){
 	appTitle <- appConfig$appName
