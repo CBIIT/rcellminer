@@ -54,3 +54,4 @@ Open .Rproj file in RStudio
 # Run Vignette
 
 Open vignette (Rmd files) from vignettes/ folder and use "Knit HTML" button to generate the HTML file.
+
