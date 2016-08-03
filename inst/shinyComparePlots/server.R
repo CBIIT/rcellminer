@@ -356,10 +356,7 @@ shinyServer(function(input, output, session) {
     	paste(filename, extension, sep=".")
     },
     content = function(file) {
-    	xData <- getFeatureData(input$xPrefix, input$xId, input$xDataset, srcContent = srcContentReactive())
-    	yData <- getFeatureData(input$yPrefix, input$yId, input$yDataset, srcContent = srcContentReactive())
-
-    	df <- getPlotData(xData, yData, input$showColor, input$showColorTissues,
+    	df <- getPlotData(xData(), yData(), input$showColor, input$showColorTissues,
     										input$xDataset, input$selectedTissuesOnly, srcContent = srcContentReactive())
 
     	# Column selection below is to restrict to cell line, x, y features,
