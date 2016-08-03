@@ -27,6 +27,9 @@ shinyServer(function(input, output, session) {
 		return(TRUE)
 	})
 
+	# Provides a srcContent (list-based) data structure containing all molecular profiling
+	# drug response, and feature/sample annotation data required for the application 
+	# (for data sources specified in the config.json file).
 	srcContentReactive <- reactive({
 		if(!exists("srcContent")) {
 			srcContent <- lapply(config, loadSourceContent)
@@ -45,6 +48,8 @@ shinyServer(function(input, output, session) {
 		return(srcContent)
 	})
 
+	# Provides the set of all possible feature identifiers available for plotting along
+	# the x-axis of the 2-D scatter plot (and for use in pattern comparisons).
 	xIdChoices <- reactive({
 		srcContent <- srcContentReactive()
 
@@ -61,6 +66,8 @@ shinyServer(function(input, output, session) {
 		return(l3)
 	})
 
+	# Provides the set of all possible feature identifiers available for plotting along
+	# the y-axis of the 2-D scatter plot.
 	yIdChoices <- reactive({
 		srcContent <- srcContentReactive()
 
@@ -75,6 +82,28 @@ shinyServer(function(input, output, session) {
 		l3 <- c(l1, l2)
 
 		return(l3)
+	})
+	
+	# Provides an a list object with x-axis feature-related data, including numeric data,
+	# data type prefix, data source, and plot label.
+	xData <- reactive({
+		shiny::validate(need(validateEntry(input$xPrefix, input$xId, input$xDataset,
+												 srcContent = srcContentReactive()),
+												 paste("ERROR:", paste0(input$xPrefix, input$xId), "not found.")))
+		xData <- getFeatureData(input$xPrefix, input$xId, input$xDataset, 
+														srcContent = srcContentReactive())
+		return(xData)
+	})
+	
+	# Provides an a list object with y-axis feature-related data, including numeric data,
+	# data type prefix, data source, and plot label.
+	yData <- reactive({
+		shiny::validate(need(validateEntry(input$yPrefix, input$yId, input$yDataset,
+												 srcContent = srcContentReactive()),
+												 paste("ERROR:", paste0(input$yPrefix, input$yId), "not found.")))
+		yData <- getFeatureData(input$yPrefix, input$yId, input$yDataset, 
+														srcContent = srcContentReactive())
+		return(yData)
 	})
 
 	#----[outputs]--------------------------------------------------------------------------
@@ -93,24 +122,11 @@ shinyServer(function(input, output, session) {
 				shiny::validate(need(input$xDataset == input$yDataset,
 							   "ERROR: x and y axis data sets must be the same."))
 			}
-			shiny::validate(
-	            need(validateEntry(input$xPrefix, input$xId, input$xDataset,
-	            									 srcContent = srcContentReactive()),
-                   paste("ERROR:", paste0(input$xPrefix, input$xId), "not found.")),
-	            need(validateEntry(input$yPrefix, input$yId, input$yDataset,
-	            									 srcContent = srcContentReactive()),
-                   paste("ERROR:", paste0(input$yPrefix, input$yId), "not found."))
-	    )
 
-			xData <- getFeatureData(input$xPrefix, input$xId, input$xDataset, srcContent = srcContentReactive())
-			yData <- getFeatureData(input$yPrefix, input$yId, input$yDataset, srcContent = srcContentReactive())
-
-# 			makePlot <- function(xData, yData, showColor, showColorTissues, dataSource, selectedTissuesOnly,
-# 													 srcContent)
-			h1 <- makePlot(xData = xData, yData = yData, showColor = input$showColor,
+			h1 <- makePlot(xData = xData(), yData = yData(), showColor = input$showColor,
 										 showColorTissues = input$showColorTissues, dataSource = input$xDataset,
-										 selectedTissuesOnly = input$selectedTissuesOnly, srcContent = srcContentReactive())
-			#return(h1)
+										 selectedTissuesOnly = input$selectedTissuesOnly, 
+										 srcContent = srcContentReactive())
 		})
   }
 
@@ -123,17 +139,8 @@ shinyServer(function(input, output, session) {
 			shiny::validate(need(input$xDataset == input$yDataset,
 										"ERROR: x and y axis data sets must be the same."))
 		}
-		shiny::validate(
-			need(validateEntry(input$xPrefix, input$xId, input$xDataset, srcContent = srcContentReactive()),
-					 paste("ERROR:", paste0(input$xPrefix, input$xId), "not found.")),
-			need(validateEntry(input$yPrefix, input$yId, input$yDataset, srcContent = srcContentReactive()),
-					 paste("ERROR:", paste0(input$yPrefix, input$yId), "not found."))
-		)
 
-		xData <- getFeatureData(input$xPrefix, input$xId, input$xDataset, srcContent = srcContentReactive())
-		yData <- getFeatureData(input$yPrefix, input$yId, input$yDataset, srcContent = srcContentReactive())
-
-		makePlotStatic(xData, yData, input$showColor, input$showColorTissues, input$xDataset,
+		makePlotStatic(xData(), yData(), input$showColor, input$showColorTissues, input$xDataset,
 									 input$selectedTissuesOnly, srcContent = srcContentReactive())
 	})
 	#--------------------------------------------------------------------------------------
@@ -147,19 +154,10 @@ shinyServer(function(input, output, session) {
   	if (!require(rcellminerUtils)){
   		shiny::validate(need(input$xDataset == input$yDataset, "ERROR: x and y axis data sets must be the same."))
   	}
-    shiny::validate(need(validateEntry(input$xPrefix, input$xId, input$xDataset,
-    																	 srcContent = srcContentReactive()),
-    										 "ERROR: x-Axis Entry Not Found."))
-    shiny::validate(need(validateEntry(input$yPrefix, input$yId, input$yDataset,
-    																	 srcContent = srcContentReactive()),
-    										 "ERROR: y-Axis Entry Not Found."))
-
-  	xData <- getFeatureData(input$xPrefix, input$xId, input$xDataset, srcContent = srcContentReactive())
-  	yData <- getFeatureData(input$yPrefix, input$yId, input$yDataset, srcContent = srcContentReactive())
 
   	# Column selection below is to restrict to cell line, x, y features,
   	# and tissue type information (source-provided + OncoTree).
-  	dlDataTab <- getPlotData(xData, yData, input$showColor, input$showColorTissues,
+  	dlDataTab <- getPlotData(xData(), yData(), input$showColor, input$showColorTissues,
   													 input$xDataset, input$selectedTissuesOnly, srcContent = srcContentReactive())
   	dlDataTabCols <- c(colnames(dlDataTab)[1:4], paste0("OncoTree", 1:4))
   	dlDataTab <- dlDataTab[, dlDataTabCols]
@@ -172,6 +170,7 @@ shinyServer(function(input, output, session) {
 
   #----[Render Data Table in 'Search IDs' Tab]-------------------------------------------
   # Generate an HTML table view of the data
+  # Note: Searchable data is derived from the x-axis data source.
 	output$ids <- DT::renderDataTable({
 		srcContent <- srcContentReactive()
     drugIds   <- srcContent[[input$xDataset]][["drugInfo"]][, "ID"]
@@ -213,11 +212,12 @@ shinyServer(function(input, output, session) {
 		if (!require(rcellminerUtils)){
 			shiny::validate(need(input$xDataset == input$yDataset, "ERROR: x and y axis data sets must be the same."))
 		}
-	  shiny::validate(need(validateEntry(input$xPrefix, input$xId, input$xDataset,
-	  																	 srcContent = srcContentReactive()),
-	  										 "ERROR: x-Axis Entry Not Found."))
-
-	  dat <- getFeatureData(input$xPrefix, input$xId, input$xDataset, srcContent = srcContentReactive())
+	  # shiny::validate(need(validateEntry(input$xPrefix, input$xId, input$xDataset,
+	  # 																	 srcContent = srcContentReactive()),
+	  # 										 "ERROR: x-Axis Entry Not Found."))
+	  # 
+	  # dat <- getFeatureData(input$xPrefix, input$xId, input$xDataset, srcContent = srcContentReactive())
+		dat <- xData()
 		if (require(rcellminerUtils)){
 			matchedLinesTab <- getMatchedCellLines(c(input$xDataset, input$yDataset))
 			dat$data <- dat$data[matchedLinesTab[, 1]]
