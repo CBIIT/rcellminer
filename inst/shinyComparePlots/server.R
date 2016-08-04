@@ -84,14 +84,34 @@ shinyServer(function(input, output, session) {
 		return(l3)
 	})
 	
+	# Provides a data frame with columns indicating the matched cell lines between
+	# the input$xDataset (column 1) and the input$yDataset (column 2).
+	matchedCellLinesTab <- reactive({
+		matchedCellLinesTab <- getMatchedCellLines(c(input$xDataset, input$yDataset))
+		shiny::validate(need(nrow(matchedCellLinesTab) > 0, 
+												 "There are no shared cell lines between the selected datasets."))
+		colnames(matchedCellLinesTab) <- c("xDataset", "yDataset")
+		return(matchedCellLinesTab)
+	})
+	
 	# Provides an a list object with x-axis feature-related data, including numeric data,
 	# data type prefix, data source, and plot label.
 	xData <- reactive({
+		if (input$selectedTissuesOnly){
+			shiny::validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
+		}
 		shiny::validate(need(validateEntry(input$xPrefix, input$xId, input$xDataset,
 												 srcContent = srcContentReactive()),
 												 paste("ERROR:", paste0(input$xPrefix, input$xId), "not found.")))
 		xData <- getFeatureData(input$xPrefix, input$xId, input$xDataset, 
 														srcContent = srcContentReactive())
+		
+		if (input$xDataset != input$yDataset){
+			shiny::validate(need(require(rcellminerUtils),
+													 "ERROR: x and y axis data sets must be the same."))
+			matchedLinesTab <- matchedCellLinesTab()
+		}
+
 		return(xData)
 	})
 	
@@ -103,6 +123,13 @@ shinyServer(function(input, output, session) {
 												 paste("ERROR:", paste0(input$yPrefix, input$yId), "not found.")))
 		yData <- getFeatureData(input$yPrefix, input$yId, input$yDataset, 
 														srcContent = srcContentReactive())
+		
+		if (input$xDataset != input$yDataset){
+			shiny::validate(need(require(rcellminerUtils),
+													 "ERROR: x and y axis data sets must be the same."))
+			matchedLinesTab <- matchedCellLinesTab()
+		}
+		
 		return(yData)
 	})
 
@@ -115,14 +142,6 @@ shinyServer(function(input, output, session) {
   #----[Render 2D Plot in 'Plot Data' Tab]---------------------------------------------
   if(require(rCharts)) {
 		output$rCharts <- renderChart({
-			if (input$selectedTissuesOnly){
-				shiny::validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
-			}
-			if (!require(rcellminerUtils)){
-				shiny::validate(need(input$xDataset == input$yDataset,
-							   "ERROR: x and y axis data sets must be the same."))
-			}
-
 			h1 <- makePlot(xData = xData(), yData = yData(), showColor = input$showColor,
 										 showColorTissues = input$showColorTissues, dataSource = input$xDataset,
 										 selectedTissuesOnly = input$selectedTissuesOnly, 
@@ -132,14 +151,6 @@ shinyServer(function(input, output, session) {
 
 	# Alternative plotting
 	output$rChartsAlternative <- renderPlot({
-		if (input$selectedTissuesOnly){
-			shiny::validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
-		}
-		if (!require(rcellminerUtils)){
-			shiny::validate(need(input$xDataset == input$yDataset,
-										"ERROR: x and y axis data sets must be the same."))
-		}
-
 		makePlotStatic(xData(), yData(), input$showColor, input$showColorTissues, input$xDataset,
 									 input$selectedTissuesOnly, srcContent = srcContentReactive())
 	})
@@ -148,13 +159,6 @@ shinyServer(function(input, output, session) {
   #----[Render Data Table in 'Download Data' Tab]----------------------------------------
   # Generate an HTML table view of the data
   output$table <- DT::renderDataTable({
-  	if (input$selectedTissuesOnly){
-  		shiny::validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
-  	}
-  	if (!require(rcellminerUtils)){
-  		shiny::validate(need(input$xDataset == input$yDataset, "ERROR: x and y axis data sets must be the same."))
-  	}
-
   	# Column selection below is to restrict to cell line, x, y features,
   	# and tissue type information (source-provided + OncoTree).
   	dlDataTab <- getPlotData(xData(), yData(), input$showColor, input$showColorTissues,
@@ -206,17 +210,7 @@ shinyServer(function(input, output, session) {
 	#----[Render Data Table in 'Compare Patterns' Tab]-------------------------------------
 	output$patternComparison <- DT::renderDataTable({
 		srcContent <- srcContentReactive()
-		if (input$selectedTissuesOnly){
-			shiny::validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
-		}
-		if (!require(rcellminerUtils)){
-			shiny::validate(need(input$xDataset == input$yDataset, "ERROR: x and y axis data sets must be the same."))
-		}
-	  # shiny::validate(need(validateEntry(input$xPrefix, input$xId, input$xDataset,
-	  # 																	 srcContent = srcContentReactive()),
-	  # 										 "ERROR: x-Axis Entry Not Found."))
-	  # 
-	  # dat <- getFeatureData(input$xPrefix, input$xId, input$xDataset, srcContent = srcContentReactive())
+
 		dat <- xData()
 		if (require(rcellminerUtils)){
 			matchedLinesTab <- getMatchedCellLines(c(input$xDataset, input$yDataset))
