@@ -21,19 +21,6 @@ getTissue2SamplesMap <- function(sampleData, typeLevelSeparator = ":"){
 		}
 	}
 	
-	# ----[test]------------------------------------------------------------------
-	# 	stopifnot(identical(sort(unique(c(tissueToSamples, recursive = TRUE))),
-	# 						sort(rownames(sampleData))))
-	# 	for (typeName in names(tissueToSamples)){
-	# 		ocTypes <- str_split(typeName, pattern = typeLevelSeparator)[[1]]
-	# 		
-	# 		for (sample in tissueToSamples[[typeName]]){
-	# 			sampleOcTypes <- as.character(sampleData[sample, ocLevels])
-	# 			stopifnot(identical(sampleOcTypes[1:length(ocTypes)], ocTypes))
-	# 		}
-	# 	}
-	# ----------------------------------------------------------------------------
-	
 	return(tissueToSamples)
 }
 

@@ -94,6 +94,27 @@ shinyServer(function(input, output, session) {
 		return(matchedCellLinesTab)
 	})
 	
+	# Explanation of xData, yData reactive variables -------------------------------------------------
+	# The xData and yData reactive variables provide list objects (accessed via xData() and yData()) 
+	# that store the essential information about a data source feature that the application code
+	# requires (e.g., to make plots, for pattern comparisons, etc.).
+	# For example, if the x-axis feature is SLFN11 NCI-60 mRNA expression, the xData() 
+	# list object would contain:
+	# xData()$dataSource: "nci60"
+	# xData()$name: "expSLFN11" (the feature identifier prepended with a data type specifier)
+	# xData()$uniqName: "expSLFN11_nci60" (the above identifier appended with the data source)
+	# xData()$plotLabel: "SLFN11 (exp, nci60)"
+	# xData()$data: A vector of numeric feature data.
+	#
+	# Note: the reactive variable construction code ensures that:
+	# (1) User-requested feature data is available for the specified data source,
+	# (2) if the x-axis and y-axis features are derived from different data sources,
+	#     the xData()$data and yData()$data vectors *have feature data from matched cell lines*.
+	#
+	# Through the reactivity, these variables are always 'current', reflecting the latest
+	# user selections, with regard to feature identifiers, data source(s), etc.
+	# ------------------------------------------------------------------------------------------------
+	
 	# Provides an a list object with x-axis feature-related data, including numeric data,
 	# data type prefix, data source, and plot label.
 	xData <- reactive({
@@ -110,6 +131,9 @@ shinyServer(function(input, output, session) {
 			shiny::validate(need(require(rcellminerUtils),
 													 "ERROR: x and y axis data sets must be the same."))
 			matchedLinesTab <- matchedCellLinesTab()
+			
+			# Restrict numeric feature data to xDataset/yDataset-matched cell lines.
+			xData$data <- xData$data[matchedLinesTab[, "xDataset"]]
 		}
 
 		return(xData)
@@ -118,6 +142,9 @@ shinyServer(function(input, output, session) {
 	# Provides an a list object with y-axis feature-related data, including numeric data,
 	# data type prefix, data source, and plot label.
 	yData <- reactive({
+		if (input$selectedTissuesOnly){
+			shiny::validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
+		}
 		shiny::validate(need(validateEntry(input$yPrefix, input$yId, input$yDataset,
 												 srcContent = srcContentReactive()),
 												 paste("ERROR:", paste0(input$yPrefix, input$yId), "not found.")))
@@ -128,6 +155,9 @@ shinyServer(function(input, output, session) {
 			shiny::validate(need(require(rcellminerUtils),
 													 "ERROR: x and y axis data sets must be the same."))
 			matchedLinesTab <- matchedCellLinesTab()
+			
+			# Restrict numeric feature data to xDataset/yDataset-matched cell lines.
+			yData$data <- yData$data[matchedLinesTab[, "yDataset"]]
 		}
 		
 		return(yData)
@@ -210,12 +240,7 @@ shinyServer(function(input, output, session) {
 	#----[Render Data Table in 'Compare Patterns' Tab]-------------------------------------
 	output$patternComparison <- DT::renderDataTable({
 		srcContent <- srcContentReactive()
-
 		dat <- xData()
-		if (require(rcellminerUtils)){
-			matchedLinesTab <- getMatchedCellLines(c(input$xDataset, input$yDataset))
-			dat$data <- dat$data[matchedLinesTab[, 1]]
-		}
 
 		if (input$selectedTissuesOnly){
 			if ((length(input$showColorTissues) > 0) && (!("all" %in% input$showColorTissues))){

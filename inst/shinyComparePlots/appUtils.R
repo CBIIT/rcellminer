@@ -15,18 +15,18 @@ validateEntry <- function(prefix, id, dataSource, srcContent) {
 getFeatureData <- function(prefix, id, dataSource, srcContent) {
 	molPharmData <- srcContent[[dataSource]][["molPharmData"]]
 	
-	entry <- paste0(prefix, id)
-	data <- as.numeric(molPharmData[[prefix]][entry, ])
-	names(data) <- names(molPharmData[[prefix]][entry, ])
+	name <- paste0(prefix, id)
+	data <- as.numeric(molPharmData[[prefix]][name, ])
+	names(data) <- names(molPharmData[[prefix]][name, ])
 	
-	results <- list(entry=entry, data=data)
+	results <- list(name=name, data=data)
 	
 	# e.g., expTOP1 with dataSource=nci60 becomes TOP1 (exp, nci60)
 	results$plotLabel <- paste0(id, " (", prefix, ", ", dataSource, ")")
 	
 	# e.g., expTOP1 with dataSource=nci60 becomes expTOP1_nci60; needed for 
 	# getPlotData() results (data.frame) with data for same feature from different sources.
-	results$uniqName <- paste0(results$entry, "_", dataSource)
+	results$uniqName <- paste0(results$name, "_", dataSource)
 	
 	results$dataSource <- dataSource
 	
@@ -48,15 +48,7 @@ getPlotData <- function(xData, yData, showColor, showColorTissues, dataSource=NU
 	}
 	
 	#-----[make sure x and y data cell lines are matched]----------------------------------
-	if (xData$dataSource != yData$dataSource){
-		if (require(rcellminerUtils)){
-			matchedLinesTab <- getMatchedCellLines(c(xData$dataSource, yData$dataSource))
-			xData$data <- xData$data[matchedLinesTab[, 1]]
-			yData$data <- yData$data[matchedLinesTab[, 2]]
-		} else{
-			stop("Install rcellminerUtils package to find matched cell lines between different data sources.")
-		}
-	} else{
+	if (xData$dataSource == yData$dataSource){
 		stopifnot(identical(names(xData$data), names(yData$data)))
 	}
 	#--------------------------------------------------------------------------------------
