@@ -87,6 +87,8 @@ shinyServer(function(input, output, session) {
 	# Provides a data frame with columns indicating the matched cell lines between
 	# the input$xDataset (column 1) and the input$yDataset (column 2).
 	matchedCellLinesTab <- reactive({
+		shiny::validate(need(require(rcellminerUtils),
+												 "ERROR: x and y axis data sets must be the same."))
 		matchedCellLinesTab <- getMatchedCellLines(c(input$xDataset, input$yDataset))
 		shiny::validate(need(nrow(matchedCellLinesTab) > 0, 
 												 "There are no shared cell lines between the selected datasets."))
@@ -128,11 +130,8 @@ shinyServer(function(input, output, session) {
 														srcContent = srcContentReactive())
 		
 		if (input$xDataset != input$yDataset){
-			shiny::validate(need(require(rcellminerUtils),
-													 "ERROR: x and y axis data sets must be the same."))
-			matchedLinesTab <- matchedCellLinesTab()
-			
 			# Restrict numeric feature data to xDataset/yDataset-matched cell lines.
+			matchedLinesTab <- matchedCellLinesTab()
 			xData$data <- xData$data[matchedLinesTab[, "xDataset"]]
 		}
 
@@ -152,11 +151,8 @@ shinyServer(function(input, output, session) {
 														srcContent = srcContentReactive())
 		
 		if (input$xDataset != input$yDataset){
-			shiny::validate(need(require(rcellminerUtils),
-													 "ERROR: x and y axis data sets must be the same."))
-			matchedLinesTab <- matchedCellLinesTab()
-			
 			# Restrict numeric feature data to xDataset/yDataset-matched cell lines.
+			matchedLinesTab <- matchedCellLinesTab()
 			yData$data <- yData$data[matchedLinesTab[, "yDataset"]]
 		}
 		
