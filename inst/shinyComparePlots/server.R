@@ -2,6 +2,10 @@ library(shiny)
 library(rcellminer)
 library(jsonlite)
 
+if (!require(rcellminerUtils)){
+	warning("rcellminerUtils package must be installed for full cross-database functionality.")
+}
+
 # Note: The jsonlite package has a validate() function whose name clashes with a
 # validate() function provided by the shiny package.
 # shiny::validate() must be used in the following code.
