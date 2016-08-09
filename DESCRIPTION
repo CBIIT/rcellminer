@@ -1,20 +1,22 @@
 Package: rcellminer
 Type: Package
-Title: rcellminer: Molecular Profiles and Drug Response for the NCI-60 Cell Lines
+Title: rcellminer: Molecular Profiles and Drug Response for the NCI-60 Cell
+    Lines
 Version: 2.0.0
 Date: 2016-04-08
 Author: Augustin Luna, Vinodh Rajapakse, Fabricio Sousa
-Maintainer: Augustin Luna <lunaa@cbio.mskcc.org>, Vinodh Rajapakse <vinodh.rajapakse@nih.gov>
+Maintainer: Augustin Luna <lunaa@cbio.mskcc.org>, Vinodh Rajapakse
+    <vinodh.rajapakse@nih.gov>
 Description: The NCI-60 cancer cell line panel has been used over the course of
-  several decades as an anti-cancer drug screen. This panel was developed as
-  part of the Developmental Therapeutics Program (DTP, http://dtp.nci.nih.gov/)
-  of the U.S. National Cancer Institute (NCI). Thousands of compounds have been
-  tested on the NCI-60, which have been extensively characterized by many
-  platforms for gene and protein expression, copy number, mutation, and others
-  (Reinhold, et al., 2012). The purpose of the CellMiner project
-  (http://discover.nci.nih.gov/cellminer) has been to integrate data
-  from multiple platforms used to analyze the NCI-60 and to provide a powerful
-  suite of tools for exploration of NCI-60 data.
+    several decades as an anti-cancer drug screen. This panel was developed as part
+    of the Developmental Therapeutics Program (DTP, http://dtp.nci.nih.gov/) of the
+    U.S. National Cancer Institute (NCI). Thousands of compounds have been tested
+    on the NCI-60, which have been extensively characterized by many platforms for
+    gene and protein expression, copy number, mutation, and others (Reinhold, et
+    al., 2012). The purpose of the CellMiner project (http://discover.nci.nih.gov/
+    cellminer) has been to integrate data from multiple platforms used to analyze
+    the NCI-60 and to provide a powerful suite of tools for exploration of NCI-60
+    data.
 License: LGPL-3 + file LICENSE
 LazyData: true
 Imports:
@@ -38,5 +40,7 @@ Suggests:
     jsonlite
 URL: http://discover.nci.nih.gov/cellminer/
 VignetteBuilder: knitr
-biocViews: aCGH, CellBasedAssays, CopyNumberVariation, GeneExpression, Pharmacogenomics,
-   Pharmacogenetics, miRNA, Cheminformatics, Visualization, Software, SystemsBiology
+biocViews: aCGH, CellBasedAssays, CopyNumberVariation, GeneExpression,
+    Pharmacogenomics, Pharmacogenetics, miRNA, Cheminformatics, Visualization,
+    Software, SystemsBiology
+RoxygenNote: 5.0.1
