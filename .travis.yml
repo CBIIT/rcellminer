@@ -1,3 +1,6 @@
+jdk:
+  - oraclejdk8  
+  
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 language: r
 
@@ -8,9 +11,6 @@ bioc_required: true
 
 r_packages:
   - rmarkdown
-  
-jdk:
-  - oraclejdk8  
 
 # On CRAN all warnings are treated as errors; this is not true on Bioconductor.
 warnings_are_errors: false
