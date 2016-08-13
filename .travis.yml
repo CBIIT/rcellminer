@@ -1,10 +1,8 @@
+# Install Java 8 for RCDK
 addons:
   apt:
     packages:
       - oracle-java8-installer
-
-jdk:
-  - oraclejdk8
   
 before_install:
   - jdk_switcher use oraclejdk8
