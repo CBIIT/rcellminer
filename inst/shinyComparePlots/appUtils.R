@@ -186,7 +186,7 @@ makePlot <- function(xData, yData, showColor, showColorTissues, dataSource, sele
 	
 	h1$tooltip(backgroundColor="rgba(255,255,255,1)", formatter=tooltipFormat)
 	
-	h1$chart(zoomType="xy")
+	h1$chart(zoomType="xy", style=list(fontFamily="Helvetica Neue"))
 	
 	# Enable exporting
 	h1$exporting(enabled=TRUE)

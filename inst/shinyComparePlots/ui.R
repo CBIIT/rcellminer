@@ -52,11 +52,13 @@ plotHeight <- 800
 plotWidth <- 800
 
 shinyUI(
-	navbarPage(appTitle,
-		inverse=FALSE,
-		tabPanel("Analysis",
+	navbarPage(appTitle, 
+						 inverse=FALSE,
+						 header = list(tags$head(includeCSS("www/css/hacks.css")),
+						 							 tags$head(includeScript("www/js/google-analytics.js"))),
+		#------[NavBar Tab: Univariate Analyses]---------------------------------------------------------
+		tabPanel("Univariate Analyses",
 			fluidPage(
-    		tags$head(includeScript("www/js/google-analytics.js")),
     		loadingModal(),
     		# Add/run startup Javascript
     		tags$head(
@@ -116,15 +118,40 @@ shinyUI(
 	            singleton(tags$script(type="text/javascript", src="js/parse_input.js"))
 	        	)
 	        ),
-	        
-	        mainPanel(
-	        	uiOutput('tabsetPanel') 
-	        )
-	    	)
+        mainPanel(
+        	uiOutput('tabsetPanel') 
+        )
+    	 )
 			)
 		),
+		#-----[NavBar Tab: Regression Models]-------------------------------------------------------------
+		tabPanel("Regression Models",
+		 fluidPage(
+			sidebarLayout(
+				sidebarPanel(
+					width=3, 
+					tags$div(
+						id="rm_input_container", 
+						selectInput("rmDataset", "Dataset", choices=dataSourceChoices, selected = "nci60"),
+						uiOutput("rmResponseDataTypeUi"),
+						textInput("rmResponseId", "Response ID: (Case-Sensitive, e.g., 609699)", "609699"),
+						uiOutput("rmPredDataTypesUi"),
+						textInput("rmPredIds", "Predictor IDS: (Case-Sensitive, e.g. SLFN11 JAG1)", "SLFN11 JAG1"),
+						selectInput("rmAlgorithm", "Algorithm", 
+												choices=c("Linear Regression", "Supervised Principal Components"), 
+												selected = "Linear Regression")
+					)
+				),
+				mainPanel(
+					uiOutput('rmTabsetPanel') 
+				)
+			)
+		 )						 
+		),
+		#-----[NavBar Tab: About]------------------------------------------------------------------------
     tabPanel("About",
     	includeMarkdown("www/files/about.md") 
     )
+		#------------------------------------------------------------------------------------------------
 	)
 )
