@@ -7,6 +7,7 @@ library(rcellminer)
 config <- jsonlite::fromJSON("config.json")
 appConfig <- jsonlite::fromJSON("appConfig.json")
 source("modal.R")
+source("appUtils.R")
 
 if (!is.null(appConfig$appName)){
 	appTitle <- appConfig$appName
@@ -124,30 +125,8 @@ shinyUI(
     	 )
 			)
 		),
-		#-----[NavBar Tab: Regression Models]-------------------------------------------------------------
-		tabPanel("Regression Models",
-		 fluidPage(
-			sidebarLayout(
-				sidebarPanel(
-					width=3, 
-					tags$div(
-						id="rm_input_container", 
-						selectInput("rmDataset", "Dataset", choices=dataSourceChoices, selected = "nci60"),
-						uiOutput("rmResponseDataTypeUi"),
-						textInput("rmResponseId", "Response ID: (Case-Sensitive, e.g., 609699)", "609699"),
-						uiOutput("rmPredDataTypesUi"),
-						textInput("rmPredIds", "Predictor IDS: (Case-Sensitive, e.g. SLFN11 JAG1)", "SLFN11 JAG1"),
-						selectInput("rmAlgorithm", "Algorithm", 
-												choices=c("Linear Regression", "Supervised Principal Components"), 
-												selected = "Linear Regression")
-					)
-				),
-				mainPanel(
-					uiOutput('rmTabsetPanel') 
-				)
-			)
-		 )						 
-		),
+		#-----[NavBar Tab: Regression Models]------------------------------------------------------------
+		regressionModelsInput("rm", dataSourceChoices),
 		#-----[NavBar Tab: About]------------------------------------------------------------------------
     tabPanel("About",
     	includeMarkdown("www/files/about.md") 
