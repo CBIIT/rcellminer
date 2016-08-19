@@ -30,10 +30,10 @@ regressionModelsInput <- function(id, dataSourceChoices) {
 regressionModels <- function(input, output, session, srcContentReactive) {
 
 	#----[Reactive Variables]--------------------------------------------------------------
-	# Returns a data frame with data suitable for predictive modeling (updated according
-	# to current user selections). The first column indicates the cell line, with
-	# subsequent columns containing response and predictor variables.
-	rmInputData <- reactive({
+	
+	# Provides an a list object with response variable-related data, including numeric data,
+	# data type prefix, data source, and plot label.
+	rmResponseData <- reactive({
 		shiny::validate(need(validateEntry(input$rmResponseDataType, 
 																			 input$rmResponseId, input$rmDataset,
 																			 srcContent = srcContentReactive()),
@@ -41,6 +41,14 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 												 			"not found.")))
 		yData <- getFeatureData(input$rmResponseDataType, input$rmResponseId, input$rmDataset, 
 														srcContent = srcContentReactive())
+		return(yData)
+	})
+	
+	# Returns a data frame with data suitable for predictive modeling (updated according
+	# to current user selections). The first column indicates the cell line, with
+	# subsequent columns containing response and predictor variables.
+	rmInputData <- reactive({
+		yData <- rmResponseData()
 		dataTab <- data.frame(CellLine = names(yData$data), stringsAsFactors = FALSE)
 		rownames(dataTab) <- dataTab$CellLine
 		dataTab[, yData$uniqName] <- yData$data
@@ -103,9 +111,30 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 	
 	#--------------------------------------------------------------------------------------
 	
+	#----[Render 2D Plot in 'Plot' Tab]----------------------------------------------------
+	if(require(rCharts)) {
+		output$rmPlot <- renderChart({
+			cat("in renderChart() ... ")
+			responseData <- rmResponseData()
+			algoResults <- rmAlgoResults()
+			predResponseData <- list()
+			predResponseData$name <- paste0("predicted_", responseData$name)
+			predResponseData$data <- algoResults$predictedResponse
+			predResponseData$plotLabel <- predResponseData$name
+			predResponseData$uniqName  <- predResponseData$name
+			predResponseData$dataSource <- responseData$dataSource
+			
+			h1 <- makePlot(xData = predResponseData, yData = responseData, showColor = TRUE,
+							showColorTissues = "all", dataSource = input$rmDataset,
+							selectedTissuesOnly = FALSE, srcContent = srcContentReactive())
+			
+			print(h1) # debug
+			h1
+		})
+	}
+	
 	output$rmData <- DT::renderDataTable({
 		dat <- rmInputData()
-		cat("In DT::renderDataTable()")
 		algoResults <- rmAlgoResults()
 		
 		dat <- cbind(predicted_response = signif(algoResults$predictedResponse, 3), dat[, -1])
@@ -138,10 +167,17 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 	output$rmTabsetPanel = renderUI({
 		# TABS: Plot, Cross-Validation, Data, Heatmap, Technical Details
 		ns <- session$ns
-		tabsetPanel(type = "tabs",
-								tabPanel("Data", DT::dataTableOutput(ns("rmData"))),
-								tabPanel("Heatmap", d3heatmapOutput(ns("rmHeatmap"))),
-								tabPanel("Technical Details", verbatimTextOutput(ns("rmTechDetails"))))
+		dataTabPanel <- tabPanel("Data", DT::dataTableOutput(ns("rmData")))
+		heatmapTabPanel <- tabPanel("Heatmap", d3heatmapOutput(ns("rmHeatmap")))
+		techDetailsTabPanel <- tabPanel("Technical Details", verbatimTextOutput(ns("rmTechDetails")))
+		
+		if (require(rCharts)){
+			plotTabPanel <- tabPanel("Plot", showOutput(ns("rmPlot"), "highcharts"))
+			tabsetPanel(type = "tabs", plotTabPanel,
+									dataTabPanel, heatmapTabPanel, techDetailsTabPanel)
+		} else{
+			tabsetPanel(type = "tabs", dataTabPanel, heatmapTabPanel, techDetailsTabPanel)	
+		}
 	})
 	
 	#-----[Support for Reactive UI Elements]-----------------------------------------------
