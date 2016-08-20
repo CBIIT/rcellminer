@@ -118,7 +118,7 @@ getPlotData <- function(xData, yData, showColor, showColorTissues, dataSource=NU
 
 
 makePlot <- function(xData, yData, showColor, showColorTissues, dataSource, selectedTissuesOnly,
-										 srcContent) {
+										 srcContent, dom="rCharts") {
 	df <- getPlotData(xData, yData, showColor, showColorTissues, dataSource, selectedTissuesOnly,
 										srcContent)
 	
@@ -193,11 +193,11 @@ makePlot <- function(xData, yData, showColor, showColorTissues, dataSource, sele
 	h1$exporting(enabled=TRUE)
 	
 	# Set name
-	h1$set(dom="rCharts")
+	h1$set(dom=dom)
 	
 	# Print chart
 	return(h1)
-	}
+}
 
 
 makePlotStatic <- function(xData, yData, showColor, showColorTissues, dataSource, 

@@ -114,7 +114,7 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 	#----[Render 2D Plot in 'Plot' Tab]----------------------------------------------------
 	if(require(rCharts)) {
 		output$rmPlot <- renderChart({
-			cat("in renderChart() ... ")
+			cat("in renderChart() ... \n")
 			responseData <- rmResponseData()
 			algoResults <- rmAlgoResults()
 			predResponseData <- list()
@@ -126,7 +126,7 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 			
 			h1 <- makePlot(xData = predResponseData, yData = responseData, showColor = TRUE,
 							showColorTissues = "all", dataSource = input$rmDataset,
-							selectedTissuesOnly = FALSE, srcContent = srcContentReactive())
+							selectedTissuesOnly = FALSE, srcContent = srcContentReactive(), dom="rm-rmPlot")
 			
 			print(h1) # debug
 			h1

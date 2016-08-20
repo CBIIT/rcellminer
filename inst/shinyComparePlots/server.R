@@ -178,7 +178,7 @@ shinyServer(function(input, output, session) {
 			h1 <- makePlot(xData = xData(), yData = yData(), showColor = input$showColor,
 										 showColorTissues = input$showColorTissues, dataSource = input$xDataset,
 										 selectedTissuesOnly = input$selectedTissuesOnly, 
-										 srcContent = srcContentReactive())
+										 srcContent = srcContentReactive(), dom="rCharts")
 		})
   }
 

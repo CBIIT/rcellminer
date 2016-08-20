@@ -56,42 +56,27 @@ shinyUI(
 	navbarPage(appTitle, 
 						 inverse=FALSE,
 						 header = list(tags$head(includeCSS("www/css/hacks.css")),
-						 							 tags$head(includeScript("www/js/google-analytics.js"))),
+						 							 # Add/run startup Javascript
+						 							 tags$head(tags$script(onloadJs)),
+						 							 # Use JQuery (built into Shiny) calls to show/hide modal based on message
+						 							 tags$head(includeScript("www/js/showLoading.js")),
+						 							 # load Javascript snippet to parse the query string.
+						 							 tags$script(includeScript("www/js/parse_input.js")),
+						 							 tags$head(includeScript("www/js/google-analytics.js")),
+						 							 tags$head(
+						 								 tags$style(HTML(paste0("
+															 .rChart {
+												  		 display: block;
+												  		 margin-left: auto; 
+												  		 margin-right: auto;
+												  		 width: ", plotWidth, "px;
+												  		 height: ", plotHeight, "px;
+														 }")))
+													 )),
 		#------[NavBar Tab: Univariate Analyses]---------------------------------------------------------
 		tabPanel("Univariate Analyses",
 			fluidPage(
     		loadingModal(),
-    		# Add/run startup Javascript
-    		tags$head(
-    			tags$script(onloadJs)
-    		),
-    		# Use JQuery (built into Shiny) calls to show/hide modal based on message
-    		tags$head(
-					tags$script('
-		        Shiny.addCustomMessageHandler("showLoading",
-		          function(message) {
-		            //console.log(message);
-		
-		            if(message.show) {
-		              $("#loadingModal").modal("show");
-		            } else {
-		              $("#loadingModal").modal("hide");
-		            }
-		          }
-		        );
-    			')
-				),
-				tags$head(
-					tags$style(HTML(paste0("
-						.rChart {
-			  		display: block;
-			  		margin-left: auto; 
-			  		margin-right: auto;
-			  		width: ", plotWidth, "px;
-			  		height: ", plotHeight, "px;
-					}")))
-				),
-    
 	    	sidebarLayout(
 	        sidebarPanel(
 	        	width=3, 
@@ -100,12 +85,10 @@ shinyUI(
 	            selectInput("xDataset", "x-Axis Dataset", choices=dataSourceChoices, selected = "nci60"),
 	            uiOutput("xPrefixUi"),
 	            textInput("xId", "ID: (e.g. 94600 or SLFN11); Case-Sensitive", "SLFN11"), 
-	          	#uiOutput("xIdUi"),
 	          	
 	            selectInput("yDataset", "y-Axis Dataset", choices=dataSourceChoices, selected = "nci60"),
 	            uiOutput("yPrefixUi"),
 	          	textInput("yId", "ID: (e.g. 94600 or SLFN11); Case-Sensitive", "94600"), 
-	          	#uiOutput("yIdUi"),
 	                
 	            checkboxInput("showColor", "Show Color?", value=TRUE),
 	        	  checkboxInput("selectedTissuesOnly", "Selected Tissues Only?", value=FALSE),
@@ -113,10 +96,7 @@ shinyUI(
 	            uiOutput("showColorTissuesUi"),
 	            
 	            # Generate a hidden input with TRUE or FALSE if rCharts is installed
-	        		tags$input(id="hasRCharts", type="text", value=hasRCharts, style="display:none"),
-	        					 
-	            # load Javascript snippet to parse the query string.
-	            singleton(tags$script(type="text/javascript", src="js/parse_input.js"))
+	        		tags$input(id="hasRCharts", type="text", value=hasRCharts, style="display:none")
 	        	)
 	        ),
         mainPanel(
