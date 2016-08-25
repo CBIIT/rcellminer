@@ -118,7 +118,7 @@ getPlotData <- function(xData, yData, showColor, showColorTissues, dataSource=NU
 
 
 makePlot <- function(xData, yData, showColor, showColorTissues, dataSource, selectedTissuesOnly,
-										 srcContent, dom="rCharts") {
+										 srcContent, dom="rCharts", showPValue = TRUE) {
 	df <- getPlotData(xData, yData, showColor, showColorTissues, dataSource, selectedTissuesOnly,
 										srcContent)
 	
@@ -157,8 +157,10 @@ makePlot <- function(xData, yData, showColor, showColorTissues, dataSource, sele
 	corResults <- crossCors(df[,xData$uniqName], 
 													rbind(df[,yData$uniqName], df[,yData$uniqName]))
 	title <- paste0(paste(yData$plotLabel, '~', xData$plotLabel),
-									', r=', signif(corResults$cor[1], digits=3),
-									' p=', signif(corResults$pval[1], digits=3))
+									', r=', signif(corResults$cor[1], digits=3))
+	if (showPValue){
+		title <- paste0(title, ' p=', signif(corResults$pval[1], digits=3))
+	}
 	
 	h1$title(text=title)
 	
