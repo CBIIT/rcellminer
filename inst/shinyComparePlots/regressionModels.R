@@ -232,10 +232,10 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 		if (require(rCharts)){
 			plotTabPanel   <- tabPanel("Plot", showOutput(ns("plot"), "highcharts"))
 			cvPlotTabPanel <- tabPanel("Cross-Validation", showOutput(ns("cvPlot"), "highcharts"))
-			tabsetPanel(type = "tabs", plotTabPanel, cvPlotTabPanel,
-									dataTabPanel, heatmapTabPanel, techDetailsTabPanel)
+			tabsetPanel(type = "tabs", heatmapTabPanel, dataTabPanel, plotTabPanel, 
+									cvPlotTabPanel, techDetailsTabPanel)
 		} else{
-			tabsetPanel(type = "tabs", dataTabPanel, heatmapTabPanel, techDetailsTabPanel)	
+			tabsetPanel(type = "tabs", heatmapTabPanel, dataTabPanel, techDetailsTabPanel)	
 		}
 	})
 	
