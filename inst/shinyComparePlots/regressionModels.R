@@ -223,7 +223,7 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 		dataTabPanel <- tabPanel("Data", DT::dataTableOutput(ns("data")))
 		heatmapTabPanel <- tabPanel("Heatmap", 
 																sliderInput(ns("numHiLoResponseLines"), 
-																						"Number of High/Low Response Lines:", 
+																						"Number of High/Low Response Lines to Display:", 
 																						min=1, max=maxNumHiLoResponseLines, 
 																						value=20, width = "50%"),
 																d3heatmapOutput(ns("heatmap")))
