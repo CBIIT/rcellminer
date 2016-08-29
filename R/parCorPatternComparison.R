@@ -60,6 +60,8 @@ parCorPatternComparison <- function(x, Y, Z, updateProgress = NULL){
 		lmData[, paste0("var_Z_", j)] <- Z[j, , drop = TRUE]
 	}
 	
+	numProcessed <- 0
+	N <- nrow(Y)
 	for (name in rownames(results)){
 		lmData[, "var_Y_n"] <- Y[name, , drop = TRUE]
 		notNa <- xzNotNa & (!is.na(Y[name, , drop=TRUE]))
@@ -73,7 +75,10 @@ parCorPatternComparison <- function(x, Y, Z, updateProgress = NULL){
 		
 		lmData[, "var_Y_n"] <- NA
 		if (is.function(updateProgress)){
-			updateProgress()
+			numProcessed <- numProcessed + 1
+			percentCompleted <- floor((numProcessed / N) * 100)
+			text <- paste0(percentCompleted, "% completed.")
+			updateProgress(text)
 		}
 	}
 	

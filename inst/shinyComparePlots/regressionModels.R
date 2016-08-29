@@ -130,6 +130,36 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 		return(rmAlgoResults)
 	})
 	
+	# Returns a data frame with partial correlation-based pattern comparison results.
+	parCorPatternCompResults <- reactive({
+		srcContent <- srcContentReactive()
+		dataTab <- inputData()
+		responseData <- rmResponseData()
+		
+		responseVec <- responseData$data
+		currentPredictorData <- t(as.matrix(dataTab[, c(-1, -2), drop = FALSE]))
+		
+		comparisonData <- srcContent[[input$dataset]][["molPharmData"]][["exp"]]
+		comparisonData <- comparisonData[, names(responseVec)]
+		
+		# ----[enable progress bar]--------------------------------------------------
+		progress <- shiny::Progress$new()
+		progress$set(message = "Computing Pattern Comparison Results: ", value = 0)
+		# Close the progress when this reactive exits (even if there's an error).
+		on.exit(progress$close())
+		N <- nrow(comparisonData)
+		updateProgress <- function(detail = NULL) {
+			progress$inc(amount = 1/N, detail = detail)
+		}
+		# ---------------------------------------------------------------------------
+		
+		pcResults <- rcellminer::parCorPatternComparison(x = responseVec,
+																										 Y = comparisonData,
+																										 Z = currentPredictorData,
+																										 updateProgress = updateProgress)
+		return(pcResults)
+	})
+	
 	#--------------------------------------------------------------------------------------
 	
 	if(require(rCharts)) {
@@ -214,6 +244,14 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 		summary(rmAlgoResults$techDetails)
 	})
 	
+	output$patternCompResults <- DT::renderDataTable({
+		pcResults <- parCorPatternCompResults()
+		
+		DT::datatable(pcResults, rownames=FALSE, colnames=colnames(pcResults), filter='top', 
+									style='bootstrap', 
+									options=list(lengthMenu = c(10, 25, 50, 100), pageLength = 10))
+	})
+	
 	#----[Organize Above Tabs for Display]--------------------------------------------------
 	output$tabsetPanel = renderUI({
 		maxNumHiLoResponseLines <- 100
@@ -228,14 +266,17 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 																						value=20, width = "50%"),
 																d3heatmapOutput(ns("heatmap")))
 		techDetailsTabPanel <- tabPanel("Technical Details", verbatimTextOutput(ns("techDetails")))
+		patternCompTabPanel <- tabPanel("Pattern Comparison", 
+																		DT::dataTableOutput(ns("patternCompResults")))
 		
 		if (require(rCharts)){
 			plotTabPanel   <- tabPanel("Plot", showOutput(ns("plot"), "highcharts"))
 			cvPlotTabPanel <- tabPanel("Cross-Validation", showOutput(ns("cvPlot"), "highcharts"))
 			tabsetPanel(type = "tabs", heatmapTabPanel, dataTabPanel, plotTabPanel, 
-									cvPlotTabPanel, techDetailsTabPanel)
+									cvPlotTabPanel, techDetailsTabPanel, patternCompTabPanel)
 		} else{
-			tabsetPanel(type = "tabs", heatmapTabPanel, dataTabPanel, techDetailsTabPanel)	
+			tabsetPanel(type = "tabs", heatmapTabPanel, dataTabPanel, techDetailsTabPanel, 
+									patternCompTabPanel)	
 		}
 	})
 	
