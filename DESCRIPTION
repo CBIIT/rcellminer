@@ -37,7 +37,8 @@ Suggests:
     BiocGenerics,
     testthat,
     BiocStyle,
-    jsonlite
+    jsonlite,
+    d3heatmap
 URL: http://discover.nci.nih.gov/cellminer/
 VignetteBuilder: knitr
 biocViews: aCGH, CellBasedAssays, CopyNumberVariation, GeneExpression,
