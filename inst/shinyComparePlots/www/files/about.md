@@ -1,3 +1,8 @@
+### Usage
+This application simplifies the exploration of datasets connected to the NCI-60. Users are allows to view both molecular data and drug activity for cell lines. The example shows a scatterplot of PAXX (C9orf142) gene expression and Bleomycin (NSC294979) activity within the NCI60. In the application, point colors represent tissues of origin for the cell lines.
+
+![Screenshot of CellMinerCDB Application](files/rcellminer_screenshot_anno.png)
+
 ### About the Data
 Data obtained from [CellMiner](http://discover.nci.nih.gov/cellminer/). 
 
