@@ -278,11 +278,12 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 																d3heatmapOutput(ns("heatmap")))
 		techDetailsTabPanel <- tabPanel("Technical Details", verbatimTextOutput(ns("techDetails")))
 		patternCompTabPanel <- tabPanel("Partial Correlation", 
-																		selectInput(ns("pcGeneSets"), "Gene Sets",
+																		selectInput(ns("pcGeneSets"), "Select Gene Sets",
 																								choices  = c(names(geneSetPathwayAnalysis::geneSets), "All Genes"),
 																								selected = "All Gene Sets",
 																								multiple=TRUE),
 																		actionButton(ns("computeParCors"), "Run"),
+																		tags$hr(),
 																		DT::dataTableOutput(ns("patternCompResults")))
 		
 		if (require(rCharts)){
