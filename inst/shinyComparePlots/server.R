@@ -18,6 +18,7 @@ if (!require(rcellminerUtils)){
 #--------------------------------------------------------------------------------------------------
 #config <- jsonlite::fromJSON(system.file("shinyComparePlots", "config.json", package="rcellminer"))
 config <- jsonlite::fromJSON("config.json")
+metaConfig <- jsonlite::fromJSON("configMeta.json")
 source("appUtils.R")
 source("dataLoadingFunctions.R")
 #--------------------------------------------------------------------------------------------------
@@ -296,8 +297,20 @@ shinyServer(function(input, output, session) {
 	  							filter='top', style='bootstrap',
 	  							options=list(lengthMenu = c(10, 25, 50, 100), pageLength = 10))
 	})
-	#--------------------------------------------------------------------------------------
 
+	#----[Render Data Table in 'Metadata' Tab]-------------------------------------------
+	output$cellLineTable <- DT::renderDataTable({
+		
+		configSelect <- metaConfig[[input$mdataSource]][["packages"]][[1]][["MetaData"]]
+		jsonFrame <- as.data.frame(configSelect)
+		
+		colnames(jsonFrame) <- c("Data Type", "Platform", "Platform Information", "Normalization Method")
+		
+		DT::datatable(jsonFrame, rownames=FALSE, colnames=colnames(jsonFrame),
+									filter='top', style='bootstrap',
+									options=list(pageLength = 10))
+	})
+	
 	output$log <- renderText({
 			paste(names(input), collapse=" ")
 			query <- parseQueryString(session$clientData$url_search)
@@ -358,7 +371,25 @@ shinyServer(function(input, output, session) {
 		}
 	})
 	#**********************************************************************************************
-
+	output$metadataPanel = renderUI({
+		#verbatimTextOutput("log") can be used for debugging
+		#tabPanel("Plot", verbatimTextOutput("genUrl"), showOutput("rCharts", "highcharts")),
+		
+		mtab1 <- tabPanel("Features",
+											DT::dataTableOutput("featTable"))
+		mtab2 <- tabPanel("Cell Line Information",
+											DT::dataTableOutput("cellLineTable"))
+		mtab3 <- tabPanel("Drug Information",
+											#includeMarkdown("www/files/help.md"),
+											DT::dataTableOutput("drugTable"))
+		
+		tabsetPanel(type="tabs",
+								tabPanel("MetadataTabs",
+												 mtab1, mtab2, mtab3
+								)
+		)
+	})
+	#**********************************************************************************************
   output$downloadData <- downloadHandler(
     filename = function() {
     	query <- parseQueryString(session$clientData$url_search)

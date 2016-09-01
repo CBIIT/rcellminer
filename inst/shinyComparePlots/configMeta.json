@@ -1,0 +1,161 @@
+{
+  "nci60":{
+    "displayName":"NCI-60",
+    "packages":{
+      "rcellminerData":{
+        "MetaData":[
+        	{
+        		"dataType":"Expression (Z-Score)",
+        		"platform":"Sulforhodamine assay",
+        		"platformInfo":"Negative log10 (GI50) values of assay",
+        		"normalizeMethod":"NA"
+        	},
+        	{
+        		"dataType":"Expression (Avg. log2 Int.)",
+        		"platform":"Sulforhodamine assay",
+        		"platformInfo":"test",
+        		"normalizeMethod":"NA"
+        	},
+        	{
+        		"dataType":"Methylation",
+        		"platform":" ",
+        		"platformInfo":" ",
+        		"normalizeMethod":"NA"
+        	},
+        	{
+        		"dataType":"Mutations",
+        		"platform":" ",
+        		"platformInfo":" ",
+        		"normalizeMethod":"NA"
+        	},
+        	{
+        		"dataType":"DNA Copy Number",
+        		"platform":" ",
+        		"platformInfo":" ",
+        		"normalizeMethod":"NA"
+        	},
+        	{
+        		"dataType":"Protein Expression (RPPA)",
+        		"platform":" ",
+        		"platformInfo":" ",
+        		"normalizeMethod":"NA"
+        	},
+        	{
+        		"dataType":"Protein Expression (SWATH-MS)",
+        		"platform":" ",
+        		"platformInfo":" ",
+        		"normalizeMethod":"NA"
+        	}
+        ]
+      }
+    }
+  },
+  "ccle":{
+    "displayName":"CCLE",
+    "packages":{
+      "ccleData":{
+        "MetaData":[
+        	{
+        		"dataType":"Drug Activity (-log10[IC50M])",
+        		"platform":"TBD",
+        		"platformInfo":"Pharmacological Profiling",
+        		"normalizeMethod":"NA"
+        	},
+        	{
+        		"dataType":"Expression (log2)",
+        		"platform":"Affymetrix U133+2 arrays",
+        		"platformInfo":"test",
+        		"normalizeMethod":"NA"
+        	},
+        	{
+        		"dataType":"Mutations",
+        		"platform":"Oncomap 3.0 core",
+        		"platformInfo":"test",
+        		"normalizeMethod":"NA"
+        	},
+        		{
+        		"dataType":"DNA Copy Number",
+        		"platform":"Affymetrix SNP6.0 Arrays",
+        		"platformInfo":"test...",
+        		"normalizeMethod":"NA"
+        	}
+        ]
+      }
+    }
+  },
+	"gdscDec15":{
+		"displayName":"GDSC",
+		"packages":{
+	  "gdscDataDec15":{
+	    "MetaData":[
+	      	{
+	        	"dataType":"Drug Activity (-log10[IC50M])",
+        		"platform":"TBD",
+        		"platformInfo":"Pharmacological Profiling",
+        		"normalizeMethod":"NA"
+	      	},
+	      	{
+	        	"dataType":"Expression (log2)",
+        		"platform":"Affymetrix Human Genome U219 Array",
+        		"platformInfo":"TBD",
+        		"normalizeMethod":"NA"
+	      	}
+	  	 ]
+	  	}
+		}
+  },
+  "ctrp":{
+    "displayName":"CTRP",
+    "packages":{
+      "ctrpData":{
+        "MetaData":[
+        	{
+        		"dataType":"Drug Activity (AUC)",
+        		"platform":"CellTiter-Glo with detection on ViewLux Microplate Imager",
+        		"platformInfo":"Measures cellular ATP levels to determine cell number and growth ",
+        		"normalizeMethod":"Percent viability curves fit with an area-under-concecentration (AUC) response curve"
+        	},
+        	{
+        		"dataType":"Expression (log2)",
+        		"platform":"Affymetrix U133+2 arrays",
+        		"platformInfo":"test",
+        		"normalizeMethod":"NA"
+        	},
+        	{
+        		"dataType":"Mutations",
+        		"platform":"Oncomap 3.0 core",
+        		"platformInfo":"test",
+        		"normalizeMethod":"NA"
+        	},
+        		{
+	        	"dataType":"DNA Copy Number",
+        		"platform":"Affymetrix SNP6.0 Arrays",
+        		"platformInfo":"Pharmacological Profiling",
+        		"normalizeMethod":"NA"
+	      	}
+        ]
+      }
+    }
+  },
+  "nciSclc":{
+    "displayName":"NCI/DTP SCLC",
+    "packages":{
+      "nciSclcData":{
+        "MetaData":[
+        	{
+            "dataType":"Expression (log2)",
+        		"platform":"TBD",
+        		"platformInfo":"TBD",
+        		"normalizeMethod":"NA"
+          },
+          {
+            "dataType":"Drug Activity (-log10[IC50M])",
+        		"platform":"TBD",
+        		"platformInfo":"TBD",
+        		"normalizeMethod":"NA"
+          }
+       	]
+      }
+    }
+  }
+}

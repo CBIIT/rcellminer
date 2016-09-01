@@ -6,6 +6,7 @@ library(rcellminer)
 #--------------------------------------------------------------------------------------------------
 config <- jsonlite::fromJSON("config.json")
 appConfig <- jsonlite::fromJSON("appConfig.json")
+metaConfig <- jsonlite::fromJSON("configMeta.json")
 source("modal.R")
 source("appUtils.R")
 
@@ -20,6 +21,10 @@ if (!is.null(appConfig$appName)){
 dataSourceChoices <- setNames(names(config),
 														  vapply(config, function(x) { x[["displayName"]] }, 
 														  			 character(1)))
+
+metaChoices <- setNames(names(metaConfig),
+												vapply(metaConfig, function(x) { x[["displayName"]] }, 
+															 character(1)))
 
 for (configSrcId in names(config)){
 	srcName <- config[[configSrcId]][["displayName"]]
@@ -110,7 +115,24 @@ shinyUI(
 		#-----[NavBar Tab: About]------------------------------------------------------------------------
     tabPanel("About",
     	includeMarkdown("www/files/about.md") 
-    )
-		#------------------------------------------------------------------------------------------------
+    ),
+		#-----[NavBar Tab: Metadata]---------------------------------------------------------------------
+		tabPanel("Metadata", 
+						 fluidPage(	
+						 	sidebarLayout(
+						 		sidebarPanel(
+						 			width=3, 
+						 			tags$div(
+						 				id="input_container", 
+						 				selectInput("mdataSource", "Data Source", choices=metaChoices, selected = "nci60")
+						 				#uiOutput(""),
+						 			)
+						 		), #end sidebarPanel
+						 		mainPanel(
+						 			uiOutput('metadataPanel')
+						 		)
+						 	)
+						 ) #end fluidPage
+		) #end tabPane 
 	)
 )
