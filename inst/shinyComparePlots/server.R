@@ -386,7 +386,7 @@ shinyServer(function(input, output, session) {
 		dataFullname <- metaConfig[[input$mdataSource]][["fullName"]]
 		
 		tabsetPanel(type="pills",
-								tabPanel(dataFullname,
+								tabPanel(dataFullname, tags$hr(),
 													mtab2
 								)
 		)

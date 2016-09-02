@@ -53,6 +53,8 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 	# subsequent columns containing response and predictor variables.
 	# Note: Observations with missing values (in predictor or reponse variables) are removed.
 	inputData <- reactive({
+		shiny::validate(need(length(input$predDataTypes) > 0,
+												 "Please select one or more predictor data types."))
 		shiny::validate(need(validateEntry(input$responseDataType, 
 																			 input$responseId, input$dataset,
 																			 srcContent = srcContentReactive()),
@@ -134,6 +136,7 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 	parCorPatternCompResults <- eventReactive(input$computeParCors, {
 		shiny::validate(need(length(input$pcGeneSets) > 0,
 												 "Please select one or more gene sets."))
+		
 		srcContent <- srcContentReactive()
 		dataTab <- inputData()
 		responseData <- rmResponseData()
@@ -141,16 +144,23 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 		responseVec <- responseData$data
 		currentPredictorData <- t(as.matrix(dataTab[, c(-1, -2), drop = FALSE]))
 		
-		comparisonData <- srcContent[[input$dataset]][["molPharmData"]][["exp"]]
-		comparisonData <- comparisonData[, names(responseVec)]
-		
-		#pcGeneSets <- stringr::str_split(stringr::str_trim(input$pcGeneSets), pattern = "\\s+")[[1]]
-		pcGeneSets <- input$pcGeneSets
-		if (!("All Genes" %in% pcGeneSets)){
-			pcGenes <- sort(unique(c(geneSetPathwayAnalysis::geneSets[pcGeneSets], recursive = TRUE)))
-			pcGenes <- paste0("exp", pcGenes)
-			pcGenes <- intersect(pcGenes, rownames(comparisonData))
-			comparisonData <- comparisonData[pcGenes, ]
+		comparisonData <- NULL
+		for (dataType in input$predDataTypes){
+			tmpData <- srcContent[[input$dataset]][["molPharmData"]][[dataType]]
+			tmpData <- tmpData[, names(responseVec)]
+			# ----[restrict to selected gene set genes if necessary]--------------------
+			if (!("All Genes" %in% input$pcGeneSets)){
+				pcGenes <- sort(unique(c(geneSetPathwayAnalysis::geneSets[input$pcGeneSets], 
+																 recursive = TRUE)))
+				dataTypePcGenes <- intersect(paste0(dataType, pcGenes), rownames(tmpData))
+				if (length(dataTypePcGenes) > 0){
+					tmpData <- tmpData[dataTypePcGenes, ]
+				} else{
+					tmpData <- NULL
+				}
+			}
+			# --------------------------------------------------------------------------
+			comparisonData <- rbind(comparisonData, tmpData)
 		}
 		
 		# ----[enable progress bar]--------------------------------------------------

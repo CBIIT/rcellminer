@@ -6,11 +6,14 @@ This application simplifies the exploration of datasets connected to the NCI-60.
 ### About the Data
 Data obtained from [CellMiner](http://discover.nci.nih.gov/cellminer/). 
 
-### About the Data Explorer
-The data explorer was built using R Shiny by:
+### About CellMinerCDB
+The CellMinerCDB application was developed using R and Shiny by:
 
 * Augustin Luna; Research Fellow, Biostatistics and Computational Biology, Dana-Farber Cancer Institute, Harvard Medical School
 * Vinodh N. Rajapakse; Postdoctoral Fellow, Developmental Therapeutics Branch, National Cancer Institute
+* Lisa Loman; Special Volunteer, Developmental Therapeutics Branch, National Cancer Institute
+* Harini Salgado; Special Volunteer, Developmental Therapeutics Branch, National Cancer Institute
+
 
 #### MSKCC Computational Biology
 * Jianjiong Gao
