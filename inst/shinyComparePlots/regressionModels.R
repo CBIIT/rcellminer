@@ -13,7 +13,7 @@ regressionModelsInput <- function(id, dataSourceChoices) {
 					 				uiOutput(ns("responseDataTypeUi")),
 					 				textInput(ns("responseId"), "Response ID: (Case-Sensitive, e.g., 609699)", "609699"),
 					 				uiOutput(ns("predDataTypesUi")),
-					 				textInput(ns("predIds"), "Predictor IDS: (Case-Sensitive, e.g. SLFN11 JAG1)", "SLFN11 JAG1"),
+					 				textInput(ns("predIds"), "Predictor IDS: (Case-Sensitive, e.g. SLFN11 BPTF)", "SLFN11 BPTF"),
 					 				selectInput(ns("algorithm"), "Algorithm", 
 					 										choices=c("Linear Regression", "Supervised Principal Components"), 
 					 										selected = "Linear Regression")
@@ -136,6 +136,8 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 	parCorPatternCompResults <- eventReactive(input$computeParCors, {
 		shiny::validate(need(length(input$pcGeneSets) > 0,
 												 "Please select one or more gene sets."))
+		shiny::validate(need(length(input$pcDataTypes) > 0,
+												 "Please select one or more data types for computing partial correlations."))
 		
 		srcContent <- srcContentReactive()
 		dataTab <- inputData()
@@ -145,7 +147,7 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 		currentPredictorData <- t(as.matrix(dataTab[, c(-1, -2), drop = FALSE]))
 		
 		comparisonData <- NULL
-		for (dataType in input$predDataTypes){
+		for (dataType in input$pcDataTypes){
 			tmpData <- srcContent[[input$dataset]][["molPharmData"]][[dataType]]
 			tmpData <- tmpData[, names(responseVec)]
 			# ----[restrict to selected gene set genes if necessary]--------------------
@@ -291,6 +293,10 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 																		selectInput(ns("pcGeneSets"), "Select Gene Sets",
 																								choices  = c(names(geneSetPathwayAnalysis::geneSets), "All Genes"),
 																								selected = "All Gene Sets",
+																								multiple=TRUE),
+																		selectInput(ns("pcDataTypes"), "Select Data Types",
+																								choices  = srcContentReactive()[[input$dataset]][["featurePrefixes"]],
+																								selected = input$predDataTypes,
 																								multiple=TRUE),
 																		actionButton(ns("computeParCors"), "Run"),
 																		tags$hr(),
