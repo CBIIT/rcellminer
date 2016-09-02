@@ -5,46 +5,52 @@
       "rcellminerData":{
         "MetaData":[
         	{
-        		"dataType":"Expression (Z-Score)",
+        		"dataType":"Drug Activity",
         		"platform":"Sulforhodamine assay",
         		"platformInfo":"Negative log10 (GI50) values of assay",
         		"normalizeMethod":"NA"
         	},
         	{
+        		"dataType":"Expression (Z-Score)",
+        		"platform":"--",
+        		"platformInfo":"--",
+        		"normalizeMethod":"--"
+        	},
+        	{
         		"dataType":"Expression (Avg. log2 Int.)",
-        		"platform":"Sulforhodamine assay",
-        		"platformInfo":"test",
-        		"normalizeMethod":"NA"
+        		"platform":"--",
+        		"platformInfo":"--",
+        		"normalizeMethod":"--"
         	},
         	{
         		"dataType":"Methylation",
-        		"platform":" ",
-        		"platformInfo":" ",
-        		"normalizeMethod":"NA"
+        		"platform":"MassARRAY EpiTYPER",
+        		"platformInfo":"500+ target regions scanned using EpiTYPER",
+        		"normalizeMethod":"Filtering to exclude Primer Dimer formation"
         	},
         	{
         		"dataType":"Mutations",
-        		"platform":" ",
-        		"platformInfo":" ",
+        		"platform":"ABI 3730 Sequencer",
+        		"platformInfo":"Sequencing for NCI-60 for mutations in known human cancer genes",
         		"normalizeMethod":"NA"
         	},
         	{
         		"dataType":"DNA Copy Number",
-        		"platform":" ",
-        		"platformInfo":" ",
-        		"normalizeMethod":"NA"
+        		"platform":"Human Genome CGH Microarray 44A and 44B",
+        		"platformInfo":"genome wide variation profiling array for coding and non-coding regions",
+        		"normalizeMethod":"Agilent Feature Extraction done with software version 8.1 with default settings for CGH arrays"
         	},
         	{
         		"dataType":"Protein Expression (RPPA)",
-        		"platform":" ",
-        		"platformInfo":" ",
-        		"normalizeMethod":"NA"
+        		"platform":"Reverse-phase lysate arrays (RPLA)",
+        		"platformInfo":"Antibodies described in AbMiner at http://discover.nci.nih.gov/abminer/",
+        		"normalizeMethod":"Dose interpolation analysis done using the DI25 algorithm. described previously (Nishizuka et al, PNAS, 2003)"
         	},
         	{
         		"dataType":"Protein Expression (SWATH-MS)",
-        		"platform":" ",
-        		"platformInfo":" ",
-        		"normalizeMethod":"NA"
+        		"platform":"--",
+        		"platformInfo":"--",
+        		"normalizeMethod":"--"
         	}
         ]
       }
@@ -57,26 +63,26 @@
         "MetaData":[
         	{
         		"dataType":"Drug Activity (-log10[IC50M])",
-        		"platform":"TBD",
-        		"platformInfo":"Pharmacological Profiling",
+        		"platform":"Pharmacological Profiling",
+        		"platformInfo":"8-point dose response curves",
         		"normalizeMethod":"NA"
         	},
         	{
         		"dataType":"Expression (log2)",
         		"platform":"Affymetrix U133+2 arrays",
-        		"platformInfo":"test",
-        		"normalizeMethod":"NA"
+        		"platformInfo":"--",
+        		"normalizeMethod":"--"
         	},
         	{
         		"dataType":"Mutations",
         		"platform":"Oncomap 3.0 core",
-        		"platformInfo":"test",
+        		"platformInfo":"--",
         		"normalizeMethod":"NA"
         	},
         		{
         		"dataType":"DNA Copy Number",
         		"platform":"Affymetrix SNP6.0 Arrays",
-        		"platformInfo":"test...",
+        		"platformInfo":"--",
         		"normalizeMethod":"NA"
         	}
         ]
@@ -90,14 +96,14 @@
 	    "MetaData":[
 	      	{
 	        	"dataType":"Drug Activity (-log10[IC50M])",
-        		"platform":"TBD",
+        		"platform":"--",
         		"platformInfo":"Pharmacological Profiling",
         		"normalizeMethod":"NA"
 	      	},
 	      	{
 	        	"dataType":"Expression (log2)",
         		"platform":"Affymetrix Human Genome U219 Array",
-        		"platformInfo":"TBD",
+        		"platformInfo":"--",
         		"normalizeMethod":"NA"
 	      	}
 	  	 ]
@@ -118,13 +124,13 @@
         	{
         		"dataType":"Expression (log2)",
         		"platform":"Affymetrix U133+2 arrays",
-        		"platformInfo":"test",
+        		"platformInfo":"--",
         		"normalizeMethod":"NA"
         	},
         	{
         		"dataType":"Mutations",
         		"platform":"Oncomap 3.0 core",
-        		"platformInfo":"test",
+        		"platformInfo":"--",
         		"normalizeMethod":"NA"
         	},
         		{
