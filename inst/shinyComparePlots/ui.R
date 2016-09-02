@@ -112,10 +112,6 @@ shinyUI(
 		),
 		#-----[NavBar Tab: Regression Models]------------------------------------------------------------
 		regressionModelsInput("rm", dataSourceChoices),
-		#-----[NavBar Tab: About]------------------------------------------------------------------------
-    tabPanel("About",
-    	includeMarkdown("www/files/about.md") 
-    ),
 		#-----[NavBar Tab: Metadata]---------------------------------------------------------------------
 		tabPanel("Metadata", 
 						 fluidPage(	
@@ -129,10 +125,16 @@ shinyUI(
 						 			)
 						 		), #end sidebarPanel
 						 		mainPanel(
-						 			uiOutput('metadataPanel')
+						 			uiOutput('metadataPanel'),
+						 			h4(htmlOutput('sourceLink'))
 						 		)
 						 	)
 						 ) #end fluidPage
-		) #end tabPane 
+		), #end tabPane 
+		#-----[NavBar Tab: About]------------------------------------------------------------------------
+    tabPanel("About",
+    	includeMarkdown("www/files/about.md") 
+    )
+		
 	)
 )

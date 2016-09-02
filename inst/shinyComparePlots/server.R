@@ -310,7 +310,7 @@ shinyServer(function(input, output, session) {
 									filter='top', style='bootstrap',
 									options=list(pageLength = 10))
 	})
-	
+	#---------------------------------------------------------------------------------------
 	output$log <- renderText({
 			paste(names(input), collapse=" ")
 			query <- parseQueryString(session$clientData$url_search)
@@ -375,19 +375,30 @@ shinyServer(function(input, output, session) {
 		#verbatimTextOutput("log") can be used for debugging
 		#tabPanel("Plot", verbatimTextOutput("genUrl"), showOutput("rCharts", "highcharts")),
 		
-		mtab1 <- tabPanel("Features",
-											DT::dataTableOutput("featTable"))
+		#mtab1 <- tabPanel("Features",
+											#DT::dataTableOutput("featTable"))
 		mtab2 <- tabPanel("Cell Line Information",
 											DT::dataTableOutput("cellLineTable"))
-		mtab3 <- tabPanel("Drug Information",
+		#mtab3 <- tabPanel("Drug Information",
 											#includeMarkdown("www/files/help.md"),
-											DT::dataTableOutput("drugTable"))
+											#DT::dataTableOutput("drugTable"))
 		
-		tabsetPanel(type="tabs",
-								tabPanel("MetadataTabs",
-												 mtab1, mtab2, mtab3
+		dataFullname <- metaConfig[[input$mdataSource]][["fullName"]]
+		
+		tabsetPanel(type="pills",
+								tabPanel(dataFullname,
+													mtab2
 								)
 		)
+	})
+	#**************************************************************************************
+	output$sourceLink <- renderUI({
+		
+		urlString <- metaConfig[[input$mdataSource]][["url"]]
+		sourceName <- metaConfig[[input$mdataSource]][["displayName"]]
+		visibleText <- paste("Select here to learn more about ", sourceName, sep="")
+	
+		a(visibleText, href=paste(urlString))
 	})
 	#**********************************************************************************************
   output$downloadData <- downloadHandler(

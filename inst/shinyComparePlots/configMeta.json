@@ -1,6 +1,8 @@
 {
   "nci60":{
     "displayName":"NCI-60",
+    "fullName": "NCI-60",
+    "url":"https://discover.nci.nih.gov/cellminer/datasetMetadata.do",
     "packages":{
       "rcellminerData":{
         "MetaData":[
@@ -12,8 +14,8 @@
         	},
         	{
         		"dataType":"Expression (Z-Score)",
-        		"platform":"--",
-        		"platformInfo":"--",
+        		"platform":"Multiple",
+        		"platformInfo":"Probe intensities combined from four platforms: Agilent Human Genome CGH Microarray 44A, Nimblegen HG19 CGH 385K WG Tiling v2.0, Affymetrix GeneChip Human Mapping 500k Array Set and Illumina Human1Mv1_C Beadchip",
         		"normalizeMethod":"--"
         	},
         	{
@@ -58,6 +60,8 @@
   },
   "ccle":{
     "displayName":"CCLE",
+    "fullName": "Cancer Cell Line Encyclopedia",
+    "url":"https://portals.broadinstitute.org/ccle/about",
     "packages":{
       "ccleData":{
         "MetaData":[
@@ -77,13 +81,13 @@
         		"dataType":"Mutations",
         		"platform":"Oncomap 3.0 core",
         		"platformInfo":"--",
-        		"normalizeMethod":"NA"
+        		"normalizeMethod":"Quantile normalization"
         	},
         		{
         		"dataType":"DNA Copy Number",
         		"platform":"Affymetrix SNP6.0 Arrays",
-        		"platformInfo":"--",
-        		"normalizeMethod":"NA"
+        		"platformInfo":"Raw Affymetrix CEL files converted to a single value for each probe set representing a SNP allele or a copy number probe",
+        		"normalizeMethod":"Inferred based on estimating probe set specific linear combination curves, followed by most similar HapMap normal samples"
         	}
         ]
       }
@@ -91,20 +95,22 @@
   },
 	"gdscDec15":{
 		"displayName":"GDSC",
+		"fullName": "Genomics of Drug Sensitivity in Cancer",
+		"url" : "http://www.cancerrxgene.org/help",
 		"packages":{
 	  "gdscDataDec15":{
 	    "MetaData":[
 	      	{
 	        	"dataType":"Drug Activity (-log10[IC50M])",
-        		"platform":"--",
-        		"platformInfo":"Pharmacological Profiling",
-        		"normalizeMethod":"NA"
+        		"platform":"Pharmacological Profiling",
+        		"platformInfo":"Fluroesence intensity data on cell viability assays. Cell viability was determined using either a DNA dye (Syto60) or metabolic assay (Resazurin or CellTitre-Glo)",
+        		"normalizeMethod":"Dose response curve fit using a multi-level fixed effect model"
 	      	},
 	      	{
 	        	"dataType":"Expression (log2)",
         		"platform":"Affymetrix Human Genome U219 Array",
-        		"platformInfo":"--",
-        		"normalizeMethod":"NA"
+        		"platformInfo":"E-MTAB-3610 Transcriptional Profiling (Array Express)",
+        		"normalizeMethod":"Robust Multi-Array Average (RMA) normalised"
 	      	}
 	  	 ]
 	  	}
@@ -112,6 +118,8 @@
   },
   "ctrp":{
     "displayName":"CTRP",
+    "fullName": "Cancer Therapeutics Response Portal",
+    "url":"http://portals.broadinstitute.org/ctrp/",
     "packages":{
       "ctrpData":{
         "MetaData":[
@@ -145,6 +153,8 @@
   },
   "nciSclc":{
     "displayName":"NCI/DTP SCLC",
+    "fullName": "NCI/DTP Small Cell Lung Cancer Data Set",
+    "url": "NA",
     "packages":{
       "nciSclcData":{
         "MetaData":[
