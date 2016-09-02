@@ -131,7 +131,9 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 	})
 	
 	# Returns a data frame with partial correlation-based pattern comparison results.
-	parCorPatternCompResults <- reactive({
+	parCorPatternCompResults <- eventReactive(input$computeParCors, {
+		shiny::validate(need(length(input$pcGeneSets) > 0,
+												 "Please select one or more gene sets."))
 		srcContent <- srcContentReactive()
 		dataTab <- inputData()
 		responseData <- rmResponseData()
@@ -141,6 +143,15 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 		
 		comparisonData <- srcContent[[input$dataset]][["molPharmData"]][["exp"]]
 		comparisonData <- comparisonData[, names(responseVec)]
+		
+		#pcGeneSets <- stringr::str_split(stringr::str_trim(input$pcGeneSets), pattern = "\\s+")[[1]]
+		pcGeneSets <- input$pcGeneSets
+		if (!("All Genes" %in% pcGeneSets)){
+			pcGenes <- sort(unique(c(geneSetPathwayAnalysis::geneSets[pcGeneSets], recursive = TRUE)))
+			pcGenes <- paste0("exp", pcGenes)
+			pcGenes <- intersect(pcGenes, rownames(comparisonData))
+			comparisonData <- comparisonData[pcGenes, ]
+		}
 		
 		# ----[enable progress bar]--------------------------------------------------
 		progress <- shiny::Progress$new()
@@ -152,11 +163,11 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 			progress$inc(amount = 1/N, detail = detail)
 		}
 		# ---------------------------------------------------------------------------
-		
 		pcResults <- rcellminer::parCorPatternComparison(x = responseVec,
 																										 Y = comparisonData,
 																										 Z = currentPredictorData,
 																										 updateProgress = updateProgress)
+	
 		return(pcResults)
 	})
 	
@@ -266,7 +277,13 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 																						value=20, width = "50%"),
 																d3heatmapOutput(ns("heatmap")))
 		techDetailsTabPanel <- tabPanel("Technical Details", verbatimTextOutput(ns("techDetails")))
-		patternCompTabPanel <- tabPanel("Pattern Comparison", 
+		patternCompTabPanel <- tabPanel("Partial Correlation", 
+																		selectInput(ns("pcGeneSets"), "Select Gene Sets",
+																								choices  = c(names(geneSetPathwayAnalysis::geneSets), "All Genes"),
+																								selected = "All Gene Sets",
+																								multiple=TRUE),
+																		actionButton(ns("computeParCors"), "Run"),
+																		tags$hr(),
 																		DT::dataTableOutput(ns("patternCompResults")))
 		
 		if (require(rCharts)){
