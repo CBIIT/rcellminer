@@ -27,7 +27,7 @@ regressionModelsInput <- function(id, dataSourceChoices) {
 	)
 }
 #-----[NavBar Tab: Regression Models (Server code)]------------------------------------------------
-regressionModels <- function(input, output, session, srcContentReactive) {
+regressionModels <- function(input, output, session, srcContentReactive, appConfig) {
 
 	#----[Reactive Variables]--------------------------------------------------------------
 	
@@ -164,22 +164,65 @@ regressionModels <- function(input, output, session, srcContentReactive) {
 			# --------------------------------------------------------------------------
 			comparisonData <- rbind(comparisonData, tmpData)
 		}
-		
-		# ----[enable progress bar]--------------------------------------------------
-		progress <- shiny::Progress$new()
-		progress$set(message = "Computing Pattern Comparison Results: ", value = 0)
-		# Close the progress when this reactive exits (even if there's an error).
-		on.exit(progress$close())
 		N <- nrow(comparisonData)
-		updateProgress <- function(detail = NULL) {
-			progress$inc(amount = 1/N, detail = detail)
+		
+		if (appConfig$runParCorsInParallel){
+			library(foreach)
+			library(doSNOW)
+			library(parallel) # Needed for detectCores
+			
+			numCores <- detectCores()
+			cl <- makeSOCKcluster(numCores)
+			registerDoSNOW(cl)
+			
+			# Split comparison data matrix into a list of approximately equal-sized
+			# matrices, based on the number of available cores.
+			parSplitNum <- seq_len(nrow(comparisonData)) %% numCores
+			compDataBatches <- split(as.data.frame(comparisonData), f = parSplitNum)
+			compDataBatches <- lapply(compDataBatches, FUN = as.matrix)
+			
+			# ----[enable progress bar]--------------------------------------------------
+			progress <- shiny::Progress$new()
+			progress$set(message = "Computing Pattern Comparison Results ... ", value = 0)
+			# Close the progress when this reactive exits (even if there's an error).
+			on.exit(progress$close())
+			updateProgress <- function(detail = NULL) {
+				progress$inc(amount = 1/numCores, detail = detail)
+			}
+			opts <- list(progress=updateProgress)
+			# ---------------------------------------------------------------------------
+			pcResults <- foreach(i=1:length(compDataBatches), .combine = rbind,
+													 .packages = "shiny", .options.snow=opts) %dopar% {
+				tmp <- rcellminer::parCorPatternComparison(x = responseVec,
+																									 Y = compDataBatches[[i]],
+																									 Z = currentPredictorData)
+				# Call below does not work, producing the following:
+				# Warning: Error in unserialize: error reading from connection
+				# tmp <- rcellminer::parCorPatternComparison(x = responseVec,
+				# 																					 Y = compDataBatches[[i]],
+				# 																					 Z = currentPredictorData,
+				# 																					 updateProgress = updateProgress)
+				return(tmp)
+			}
+			stopCluster(cl)
+			
+			pcResults <- pcResults[order(pcResults$PARCOR, decreasing = TRUE), ]
+		} else{
+			# ----[enable progress bar]--------------------------------------------------
+			progress <- shiny::Progress$new()
+			progress$set(message = "Computing Pattern Comparison Results: ", value = 0)
+			# Close the progress when this reactive exits (even if there's an error).
+			on.exit(progress$close())
+			updateProgress <- function(detail = NULL) {
+				progress$inc(amount = 1/N, detail = detail)
+			}
+			# ---------------------------------------------------------------------------
+			pcResults <- rcellminer::parCorPatternComparison(x = responseVec,
+																											 Y = comparisonData,
+																											 Z = currentPredictorData,
+																											 updateProgress = updateProgress)	
 		}
-		# ---------------------------------------------------------------------------
-		pcResults <- rcellminer::parCorPatternComparison(x = responseVec,
-																										 Y = comparisonData,
-																										 Z = currentPredictorData,
-																										 updateProgress = updateProgress)
-	
+		
 		return(pcResults)
 	})
 	

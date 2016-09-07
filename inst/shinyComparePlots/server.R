@@ -18,6 +18,7 @@ if (!require(rcellminerUtils)){
 #--------------------------------------------------------------------------------------------------
 #config <- jsonlite::fromJSON(system.file("shinyComparePlots", "config.json", package="rcellminer"))
 config <- jsonlite::fromJSON("config.json")
+appConfig <- jsonlite::fromJSON("appConfig.json")
 metaConfig <- jsonlite::fromJSON("configMeta.json")
 source("appUtils.R")
 source("dataLoadingFunctions.R")
@@ -473,7 +474,8 @@ shinyServer(function(input, output, session) {
   })
 	
   #-----[NavBar Tab Server Code]---------------------------------------------------------
-  rm <- callModule(regressionModels, "rm", srcContentReactive = srcContentReactive)
+  rm <- callModule(regressionModels, "rm", srcContentReactive = srcContentReactive,
+  								 appConfig = appConfig)
 
 })
 #-----[end of shinyServer()]-----------------------------------------------------------------------
