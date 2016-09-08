@@ -14,6 +14,8 @@ regressionModelsInput <- function(id, dataSourceChoices) {
 					 				textInput(ns("responseId"), "Response ID: (Case-Sensitive, e.g., 609699)", "609699"),
 					 				uiOutput(ns("predDataTypesUi")),
 					 				textInput(ns("predIds"), "Predictor IDS: (Case-Sensitive, e.g. SLFN11 BPTF)", "SLFN11 BPTF"),
+					 				radioButtons(ns("tissueSelectionMode"), "Select Tissues", c("Include", "Exclude")),
+					 				uiOutput(ns("selectTissuesUi")),
 					 				selectInput(ns("algorithm"), "Algorithm", 
 					 										choices=c("Linear Regression", "Supervised Principal Components"), 
 					 										selected = "Linear Regression")
@@ -53,6 +55,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 	# subsequent columns containing response and predictor variables.
 	# Note: Observations with missing values (in predictor or reponse variables) are removed.
 	inputData <- reactive({
+		shiny::validate(need(length(input$selectedTissues) > 0, "Please select tissue types."))
 		shiny::validate(need(length(input$predDataTypes) > 0,
 												 "Please select one or more predictor data types."))
 		shiny::validate(need(validateEntry(input$responseDataType, 
@@ -84,10 +87,28 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		
 		shiny::validate(need(ncol(dataTab) > 2,
 												 paste("ERROR: No data for specified predictors.")))
-		
 		shiny::validate(need(nrow(dataTab) > 0,
 												 paste("ERROR: All cell lines have missing response or predictor data.")))
 		
+		# Accepting all available tissue types corrsponds to either,
+		# selecting 'all' if the Include radio button is selected, OR
+		# selecting 'none' if the Exclude radio button is selected.
+		allTissuesSelected <- ("all" %in% input$selectedTissues) || ("none" %in% input$selectedTissues)
+		if (!allTissuesSelected){
+			selectedTissueSamples <- getTissueTypeSamples(tissueTypes = input$selectedTissues, 
+																										dataSource = input$dataset,
+																										srcContent)
+			if (input$tissueSelectionMode == "Include"){
+				matchedLines <- intersect(rownames(dataTab), selectedTissueSamples)
+			} else{ # input$tissueSelectionMode == "Exclude"
+				matchedLines <- setdiff(rownames(dataTab), selectedTissueSamples)
+			}
+			shiny::validate(need(matchedLines > 0,
+				paste("ERROR: no data available with specified tissue type criteria.")))
+			
+			dataTab <- dataTab[matchedLines, , drop = FALSE]
+		}
+
 		return(dataTab)
 	})
 	
@@ -103,6 +124,8 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 	algoResults <- reactive({
 		dataTab <- inputData()
 		rmAlgoResults <- list()
+		
+		shiny::validate(need(nrow(dataTab) >= 10, "Insufficient number of cell lines."))
 		
 		# Note: refactor this function to gather and validate parameters, which are then passed
 		# to a specialized implementation function that returns a standard format algoResults
@@ -141,6 +164,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		
 		srcContent <- srcContentReactive()
 		dataTab <- inputData()
+		shiny::validate(need(nrow(dataTab) >= 10, "Insufficient number of cell lines."))
 		responseData <- rmResponseData()
 		
 		responseVec <- responseData$data
@@ -267,14 +291,16 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 	#----[Show Input + Predicted Response Data in 'Data' Tab]-------------------------------
 	output$data <- DT::renderDataTable({
 		dat <- inputData()
-		rmAlgoResults <- algoResults()
 		
-		dat <- cbind(predicted_response = signif(rmAlgoResults$predictedResponse, 3), dat[, -1])
-		if (length(rmAlgoResults$cvPredictedResponse) > 0){
-			dat <- cbind(cv_predicted_response = signif(rmAlgoResults$cvPredictedResponse, 3), dat)
+		if (nrow(dat) >= 10){
+			rmAlgoResults <- algoResults()
+			dat <- cbind(predicted_response = signif(rmAlgoResults$predictedResponse, 3), dat[, -1])
+			if (length(rmAlgoResults$cvPredictedResponse) > 0){
+				dat <- cbind(cv_predicted_response = signif(rmAlgoResults$cvPredictedResponse, 3), dat)
+			}
+			dat <- cbind(CellLine = rownames(dat), dat)	
 		}
-		dat <- cbind(CellLine = rownames(dat), dat)
-		
+
 		DT::datatable(dat, rownames=FALSE, colnames=colnames(dat), filter='top', 
 									style='bootstrap', options=list(pageLength = nrow(dat)))
 	})
@@ -310,6 +336,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		summary(rmAlgoResults$techDetails)
 	})
 	
+	#----[Show Partial Correlation Results in 'Partial Correlations' Tab]-------------------
 	output$patternCompResults <- DT::renderDataTable({
 		pcResults <- parCorPatternCompResults()
 		pcResults$ANNOT <- ""
@@ -405,6 +432,20 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 								choices  = srcContent[[input$dataset]][["featurePrefixes"]],
 								selected = srcContent[[input$dataset]][["defaultFeatureX"]],
 								multiple=TRUE)
+	})
+	
+	output$selectTissuesUi <- renderUI({
+		ns <- session$ns
+		srcContent <- srcContentReactive()
+		tissueTypes <- sort(unique(names(srcContent[[input$dataset]][["tissueToSamplesMap"]])))
+
+		if (input$tissueSelectionMode == "Include"){
+			selectInput(ns("selectedTissues"), label = NULL, choices=c("all", tissueTypes),
+									multiple=TRUE, selected="all")
+		} else{ # input$tissueSelectionMode == "Exclude"
+			selectInput(ns("selectedTissues"), label = NULL, choices=c("none", tissueTypes),
+									multiple=TRUE, selected="none")
+		}
 	})
 	#--------------------------------------------------------------------------------------
 	
