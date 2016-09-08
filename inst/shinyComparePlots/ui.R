@@ -61,12 +61,13 @@ shinyUI(
 	navbarPage(appTitle, 
 						 inverse=FALSE,
 						 header = list(tags$head(includeCSS("www/css/hacks.css")),
+						 							 #tags$head(includeCSS("www/css/tooltip.css")),
 						 							 # Add/run startup Javascript
 						 							 tags$head(tags$script(onloadJs)),
 						 							 # Use JQuery (built into Shiny) calls to show/hide modal based on message
 						 							 tags$head(includeScript("www/js/showLoading.js")),
 						 							 # load Javascript snippet to parse the query string.
-						 							 tags$script(includeScript("www/js/parse_input.js")),
+						 							 #tags$script(includeScript("www/js/parse_input.js")),
 						 							 tags$head(includeScript("www/js/google-analytics.js")),
 						 							 tags$head(
 						 								 tags$style(HTML(paste0("

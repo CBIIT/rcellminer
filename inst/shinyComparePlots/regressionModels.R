@@ -312,11 +312,44 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 	
 	output$patternCompResults <- DT::renderDataTable({
 		pcResults <- parCorPatternCompResults()
+		pcResults$ANNOT <- ""
+		
+		for (i in seq_len(nrow(pcResults))){
+			name <- rcellminer::removeMolDataType(pcResults[i, "NAME"])
+			if (name %in% rownames(geneSetPathwayAnalysis::geneAnnotTab)){
+				pcResults[i, "ANNOT"] <-  geneSetPathwayAnalysis::geneAnnotTab[name, "SHORT_ANNOT"]
+			} 
+		}
 		
 		DT::datatable(pcResults, rownames=FALSE, colnames=colnames(pcResults), filter='top', 
-									style='bootstrap', 
+									style='bootstrap',
 									options=list(lengthMenu = c(10, 25, 50, 100), pageLength = 10))
 	})
+	
+	# output$patternCompResults <- DT::renderDataTable({
+	# 	pcResults <- parCorPatternCompResults()
+	# 	pcResults$TOOLTIP <- NA
+	# 	
+	# 	for (i in seq_len(nrow(pcResults))){
+	# 		tooltipStr <- '<div class="tooltip">'
+	# 		noPrefixFeatureName <- rcellminer::removeMolDataType(pcResults[i, "NAME"])
+	# 		tooltipStr <- paste0(tooltipStr, noPrefixFeatureName, '<span class="tooltiptext">')
+	# 		
+	# 		if (noPrefixFeatureName %in% rownames(geneSetPathwayAnalysis::geneAnnotTab)){
+	# 			tooltipStr <- paste0(tooltipStr, 
+	# 													 geneSetPathwayAnalysis::geneAnnotTab[noPrefixFeatureName, "SHORT_ANNOT"])
+	# 		} else{
+	# 			tooltipStr <- paste0(tooltipStr, "NA")
+	# 		}
+	# 		tooltipStr <- paste0(tooltipStr, '</span></div>')
+	# 		
+	# 		pcResults[i, "TOOLTIP"] <- tooltipStr
+	# 	}
+	# 	
+	# 	DT::datatable(pcResults, rownames=FALSE, colnames=colnames(pcResults), filter='top', 
+	# 								style='bootstrap', escape = FALSE,
+	# 								options=list(lengthMenu = c(10, 25, 50, 100), pageLength = 10))
+	# })
 	
 	#----[Organize Above Tabs for Display]--------------------------------------------------
 	output$tabsetPanel = renderUI({

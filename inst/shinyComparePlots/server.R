@@ -2,8 +2,10 @@ library(shiny)
 library(d3heatmap)
 library(rcellminer)
 library(rcellminerElasticNet)
+library(geneSetPathwayAnalysis)
 library(jsonlite)
 library(stringr)
+#library(tooltipsterR)
 
 if (!require(rcellminerUtils)){
 	warning("rcellminerUtils package must be installed for full cross-database functionality.")
