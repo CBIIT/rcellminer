@@ -97,7 +97,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		if (!allTissuesSelected){
 			selectedTissueSamples <- getTissueTypeSamples(tissueTypes = input$selectedTissues, 
 																										dataSource = input$dataset,
-																										srcContent)
+																										srcContent = srcContentReactive())
 			if (input$tissueSelectionMode == "Include"){
 				matchedLines <- intersect(rownames(dataTab), selectedTissueSamples)
 			} else{ # input$tissueSelectionMode == "Exclude"
