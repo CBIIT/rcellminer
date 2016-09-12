@@ -206,7 +206,8 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		}
 		N <- nrow(comparisonData)
 		
-		if (appConfig$runParCorsInParallel){
+		if ((appConfig$runParCorsInParallel) && 
+				(N > appConfig$runParCorsInParallelThreshold)){
 			library(foreach)
 			library(doSNOW)
 			library(parallel) # Needed for detectCores

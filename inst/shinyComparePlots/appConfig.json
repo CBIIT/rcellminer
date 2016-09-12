@@ -1,4 +1,5 @@
 {
   "appName":"CellMinerCDB",
-  "runParCorsInParallel":true
+  "runParCorsInParallel":true,
+  "runParCorsInParallelThreshold":2000
 }
