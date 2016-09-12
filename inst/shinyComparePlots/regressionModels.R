@@ -321,13 +321,45 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			stringr::str_split(x, "_")[[1]][1] }, character(1))
 		
 		xAxisFontSize <- "6pt"
-		# Notes:
-		# Investigate 'cellnote' argument, which may allow use one matrix with suitably
-		# scaled data for heatmap (color scaling), with original values displayed in 
-		# tooltips.
-		d3heatmap::d3heatmap(dataMatrix, dendrogram = "none", colors = "RdYlGn",
-												 xaxis_font_size = xAxisFontSize, 
-												 #width = (ncol(dataMatrix)*4),
+
+		# TO DO: Move to appropriate general functions file/package.
+		scaleDataForHeatmap <- function(dat){
+			if (is.vector(dat)){
+				vecNames <- names(dat)
+				dat <- matrix(dat, nrow = 1, ncol = length(dat))
+				rownames(dat) <- "tmp1"
+				colnames(dat) <- vecNames
+			}
+			
+			scaledDat <- matrix(NA, nrow = nrow(dat), ncol = ncol(dat))
+			rownames(scaledDat) <- rownames(dat)
+			colnames(scaledDat) <- colnames(dat)
+			rowDataTypes <- unname(rcellminer::getMolDataType(rownames(dat)))
+			dataTypes <- unique(rowDataTypes)
+			
+			for (dType in dataTypes){
+				indexSet <- which(rowDataTypes == dType)
+				dTypeMin <- min(as.numeric(dat[indexSet, ]), na.rm = TRUE)
+				dTypeMax <- max(as.numeric(dat[indexSet, ]), na.rm = TRUE)
+				dTypeRange <- dTypeMax - dTypeMin
+				for (i in indexSet){
+					if (dTypeRange != 0){
+						scaledDat[i, ] <- (dat[i, ] - dTypeMin) / dTypeRange
+					} else{
+						scaledDat[i, ] <- 0.5
+					}
+				}
+			}
+			
+			return(scaledDat)			 
+		}
+		
+		scaledDataMatrix <- scaleDataForHeatmap(dataMatrix)
+		d3heatmap::d3heatmap(x = scaledDataMatrix,  # Used for color scaling.
+												 cellnote = dataMatrix, # Used for tooltip values.
+												 dendrogram = "none", 
+												 colors = colorRamp(colors = c("green", "black", "red")),
+												 xaxis_font_size = xAxisFontSize,
 												 xaxis_height = 200, yaxis_width = 200)
 	})
 	
