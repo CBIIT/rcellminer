@@ -17,7 +17,7 @@ regressionModelsInput <- function(id, dataSourceChoices) {
 					 				radioButtons(ns("tissueSelectionMode"), "Select Tissues", c("Include", "Exclude")),
 					 				uiOutput(ns("selectTissuesUi")),
 					 				selectInput(ns("algorithm"), "Algorithm", 
-					 										choices=c("Linear Regression", "Supervised Principal Components"), 
+					 										choices=c("Linear Regression", "Lasso"), 
 					 										selected = "Linear Regression")
 					 			)
 					 		),
@@ -38,6 +38,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 	# subsequent columns containing response and predictor variables.
 	# Note: Observations with missing values (in predictor or reponse variables) are removed.
 	inputData <- reactive({
+		shiny::validate(need(input$responseId != "", "Please enter a response variable."))
 		shiny::validate(need(length(input$selectedTissues) > 0, "Please select tissue types."))
 		shiny::validate(need(length(input$predDataTypes) > 0,
 												 "Please select one or more predictor data types."))
@@ -45,6 +46,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 																			 input$responseId, input$dataset,
 																			 srcContent = srcContentReactive()),
 			paste("ERROR:", paste0(input$responseDataType, input$responseId), "not found.")))
+		
 		yData <- getFeatureData(input$responseDataType, input$responseId, input$dataset, 
 														srcContent = srcContentReactive())
 		yData$data <- na.exclude(yData$data)
@@ -68,8 +70,21 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		
 		dataTab <- na.exclude(dataTab)
 		
-		shiny::validate(need(ncol(dataTab) > 2,
-												 paste("ERROR: No data for specified predictors.")))
+		# TO DO: Move appropriately.
+		isFeatureSelectionAlgorithm <- function(){
+			featureSelectionAlgorithms <- "Lasso" # TO DO: (perhaps) set from configuration.
+			if (input$algorithm %in% featureSelectionAlgorithms){
+				return(TRUE)
+			} else{
+				return(FALSE)
+			}
+		}
+		
+		if (!isFeatureSelectionAlgorithm()){
+			shiny::validate(need(ncol(dataTab) > 2,
+													 paste("ERROR: No data for specified predictors.")))
+		}
+		
 		shiny::validate(need(nrow(dataTab) > 0,
 												 paste("ERROR: All cell lines have missing response or predictor data.")))
 		
@@ -309,13 +324,13 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 	#----[Show Predictors and Response in 'Heatmap' Tab]------------------------------------
 	output$heatmap <- renderD3heatmap({
 		dataTab <- inputData()
-		dataMatrix <- as.matrix(t(dataTab[, -1]))
+		dataMatrix <- as.matrix(t(dataTab[, -1, drop = FALSE]))
 		numHiLoCols <- min(input$numHiLoResponseLines, floor(ncol(dataMatrix)/2))
 		# Order columns by decreasing response values.
-		dataMatrix <- dataMatrix[, order(dataMatrix[1, , drop = TRUE], decreasing = TRUE)]
+		dataMatrix <- dataMatrix[, order(dataMatrix[1, , drop = TRUE], decreasing = TRUE), drop = FALSE]
 		# Extract highest/lowest responder columns.
 		colIndexSet <- c(1:numHiLoCols, (ncol(dataMatrix) - numHiLoCols + 1):ncol(dataMatrix))
-		dataMatrix <- dataMatrix[, colIndexSet]
+		dataMatrix <- dataMatrix[, colIndexSet, drop = FALSE]
 		# Remove data source identifier in predictor names.
 		rownames(dataMatrix) <- vapply(rownames(dataMatrix), function(x) { 
 			stringr::str_split(x, "_")[[1]][1] }, character(1))
