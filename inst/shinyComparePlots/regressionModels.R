@@ -32,24 +32,7 @@ regressionModelsInput <- function(id, dataSourceChoices) {
 regressionModels <- function(input, output, session, srcContentReactive, appConfig) {
 
 	#----[Reactive Variables]--------------------------------------------------------------
-	
-	# Provides an a list object with response variable-related data, including numeric data,
-	# data type prefix, data source, and plot label.
-	# Note: Observations with missing values (in predictor or reponse variables) are removed.
-	# Note: The numeric data always matches what is provided within the inputData() data frame.
-	rmResponseData <- reactive({
-		dataTab <- inputData() # Validation already done.
-		
-		yData <- list()
-		yData$name <- colnames(dataTab)[2] # 1st column: cell line name, 2nd column: response variable.
-		yData$data <- setNames(dataTab[, yData$name], rownames(dataTab))
-		yData$plotLabel <- yData$name
-		yData$uniqName  <- yData$name
-		yData$dataSource <- strsplit(yData$name, split = "_")[[1]][2]
 
-		return(yData)
-	})
-	
 	# Returns a data frame with data suitable for predictive modeling (updated according
 	# to current user selections). The first column indicates the cell line, with
 	# subsequent columns containing response and predictor variables.
@@ -110,6 +93,24 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		}
 
 		return(dataTab)
+	})
+	
+	
+	# Provides an a list object with response variable-related data, including numeric data,
+	# data type prefix, data source, and plot label.
+	# Note: Observations with missing values (in predictor or reponse variables) are removed.
+	# Note: The numeric data always matches what is provided within the inputData() data frame.
+	rmResponseData <- reactive({
+		dataTab <- inputData() # Validation already done.
+		
+		yData <- list()
+		yData$name <- colnames(dataTab)[2] # 1st column: cell line name, 2nd column: response variable.
+		yData$data <- setNames(dataTab[, yData$name], rownames(dataTab))
+		yData$plotLabel <- yData$name
+		yData$uniqName  <- yData$name
+		yData$dataSource <- strsplit(yData$name, split = "_")[[1]][2]
+		
+		return(yData)
 	})
 	
 	# Returns a list with (at least) the following elements:
