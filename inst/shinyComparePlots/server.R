@@ -5,6 +5,7 @@ library(rcellminerElasticNet)
 library(geneSetPathwayAnalysis)
 library(jsonlite)
 library(stringr)
+library(glmnet)
 #library(tooltipsterR)
 
 if (!require(rcellminerUtils)){

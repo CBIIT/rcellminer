@@ -18,7 +18,17 @@ regressionModelsInput <- function(id, dataSourceChoices) {
 					 				uiOutput(ns("selectTissuesUi")),
 					 				selectInput(ns("algorithm"), "Algorithm", 
 					 										choices=c("Linear Regression", "Lasso"), 
-					 										selected = "Linear Regression")
+					 										selected = "Linear Regression"),
+					 				# Only show these panels if selected algorithm is Lasso.
+					 				conditionalPanel(
+					 					# condition must be a Javascript expression.
+					 					condition = paste0("input['", ns("algorithm"), "'] == 'Lasso'"),
+					 					uiOutput(ns("selectInputGeneSetsUi"))),
+					 				conditionalPanel(
+					 					condition = paste0("input['", ns("algorithm"), "'] == 'Lasso'"),
+					 					numericInput(ns("maxNumPredictors"), 
+					 											 "Maximum Number of Predictors", value = 4, 
+					 											 min = 1, max = 100, step = 1))
 					 			)
 					 		),
 					 		mainPanel(
@@ -30,8 +40,48 @@ regressionModelsInput <- function(id, dataSourceChoices) {
 }
 #-----[NavBar Tab: Regression Models (Server code)]------------------------------------------------
 regressionModels <- function(input, output, session, srcContentReactive, appConfig) {
+	
+	#----[Utility Functions]----------------------------------------------------------------
+	# TO DO: Generalize and move elsewhere if possible.
+	getFeatureDataMatrix <- function(dataSet, dataTypes, srcContent, rmNaCols = TRUE,
+																	 responseVec = NULL, geneSetNames = NULL){
+		featureDataMat <- NULL
+		for (dType in dataTypes){
+			tmpData <- srcContent[[dataSet]][["molPharmData"]][[dType]]
+			if (!is.null(responseVec)){
+				tmpData <- tmpData[, names(responseVec)]
+			}
+			
+			# ----[restrict to selected gene set genes if necessary]--------------------
+			if ((!is.null(geneSetNames)) && (!("All Genes" %in% geneSetNames))){
+				geneSetNames <- intersect(geneSetNames, names((geneSetPathwayAnalysis::geneSets)))
+				if (length(geneSetNames) > 0){
+					genes <- sort(unique(c(geneSetPathwayAnalysis::geneSets[geneSetNames], 
+																 recursive = TRUE)))
+					dataTypeGenes <- intersect(paste0(dType, genes), rownames(tmpData))
+					if (length(dataTypeGenes) > 0){
+						tmpData <- tmpData[dataTypeGenes, ]
+					} else{
+						tmpData <- NULL
+					}
+				}
+			}
+			# --------------------------------------------------------------------------
+			
+			featureDataMat <- rbind(featureDataMat, tmpData)
+		}
+		
+		if (rmNaCols){
+			hasNaInCol <- apply(featureDataMat, MARGIN = 2, FUN = function(x){
+				any(is.na(x))
+			})
+			featureDataMat <- featureDataMat[, !hasNaInCol]
+		}
+		
+		return(featureDataMat)
+	}
 
-	#----[Reactive Variables]--------------------------------------------------------------
+	#----[Reactive Variables]---------------------------------------------------------------
 
 	# Returns a data frame with data suitable for predictive modeling (updated according
 	# to current user selections). The first column indicates the cell line, with
@@ -187,6 +237,63 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			stopifnot(identical(names(rmAlgoResults$predictedResponse), rownames(lmData)))
 			stopifnot(identical(names(rmAlgoResults$cvPredictedResponse), rownames(lmData)))
 			# --------------------------------------------------------------------------
+		} else if (input$algorithm == "Lasso"){
+			shiny::validate(need(length(input$inputGeneSets) > 0,
+													 "Please select one or more gene sets."))
+			
+			# TO DO: Allow starting predictors that are forced into the model.
+			
+			# First column has cell line names, second column has response data.
+			lassoResponseVec <- setNames(dataTab[, 2, drop = TRUE], rownames(dataTab))
+			lassoPredData <- t(getFeatureDataMatrix(dataSet = input$dataset,
+				dataTypes = input$predDataTypes, srcContent = srcContent,
+				responseVec = lassoResponseVec, geneSetNames = input$inputGeneSets))
+			
+			# Check and update: lines with missing predictor data may have been removed.
+			shiny::validate(need(nrow(lassoPredData) > 10, "Insufficient number of cell lines."))
+			lassoResponseVec <- lassoResponseVec[rownames(lassoPredData)]
+			
+			#-----[glmnet]--------------------------------------------------------------
+			set.seed (1)
+			lassoCvOutput <- cv.glmnet(x = lassoPredData, y = lassoResponseVec, alpha=1)
+			lassoIntercept <- coef(lassoCvOutput, s = "lambda.min")[1,1]
+			lassoPredictorWts <- coef(lassoCvOutput, s = "lambda.min")[-1,1]
+			lassoPredictorWts <- lassoPredictorWts[lassoPredictorWts != 0]
+			
+			shiny::validate(need(length(lassoPredictorWts) > 0, 
+													 "No predictor variables selected by Lasso algorithm."))
+			
+			lassoPredictorWts <- lassoPredictorWts[order(abs(lassoPredictorWts), decreasing = TRUE)]
+			
+			lassoPredictedResponse <- rcellminerElasticNet::predictWithLinRegModel(
+				coeffVec = lassoPredictorWts, yIntercept = lassoIntercept, 
+				newData = lassoPredData[, names(lassoPredictorWts)])
+			#---------------------------------------------------------------------------
+
+			# Make 'updated input' data frame: starting response and feature data
+			# PLUS data for features selected by Lasso.
+			lassoModelData <- dataTab[names(lassoResponseVec), ]
+			for (predId in names(lassoPredictorWts)){
+				lassoModelData[, predId] <- lassoPredData[, predId]
+			}
+			
+			lassoLmModelData <- lassoModelData[, -1]
+			lassoLmCvFit <- rcellminerElasticNet::getLmCvFit(
+				X = as.matrix(lassoLmModelData[, -1, drop = FALSE]), 
+				y = lassoLmModelData[, 1, drop = TRUE], nFolds = 10, nRepeats = 1)
+			
+			# -----[assemble results]---------------------------------------------------
+			rmAlgoResults$algorithm <- "Lasso"
+			rmAlgoResults$predictorWts <- lassoPredictorWts
+			rmAlgoResults$predictedResponse <- lassoPredictedResponse
+			rmAlgoResults$cvPredictedResponse <- lassoLmCvFit$cvPred
+			rmAlgoResults$techDetails <- "Lasso Technical Details"
+			
+			# Feature selection algorithms are expected to find additional 
+			# predictors. The entry updates the starting inputData(), adding
+			# data for selected predictors.
+			rmAlgoResults$updatedInputData <- lassoModelData
+			# --------------------------------------------------------------------------
 		} else{
 			shiny::validate(FALSE, paste("ERROR: Algorithm not available."))
 		}
@@ -209,24 +316,12 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		responseVec <- responseData$data
 		currentPredictorData <- t(as.matrix(dataTab[, c(-1, -2), drop = FALSE]))
 		
-		comparisonData <- NULL
-		for (dataType in input$pcDataTypes){
-			tmpData <- srcContent[[input$dataset]][["molPharmData"]][[dataType]]
-			tmpData <- tmpData[, names(responseVec)]
-			# ----[restrict to selected gene set genes if necessary]--------------------
-			if (!("All Genes" %in% input$pcGeneSets)){
-				pcGenes <- sort(unique(c(geneSetPathwayAnalysis::geneSets[input$pcGeneSets], 
-																 recursive = TRUE)))
-				dataTypePcGenes <- intersect(paste0(dataType, pcGenes), rownames(tmpData))
-				if (length(dataTypePcGenes) > 0){
-					tmpData <- tmpData[dataTypePcGenes, ]
-				} else{
-					tmpData <- NULL
-				}
-			}
-			# --------------------------------------------------------------------------
-			comparisonData <- rbind(comparisonData, tmpData)
-		}
+		# TO DO: investigate NA handling details in partial correlation computation.
+		comparisonData <- getFeatureDataMatrix(dataSet = input$dataset,
+			dataTypes = input$pcDataTypes, srcContent = srcContent,
+			responseVec = responseVec, geneSetNames = input$pcGeneSets, 
+			rmNaCols = FALSE) 
+
 		N <- nrow(comparisonData)
 		
 		if ((appConfig$runParCorsInParallel) && 
@@ -260,12 +355,6 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 				tmp <- rcellminer::parCorPatternComparison(x = responseVec,
 																									 Y = compDataBatches[[i]],
 																									 Z = currentPredictorData)
-				# Call below does not work, producing the following:
-				# Warning: Error in unserialize: error reading from connection
-				# tmp <- rcellminer::parCorPatternComparison(x = responseVec,
-				# 																					 Y = compDataBatches[[i]],
-				# 																					 Z = currentPredictorData,
-				# 																					 updateProgress = updateProgress)
 				return(tmp)
 			}
 			stopCluster(cl)
@@ -295,8 +384,20 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 	if(require(rCharts)) {
 		#----[Show 2D Actual vs. Predicted Response Scatter Plot in 'Plot' Tab]----------------
 		output$plot <- renderChart({
-			responseData <- rmResponseData()
 			rmAlgoResults <- algoResults()
+			
+			responseData <- rmResponseData()
+			if (!is.null(rmAlgoResults$updatedInputData)){
+				# Feature selection algorithms will add additional predictors, and
+				# may drop cell lines with missing values for candidate predictors,
+				# requiring update of response data below.
+				updatedInputData <- rmAlgoResults$updatedInputData
+				
+				# First column has cell line names, second column has response data.
+				responseData$data <- setNames(updatedInputData[, 2, drop = TRUE], 
+																			rownames(updatedInputData))
+			}
+			
 			predResponseData <- list()
 			predResponseData$name <- paste0("predicted_", responseData$name)
 			predResponseData$data <- rmAlgoResults$predictedResponse
@@ -312,8 +413,20 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 	
 		#----[Show 2D Actual vs. CV-Predicted Response Scatter Plot in 'Cross-Validation' Tab]-
 		output$cvPlot <- renderChart({
-			responseData <- rmResponseData()
 			rmAlgoResults <- algoResults()
+			
+			responseData <- rmResponseData()
+			if (!is.null(rmAlgoResults$updatedInputData)){
+				# Feature selection algorithms will add additional predictors, and
+				# may drop cell lines with missing values for candidate predictors,
+				# requiring update of response data below.
+				updatedInputData <- rmAlgoResults$updatedInputData
+				
+				# First column has cell line names, second column has response data.
+				responseData$data <- setNames(updatedInputData[, 2, drop = TRUE], 
+																			rownames(updatedInputData))
+			}
+			
 			cvPredResponseData <- list()
 			cvPredResponseData$name <- paste0("cv_predicted_", responseData$name)
 			cvPredResponseData$data <- rmAlgoResults$cvPredictedResponse
@@ -334,6 +447,10 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		
 		if (nrow(dat) >= 10){
 			rmAlgoResults <- algoResults()
+			if (!is.null(rmAlgoResults$updatedInputData)){
+				# Algorithm selected additional features.
+				dat <- rmAlgoResults$updatedInputData
+			}
 			dat <- cbind(predicted_response = signif(rmAlgoResults$predictedResponse, 3), dat[, -1])
 			if (length(rmAlgoResults$cvPredictedResponse) > 0){
 				dat <- cbind(cv_predicted_response = signif(rmAlgoResults$cvPredictedResponse, 3), dat)
@@ -347,7 +464,13 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 	
 	#----[Show Predictors and Response in 'Heatmap' Tab]------------------------------------
 	output$heatmap <- renderD3heatmap({
-		dataTab <- inputData()
+		rmAlgoResults <- algoResults()
+		if (is.null(rmAlgoResults$updatedInputData)){
+			dataTab <- inputData()
+		} else{
+			dataTab <- rmAlgoResults$updatedInputData
+		}
+		
 		dataMatrix <- as.matrix(t(dataTab[, -1, drop = FALSE]))
 		numHiLoCols <- min(input$numHiLoResponseLines, floor(ncol(dataMatrix)/2))
 		# Order columns by decreasing response values.
@@ -518,6 +641,14 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			selectInput(ns("selectedTissues"), label = NULL, choices=c("none", tissueTypes),
 									multiple=TRUE, selected="none")
 		}
+	})
+	
+	output$selectInputGeneSetsUi <- renderUI({
+		ns <- session$ns
+		selectInput(ns("inputGeneSets"), "Select Gene Sets",
+								choices  = c(names(geneSetPathwayAnalysis::geneSets), "All Genes"),
+								selected = "All Gene Sets",
+								multiple=TRUE)
 	})
 	#--------------------------------------------------------------------------------------
 	
