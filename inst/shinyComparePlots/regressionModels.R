@@ -55,16 +55,39 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		rownames(dataTab) <- dataTab$CellLine
 		dataTab[, yData$uniqName] <- yData$data
 		
+		featurePrefixes <- unname(srcContent[[input$dataset]][["featurePrefixes"]])
 		predIds <- stringr::str_split(stringr::str_trim(input$predIds), pattern = "\\s+")[[1]] 
 		for (id in predIds){
-			for (dataType in input$predDataTypes){
-				if (validateEntry(dataType, id, input$dataset, srcContentReactive())){
-					xData <- getFeatureData(dataType, id, input$dataset, srcContentReactive())
+			idPrefix <- rcellminer::getMolDataType(id)
+			if (idPrefix %in% featurePrefixes){
+				#------------------------------------------------------------------------------------
+				# This is for predictors ids of the form "expSLFN11". The explicit data type
+				# prefix indicates that one (and only one) specified data type is to be 
+				# retrieved.
+				id <- rcellminer::removeMolDataType(id) # e.g. "expSLFN11" --> "SLFN11"
+				if (validateEntry(idPrefix, id, input$dataset, srcContentReactive())){
+					xData <- getFeatureData(idPrefix, id, input$dataset, srcContentReactive())
 					xData$data <- xData$data[names(yData$data)] # Match lines w/non-NA response data.
 					dataTab[, xData$uniqName] <- xData$data
 				} else{
-					warning(paste0(dataType, id), " not found.")
+					warning(paste0(idPrefix, id), " not found.")
 				}
+				#------------------------------------------------------------------------------------
+			} else{
+				#------------------------------------------------------------------------------------
+				# This is for predictor ids of the form "SLFN11". An attempt will be made to
+				# retrieve data for this predictor from all data types specified in
+				# input$predDataTypes.
+				for (dataType in input$predDataTypes){
+					if (validateEntry(dataType, id, input$dataset, srcContentReactive())){
+						xData <- getFeatureData(dataType, id, input$dataset, srcContentReactive())
+						xData$data <- xData$data[names(yData$data)] # Match lines w/non-NA response data.
+						dataTab[, xData$uniqName] <- xData$data
+					} else{
+						warning(paste0(dataType, id), " not found.")
+					}
+				}
+				#------------------------------------------------------------------------------------
 			}
 		}
 		
