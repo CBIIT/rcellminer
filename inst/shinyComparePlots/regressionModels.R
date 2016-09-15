@@ -242,13 +242,39 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			shiny::validate(need(length(input$inputGeneSets) > 0,
 													 "Please select one or more gene sets."))
 			
-			# TO DO: Allow starting predictors that are forced into the model.
-			
 			# First column has cell line names, second column has response data.
 			lassoResponseVec <- setNames(dataTab[, 2, drop = TRUE], rownames(dataTab))
 			lassoPredData <- t(getFeatureDataMatrix(dataSet = input$dataset,
 				dataTypes = input$predDataTypes, srcContent = srcContent,
 				responseVec = lassoResponseVec, geneSetNames = input$inputGeneSets))
+			
+			# Check if user has supplied starting predictors, and add their data if
+			# it isn't already included.
+			if (ncol(dataTab) > 2){
+				userPredData <- as.matrix(dataTab[, -(1:2), drop = FALSE])
+				# remove datasource suffix, e.g., "expSLFN11_nci60" ---> "expSLFN11"
+				colnames(userPredData) <- unname(vapply(colnames(userPredData), function(x) {
+					stringr::str_split(x, "_")[[1]][1]}, character(1)))
+				featuresToAdd <- setdiff(colnames(userPredData), colnames(lassoPredData))
+				
+				if (length(featuresToAdd) > 0){
+					userPredData <- userPredData[, featuresToAdd, drop = FALSE]
+					
+					# (1) Match cell lines between userPredData and lassoPredData (some lines
+					# may have been dropped from the latter due to missing values for some
+					# predictors).
+					userPredData  <- userPredData[rownames(lassoPredData), , drop = FALSE]
+					
+					lassoPredData <- cbind(userPredData, lassoPredData)
+					
+					# (2) Remove any additional lines with missing predictor data 
+					# (introduced by userPredData).
+					hasNaValues <- apply(lassoPredData, MARGIN = 1, FUN = function(x){
+						any(is.na(x))
+					})
+					lassoPredData <- lassoPredData[!hasNaValues, , drop = FALSE]
+				}
+			}
 			
 			# Check and update: lines with missing predictor data may have been removed.
 			shiny::validate(need(nrow(lassoPredData) > 10, "Insufficient number of cell lines."))
