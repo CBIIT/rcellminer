@@ -80,6 +80,11 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		
 		return(featureDataMat)
 	}
+	
+	summary.LassoResults <- function(x) {
+		stopifnot(inherits(x, "LassoResults"))
+		print(unclass(x))
+	}
 
 	#----[Reactive Variables]---------------------------------------------------------------
 
@@ -277,7 +282,8 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			}
 			
 			# Check and update: lines with missing predictor data may have been removed.
-			shiny::validate(need(nrow(lassoPredData) > 10, "Insufficient number of cell lines."))
+			shiny::validate(need(nrow(lassoPredData) > 10, 
+													 "Insufficient number of cell lines (without   NA-free data for candidate predictor set)."))
 			lassoResponseVec <- lassoResponseVec[rownames(lassoPredData)]
 			
 			#-----[glmnet]--------------------------------------------------------------
@@ -313,12 +319,17 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 				X = as.matrix(lassoLmModelData[, -1, drop = FALSE]), 
 				y = lassoLmModelData[, 1, drop = TRUE], nFolds = 10, nRepeats = 1)
 			
+			# TO DO : Augment results object and summary function for better
+			# presentation of appropriate results.
+			lassoResultsObj <- signif(lassoPredictorWts, 3)
+			class(lassoResultsObj) <- "LassoResults"
+			
 			# -----[assemble results]---------------------------------------------------
 			rmAlgoResults$algorithm <- "Lasso"
 			rmAlgoResults$predictorWts <- lassoPredictorWts
 			rmAlgoResults$predictedResponse <- lassoPredictedResponse
 			rmAlgoResults$cvPredictedResponse <- lassoLmCvFit$cvPred
-			rmAlgoResults$techDetails <- "Lasso Technical Details"
+			rmAlgoResults$techDetails <- lassoResultsObj
 			
 			# Feature selection algorithms are expected to find additional 
 			# predictors. The entry updates the starting inputData(), adding
@@ -340,12 +351,36 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 												 "Please select one or more data types for computing partial correlations."))
 		
 		srcContent <- srcContentReactive()
-		dataTab <- inputData()
-		shiny::validate(need(nrow(dataTab) >= 10, "Insufficient number of cell lines."))
-		responseData <- rmResponseData()
 		
-		responseVec <- responseData$data
+		# TO DO: Refactor to more generic call to isFeatureSelectionAlgorithm().
+		if (input$algorithm == "Lasso"){
+			rmAlgoResults <- algoResults()
+			if (!is.null(rmAlgoResults$updatedInputData)){
+				# Feature selection algorithms will add additional predictors, and
+				# may drop cell lines with missing values for candidate predictors,
+				# requiring update of response data below.
+				dataTab <- rmAlgoResults$updatedInputData
+				
+				# First column has cell line names, second column has response data.
+				responseVec <- setNames(dataTab[, 2, drop = TRUE], rownames(dataTab))
+			}
+		} else{
+			dataTab <- inputData()
+			responseData <- rmResponseData()
+			responseVec <- responseData$data
+		}
+	
+		# TO DO: Right now, in the context of a feature selection algorithm, the user
+		# may specify features, but these are not forced into the model - they are only
+		# included in the starting candidate set.  This is a reasonable choice, but
+		# the partial correlation will be computed with respect to whatever features
+		# were selected by the algorithm.  This behavior may be non-intuitive because
+		# the use-specified features will be visibly entered, but if the algorithm
+		# does not select them, the partial correlation will not be excluding their
+		# effect in terms of response prediction.
 		currentPredictorData <- t(as.matrix(dataTab[, c(-1, -2), drop = FALSE]))
+		shiny::validate(need(nrow(currentPredictorData) > 0,
+												 "Initial predictors must be available for partial correlation computation."))
 		
 		# TO DO: investigate NA handling details in partial correlation computation.
 		comparisonData <- getFeatureDataMatrix(dataSet = input$dataset,
