@@ -292,19 +292,23 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			
 			lassoPredictorWts <- lassoPredictorWts[order(abs(lassoPredictorWts), decreasing = TRUE)]
 			
+			# TO DO: Investigate implementation and behavior of glmnet pmax argument.
+			lassoPredictorWts <- lassoPredictorWts[1:min(input$maxNumPredictors, length(lassoPredictorWts))]
+			
 			lassoPredictedResponse <- rcellminerElasticNet::predictWithLinRegModel(
 				coeffVec = lassoPredictorWts, yIntercept = lassoIntercept, 
-				newData = lassoPredData[, names(lassoPredictorWts)])
+				newData = lassoPredData[, names(lassoPredictorWts), drop = FALSE])
 			#---------------------------------------------------------------------------
 
 			# Make 'updated input' data frame: starting response and feature data
-			# PLUS data for features selected by Lasso.
-			lassoModelData <- dataTab[names(lassoResponseVec), ]
+			# ultimately selected by Lasso.
+			lassoModelData <- dataTab[names(lassoResponseVec), 1:2] # CellLine, Response.
 			for (predId in names(lassoPredictorWts)){
-				lassoModelData[, predId] <- lassoPredData[, predId]
+				uniqPredId <- paste0(predId, "_", input$dataset)
+				lassoModelData[, uniqPredId] <- lassoPredData[, predId]
 			}
 			
-			lassoLmModelData <- lassoModelData[, -1]
+			lassoLmModelData <- lassoModelData[, -1] # dropping CellLine column
 			lassoLmCvFit <- rcellminerElasticNet::getLmCvFit(
 				X = as.matrix(lassoLmModelData[, -1, drop = FALSE]), 
 				y = lassoLmModelData[, 1, drop = TRUE], nFolds = 10, nRepeats = 1)
