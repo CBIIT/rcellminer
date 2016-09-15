@@ -567,12 +567,19 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			
 			for (dType in dataTypes){
 				indexSet <- which(rowDataTypes == dType)
-				dTypeMin <- min(as.numeric(dat[indexSet, ]), na.rm = TRUE)
-				dTypeMax <- max(as.numeric(dat[indexSet, ]), na.rm = TRUE)
+				# dTypeMin <- min(as.numeric(dat[indexSet, ]), na.rm = TRUE)
+				# dTypeMax <- max(as.numeric(dat[indexSet, ]), na.rm = TRUE)
+				valQtls <- quantile(x = as.numeric(dat[indexSet, ]), 
+														probs = c(0.05, 0.95), na.rm = TRUE)
+				dTypeMin <- valQtls[1]
+				dTypeMax <- valQtls[2]
 				dTypeRange <- dTypeMax - dTypeMin
 				for (i in indexSet){
 					if (dTypeRange != 0){
-						scaledDat[i, ] <- (dat[i, ] - dTypeMin) / dTypeRange
+						tmp <- (dat[i, ] - dTypeMin) / dTypeRange
+						tmp[which(tmp < 0)] <- 0
+						tmp[which(tmp > 1)] <- 1
+						scaledDat[i, ] <- tmp
 					} else{
 						scaledDat[i, ] <- 0.5
 					}
