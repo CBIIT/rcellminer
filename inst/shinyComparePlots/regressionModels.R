@@ -105,7 +105,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		rownames(dataTab) <- dataTab$CellLine
 		dataTab[, yData$uniqName] <- yData$data
 		
-		featurePrefixes <- unname(srcContent[[input$dataset]][["featurePrefixes"]])
+		featurePrefixes <- unname(srcContentReactive()[[input$dataset]][["featurePrefixes"]])
 		predIds <- stringr::str_split(stringr::str_trim(input$predIds), pattern = "\\s+")[[1]] 
 		for (id in predIds){
 			idPrefix <- rcellminer::getMolDataType(id)
@@ -211,6 +211,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 	# techDetails: an object that can be passed to a suitable summary() function to provide
 	#   a printed summary of technical results.
 	algoResults <- reactive({
+		srcContent <- srcContentReactive()
 		dataTab <- inputData()
 		rmAlgoResults <- list()
 		
