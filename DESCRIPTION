@@ -38,7 +38,11 @@ Suggests:
     testthat,
     BiocStyle,
     jsonlite,
-    d3heatmap
+    d3heatmap,
+    glmnet,
+    foreach,
+    doSNOW,
+    parallel
 URL: http://discover.nci.nih.gov/cellminer/
 VignetteBuilder: knitr
 biocViews: aCGH, CellBasedAssays, CopyNumberVariation, GeneExpression,
