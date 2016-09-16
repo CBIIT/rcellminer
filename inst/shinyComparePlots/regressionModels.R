@@ -246,6 +246,8 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		} else if (input$algorithm == "Lasso"){
 			shiny::validate(need(length(input$inputGeneSets) > 0,
 													 "Please select one or more gene sets."))
+			shiny::validate(input$maxNumPredictors > 0,
+													 "Please set maximum number of predictors."))
 			
 			# First column has cell line names, second column has response data.
 			lassoResponseVec <- setNames(dataTab[, 2, drop = TRUE], rownames(dataTab))
