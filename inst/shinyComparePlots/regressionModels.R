@@ -149,7 +149,18 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 	
 	summary.LassoResults <- function(x) {
 		stopifnot(inherits(x, "LassoResults"))
-		print(unclass(x))
+		cat("Predictors Selected by Lasso (Ordered by Regression Coefficient Magnitude)")
+		cat("\n")
+		cat("--------------------------------------------------------------------------")
+		cat("\n")
+		predSummaryTab <- data.frame(PREDICTOR = names(x$predictorWts),
+																 COEFFICIENT = x$predictorWts,
+																 stringsAsFactors = FALSE)
+		rownames(predSummaryTab) <- NULL
+		print(predSummaryTab)
+		cat("--------------------------------------------------------------------------")
+		cat("\n")
+		cat(paste0("Multiple R-squared: ", round(x$rSquared, 4)))
 	}
 
 	#----[Reactive Variables]---------------------------------------------------------------
@@ -310,6 +321,15 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			stopifnot(identical(names(rmAlgoResults$cvPredictedResponse), rownames(lmData)))
 			# --------------------------------------------------------------------------
 		} else if (input$algorithm == "Lasso"){
+			# ----[enable progress bar]--------------------------------------------------
+			progress <- shiny::Progress$new()
+			progress$set(message = "Computing Lasso Results ... ", value = 0)
+			# Close the progress when this reactive exits (even if there's an error).
+			on.exit(progress$close())
+			updateProgress <- function(detail = NULL) {
+				progress$inc(amount = 1, detail = detail)
+			}
+			# ---------------------------------------------------------------------------
 			shiny::validate(need(length(input$inputGeneSets) > 0,
 													 "Please select one or more gene sets."))
 			shiny::validate(need(input$maxNumPredictors > 0,
@@ -372,6 +392,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			lassoPredictedResponse <- rcellminerElasticNet::predictWithLinRegModel(
 				coeffVec = lassoPredictorWts, yIntercept = lassoIntercept, 
 				newData = lassoPredData[, names(lassoPredictorWts), drop = FALSE])
+			lassoPredResponseCor <- cor.test(lassoPredictedResponse, lassoResponseVec)$estimate
 			#---------------------------------------------------------------------------
 
 			# Make 'updated input' data frame: starting response and feature data
@@ -389,7 +410,9 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			
 			# TO DO : Augment results object and summary function for better
 			# presentation of appropriate results.
-			lassoResultsObj <- signif(lassoPredictorWts, 3)
+			lassoResultsObj <- list()
+			lassoResultsObj$predictorWts <- signif(lassoPredictorWts, 3)
+			lassoResultsObj$rSquared <- lassoPredResponseCor^2
 			class(lassoResultsObj) <- "LassoResults"
 			
 			# -----[assemble results]---------------------------------------------------
@@ -403,6 +426,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			# predictors. The entry updates the starting inputData(), adding
 			# data for selected predictors.
 			rmAlgoResults$updatedInputData <- lassoModelData
+			updateProgress()
 			# --------------------------------------------------------------------------
 		} else{
 			shiny::validate(FALSE, paste("ERROR: Algorithm not available."))
@@ -497,7 +521,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		} else{
 			# ----[enable progress bar]--------------------------------------------------
 			progress <- shiny::Progress$new()
-			progress$set(message = "Computing Pattern Comparison Results: ", value = 0)
+			progress$set(message = "Computing Partial Correlation Results: ", value = 0)
 			# Close the progress when this reactive exits (even if there's an error).
 			on.exit(progress$close())
 			updateProgress <- function(detail = NULL) {
