@@ -321,6 +321,8 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			stopifnot(identical(names(rmAlgoResults$cvPredictedResponse), rownames(lmData)))
 			# --------------------------------------------------------------------------
 		} else if (input$algorithm == "Lasso"){
+			# TO DO:
+			# --- Consider filtering candidate predictors by data range.
 			# ----[enable progress bar]--------------------------------------------------
 			progress <- shiny::Progress$new()
 			progress$set(message = "Computing Lasso Results ... ", value = 0)
