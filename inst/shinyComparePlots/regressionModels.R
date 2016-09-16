@@ -551,7 +551,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		xAxisFontSize <- "6pt"
 
 		# TO DO: Move to appropriate general functions file/package.
-		scaleDataForHeatmap <- function(dat){
+		scaleDataForHeatmap <- function(dat, scaleByRow = FALSE){
 			if (is.vector(dat)){
 				vecNames <- names(dat)
 				dat <- matrix(dat, nrow = 1, ncol = length(dat))
@@ -565,16 +565,12 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			rowDataTypes <- unname(rcellminer::getMolDataType(rownames(dat)))
 			dataTypes <- unique(rowDataTypes)
 			
-			for (dType in dataTypes){
-				indexSet <- which(rowDataTypes == dType)
-				# dTypeMin <- min(as.numeric(dat[indexSet, ]), na.rm = TRUE)
-				# dTypeMax <- max(as.numeric(dat[indexSet, ]), na.rm = TRUE)
-				valQtls <- quantile(x = as.numeric(dat[indexSet, ]), 
-														probs = c(0.05, 0.95), na.rm = TRUE)
-				dTypeMin <- valQtls[1]
-				dTypeMax <- valQtls[2]
-				dTypeRange <- dTypeMax - dTypeMin
-				for (i in indexSet){
+			if (scaleByRow){
+				for (i in seq_len(nrow(scaledDat))){
+					valQtls <- quantile(x = as.numeric(dat[i, ]), probs = c(0.05, 0.95), na.rm = TRUE)
+					dTypeMin <- valQtls[1]
+					dTypeMax <- valQtls[2]
+					dTypeRange <- dTypeMax - dTypeMin
 					if (dTypeRange != 0){
 						tmp <- (dat[i, ] - dTypeMin) / dTypeRange
 						tmp[which(tmp < 0)] <- 0
@@ -584,12 +580,32 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 						scaledDat[i, ] <- 0.5
 					}
 				}
+			} else{
+				for (dType in dataTypes){
+					indexSet <- which(rowDataTypes == dType)
+					# dTypeMin <- min(as.numeric(dat[indexSet, ]), na.rm = TRUE)
+					# dTypeMax <- max(as.numeric(dat[indexSet, ]), na.rm = TRUE)
+					valQtls <- quantile(x = as.numeric(dat[indexSet, ]), probs = c(0.05, 0.95), na.rm = TRUE)
+					dTypeMin <- valQtls[1]
+					dTypeMax <- valQtls[2]
+					dTypeRange <- dTypeMax - dTypeMin
+					for (i in indexSet){
+						if (dTypeRange != 0){
+							tmp <- (dat[i, ] - dTypeMin) / dTypeRange
+							tmp[which(tmp < 0)] <- 0
+							tmp[which(tmp > 1)] <- 1
+							scaledDat[i, ] <- tmp
+						} else{
+							scaledDat[i, ] <- 0.5
+						}
+					}
+				}
 			}
 			
 			return(scaledDat)			 
 		}
 		
-		scaledDataMatrix <- scaleDataForHeatmap(dataMatrix)
+		scaledDataMatrix <- scaleDataForHeatmap(dataMatrix, input$useHeatmapRowColorScale)
 		d3heatmap::d3heatmap(x = scaledDataMatrix,  # Used for color scaling.
 												 cellnote = dataMatrix, # Used for tooltip values.
 												 dendrogram = "none", 
@@ -658,6 +674,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 																						"Number of High/Low Response Lines to Display:", 
 																						min=1, max=maxNumHiLoResponseLines, 
 																						value=20, width = "50%"),
+																checkboxInput(ns("useHeatmapRowColorScale"), "Use Row Z-Score Color Scale", FALSE),
 																d3heatmapOutput(ns("heatmap")))
 		techDetailsTabPanel <- tabPanel("Technical Details", verbatimTextOutput(ns("techDetails")))
 		patternCompTabPanel <- tabPanel("Partial Correlation", 
