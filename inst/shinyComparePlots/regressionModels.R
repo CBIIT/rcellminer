@@ -81,6 +81,72 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		return(featureDataMat)
 	}
 	
+	# TO DO: Move to appropriate general functions file/package.
+	scaleDataForHeatmap <- function(dat, scaleByRow = FALSE){
+		if (is.vector(dat)){
+			vecNames <- names(dat)
+			dat <- matrix(dat, nrow = 1, ncol = length(dat))
+			rownames(dat) <- "tmp1"
+			colnames(dat) <- vecNames
+		}
+		
+		scaledDat <- matrix(NA, nrow = nrow(dat), ncol = ncol(dat))
+		rownames(scaledDat) <- rownames(dat)
+		colnames(scaledDat) <- colnames(dat)
+		rowDataTypes <- unname(rcellminer::getMolDataType(rownames(dat)))
+		dataTypes <- unique(rowDataTypes)
+		
+		getQuantiles <- function(dataType){
+			if (dataType == "mut"){
+				loQtl <- 0
+				hiQtl <- 1
+			} else{
+				loQtl <- 0.05
+				hiQtl <- 0.95
+			}
+			return(c(loQtl, hiQtl))
+		}
+		
+		if (scaleByRow){
+			for (i in seq_len(nrow(scaledDat))){
+				valQtls <- quantile(x = as.numeric(dat[i, ]), 
+					probs = getQuantiles(rowDataTypes[i]), na.rm = TRUE)
+				dTypeMin <- valQtls[1]
+				dTypeMax <- valQtls[2]
+				dTypeRange <- dTypeMax - dTypeMin
+				if (dTypeRange != 0){
+					tmp <- (dat[i, ] - dTypeMin) / dTypeRange
+					tmp[which(tmp < 0)] <- 0
+					tmp[which(tmp > 1)] <- 1
+					scaledDat[i, ] <- tmp
+				} else{
+					scaledDat[i, ] <- 0.5
+				}
+			}
+		} else{
+			for (dType in dataTypes){
+				indexSet <- which(rowDataTypes == dType)
+				valQtls <- quantile(x = as.numeric(dat[indexSet, ]), 
+					probs = getQuantiles(dType), na.rm = TRUE)
+				dTypeMin <- valQtls[1]
+				dTypeMax <- valQtls[2]
+				dTypeRange <- dTypeMax - dTypeMin
+				for (i in indexSet){
+					if (dTypeRange != 0){
+						tmp <- (dat[i, ] - dTypeMin) / dTypeRange
+						tmp[which(tmp < 0)] <- 0
+						tmp[which(tmp > 1)] <- 1
+						scaledDat[i, ] <- tmp
+					} else{
+						scaledDat[i, ] <- 0.5
+					}
+				}
+			}
+		}
+		
+		return(scaledDat)			 
+	}
+	
 	summary.LassoResults <- function(x) {
 		stopifnot(inherits(x, "LassoResults"))
 		print(unclass(x))
@@ -246,7 +312,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		} else if (input$algorithm == "Lasso"){
 			shiny::validate(need(length(input$inputGeneSets) > 0,
 													 "Please select one or more gene sets."))
-			shiny::validate(input$maxNumPredictors > 0,
+			shiny::validate(need(input$maxNumPredictors > 0,
 													 "Please set maximum number of predictors."))
 			
 			# First column has cell line names, second column has response data.
@@ -552,61 +618,6 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		
 		xAxisFontSize <- "6pt"
 
-		# TO DO: Move to appropriate general functions file/package.
-		scaleDataForHeatmap <- function(dat, scaleByRow = FALSE){
-			if (is.vector(dat)){
-				vecNames <- names(dat)
-				dat <- matrix(dat, nrow = 1, ncol = length(dat))
-				rownames(dat) <- "tmp1"
-				colnames(dat) <- vecNames
-			}
-			
-			scaledDat <- matrix(NA, nrow = nrow(dat), ncol = ncol(dat))
-			rownames(scaledDat) <- rownames(dat)
-			colnames(scaledDat) <- colnames(dat)
-			rowDataTypes <- unname(rcellminer::getMolDataType(rownames(dat)))
-			dataTypes <- unique(rowDataTypes)
-			
-			if (scaleByRow){
-				for (i in seq_len(nrow(scaledDat))){
-					valQtls <- quantile(x = as.numeric(dat[i, ]), probs = c(0.05, 0.95), na.rm = TRUE)
-					dTypeMin <- valQtls[1]
-					dTypeMax <- valQtls[2]
-					dTypeRange <- dTypeMax - dTypeMin
-					if (dTypeRange != 0){
-						tmp <- (dat[i, ] - dTypeMin) / dTypeRange
-						tmp[which(tmp < 0)] <- 0
-						tmp[which(tmp > 1)] <- 1
-						scaledDat[i, ] <- tmp
-					} else{
-						scaledDat[i, ] <- 0.5
-					}
-				}
-			} else{
-				for (dType in dataTypes){
-					indexSet <- which(rowDataTypes == dType)
-					# dTypeMin <- min(as.numeric(dat[indexSet, ]), na.rm = TRUE)
-					# dTypeMax <- max(as.numeric(dat[indexSet, ]), na.rm = TRUE)
-					valQtls <- quantile(x = as.numeric(dat[indexSet, ]), probs = c(0.05, 0.95), na.rm = TRUE)
-					dTypeMin <- valQtls[1]
-					dTypeMax <- valQtls[2]
-					dTypeRange <- dTypeMax - dTypeMin
-					for (i in indexSet){
-						if (dTypeRange != 0){
-							tmp <- (dat[i, ] - dTypeMin) / dTypeRange
-							tmp[which(tmp < 0)] <- 0
-							tmp[which(tmp > 1)] <- 1
-							scaledDat[i, ] <- tmp
-						} else{
-							scaledDat[i, ] <- 0.5
-						}
-					}
-				}
-			}
-			
-			return(scaledDat)			 
-		}
-		
 		scaledDataMatrix <- scaleDataForHeatmap(dataMatrix, input$useHeatmapRowColorScale)
 		d3heatmap::d3heatmap(x = scaledDataMatrix,  # Used for color scaling.
 												 cellnote = dataMatrix, # Used for tooltip values.
