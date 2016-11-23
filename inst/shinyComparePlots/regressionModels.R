@@ -303,9 +303,13 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		# to a specialized implementation function that returns a standard format algoResults
 		# list object.
 		if (input$algorithm == "Linear Regression"){
-			lmData <- dataTab[, -1] # First column has cell line names
-			# Note: will have to handle issues caused by predictor names with spaces 
+			lmData <- dataTab[, -1, drop = FALSE] # First column has cell line names
+			
+			# Note: Handling issues caused by variable names with spaces 
 			# or other characters that cannot be used within a formula.
+			colnames(lmData) <- stringr::str_replace_all(colnames(lmData), 
+				pattern = "[-|/| ]", replacement = "")
+			
 			lmFormula <- as.formula(paste0(colnames(lmData)[1], " ~ ."))
 			lmFit <- lm(lmFormula, lmData)
 			lmCvFit <- rcellminerElasticNet::getLmCvFit(X = as.matrix(lmData[, -1, drop = FALSE]), 
