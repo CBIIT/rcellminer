@@ -295,8 +295,18 @@ shinyServer(function(input, output, session) {
 	    	results$Location <- chromLocs
 	    	results <- results[, c("ID", "Data Type", "Gene", "Location", "Correlation", "P-Value")]
 	    }
+	    
+	    if (require(geneSetPathwayAnalysis)){
+	    	results$Annotation <- geneSetPathwayAnalysis::geneAnnotTab[results$Gene, "SHORT_ANNOT"]
+				results$Annotation[is.na(results$Annotation)] <- ""
+	    }
+	    
+	    results$ID <- NULL
 	  }
-
+	  
+	  results[, "Correlation"] <- round(results[, "Correlation"], 3)
+	  results[, "P-Value"] <- signif(results[, "P-Value"], 3)
+		
 	  DT::datatable(results, rownames=FALSE, colnames=colnames(results),
 	  							filter='top', style='bootstrap',
 	  							options=list(lengthMenu = c(10, 25, 50, 100), pageLength = 10))
