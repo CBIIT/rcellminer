@@ -170,9 +170,9 @@ makePlot <- function(xData, yData, showColor, showColorTissues, dataSource, sele
 	yAxisMin <- min(yData$data, na.rm = TRUE) - 0.25
 	yAxisMax <- max(yData$data, na.rm = TRUE) + 0.25
 	
-	h1$xAxis(title=list(enabled=TRUE, text=xData$plotLabel, style=list(fontSize="20px", fontWeight="bold")),
+	h1$xAxis(title=list(enabled=TRUE, text=xData$plotLabel, style=list(fontSize="24px", fontWeight="bold")),
 					 min=xAxisMin, max=xAxisMax, labels=list(style=list(fontSize="20px")))
-	h1$yAxis(title=list(enabled=TRUE, text=yData$plotLabel, style=list(fontSize="20px", fontWeight="bold")),
+	h1$yAxis(title=list(enabled=TRUE, text=yData$plotLabel, style=list(fontSize="24px", fontWeight="bold")),
 					 min=yAxisMin, max=yAxisMax, labels=list(style=list(fontSize="20px")))
 	
 	h1$legend(enabled=FALSE)
