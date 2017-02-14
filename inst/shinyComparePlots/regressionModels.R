@@ -665,13 +665,40 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		rmAlgoResults <- algoResults()
 		
 		if ("eqnStr" %in% names(rmAlgoResults)){
-			cat("RESPONSE AS A FUNCTION OF PREDICTOR VALUES:")
+			cat("PREDICTED RESPONSE AS A FUNCTION OF INPUT VARIABLES:")
 			cat("\n\n")
 			
-			cat(rmAlgoResults$eqnStr)
+			eqnStr <- rmAlgoResults$eqnStr
+			if (nchar(eqnStr) < 60){
+				cat(eqnStr)
+			} else{
+				# Print equation over multiple lines.
+				eqnElements <- str_split(eqnStr, "\\+")[[1]]
+				cat(eqnElements[1])
+				
+				numTerms <- length(eqnElements)
+				if (numTerms > 1){
+					cat("+")
+					charCount <- 0
+					#-------------------------------------------
+					for (i in (2:numTerms)){
+						eqnTerm <- eqnElements[i]
+						charCount <- charCount + nchar(eqnTerm)
+						cat(eqnTerm)
+						if (i != numTerms){
+							cat("+")
+							if (charCount > 60){
+								charCount <- 0
+								cat("\n     ")
+							}
+						}
+					}
+					#-------------------------------------------
+				}
+			}
 			
 			cat("\n")
-			cat(rep("_", 50))
+			cat(paste0(rep("_", 90), collapse = ""))
 			cat("\n")
 		}
 		
