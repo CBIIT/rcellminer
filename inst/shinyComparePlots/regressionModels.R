@@ -149,6 +149,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 	
 	summary.LassoResults <- function(x) {
 		stopifnot(inherits(x, "LassoResults"))
+		cat("\n\n")
 		cat("Predictors Selected by Lasso (Ordered by Regression Coefficient Magnitude)")
 		cat("\n")
 		cat("--------------------------------------------------------------------------")
@@ -320,6 +321,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			rmAlgoResults$predictedResponse <- predict(lmFit)
 			rmAlgoResults$cvPredictedResponse <- lmCvFit$cvPred
 			rmAlgoResults$techDetails <- lmFit
+			rmAlgoResults$eqnStr <- getLmEquationString(rmAlgoResults$predictorWts)
 			
 			stopifnot(identical(names(rmAlgoResults$predictedResponse), rownames(lmData)))
 			stopifnot(identical(names(rmAlgoResults$cvPredictedResponse), rownames(lmData)))
@@ -427,6 +429,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			rmAlgoResults$predictedResponse <- lassoPredictedResponse
 			rmAlgoResults$cvPredictedResponse <- lassoLmCvFit$cvPred
 			rmAlgoResults$techDetails <- lassoResultsObj
+			rmAlgoResults$eqnStr <- getLmEquationString(rmAlgoResults$predictorWts)
 			
 			# Feature selection algorithms are expected to find additional 
 			# predictors. The entry updates the starting inputData(), adding
@@ -660,6 +663,18 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 	#----[Show Technical Details in 'Technical Details' Tab]--------------------------------
 	output$techDetails <- renderPrint({
 		rmAlgoResults <- algoResults()
+		
+		if ("eqnStr" %in% names(rmAlgoResults)){
+			cat("RESPONSE AS A FUNCTION OF PREDICTOR VALUES:")
+			cat("\n\n")
+			
+			cat(rmAlgoResults$eqnStr)
+			
+			cat("\n")
+			cat(rep("_", 50))
+			cat("\n")
+		}
+		
 		summary(rmAlgoResults$techDetails)
 	})
 	
