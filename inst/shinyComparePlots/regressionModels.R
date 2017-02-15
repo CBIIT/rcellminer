@@ -698,7 +698,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			}
 			
 			cat("\n")
-			cat(paste0(rep("_", 90), collapse = ""))
+			#cat(paste0(rep("_", 100), collapse = ""))
 			cat("\n")
 		}
 		
@@ -716,6 +716,8 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 				pcResults[i, "ANNOT"] <-  geneSetPathwayAnalysis::geneAnnotTab[name, "SHORT_ANNOT"]
 			} 
 		}
+		pcResults$PARCOR <- round(pcResults$PARCOR, 3)
+		pcResults$PVAL   <- signif(pcResults$PVAL, 3)
 		
 		DT::datatable(pcResults, rownames=FALSE, colnames=colnames(pcResults), filter='top', 
 									style='bootstrap',
