@@ -149,6 +149,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 	
 	summary.LassoResults <- function(x) {
 		stopifnot(inherits(x, "LassoResults"))
+		cat("\n\n")
 		cat("Predictors Selected by Lasso (Ordered by Regression Coefficient Magnitude)")
 		cat("\n")
 		cat("--------------------------------------------------------------------------")
@@ -320,6 +321,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			rmAlgoResults$predictedResponse <- predict(lmFit)
 			rmAlgoResults$cvPredictedResponse <- lmCvFit$cvPred
 			rmAlgoResults$techDetails <- lmFit
+			rmAlgoResults$eqnStr <- getLmEquationString(rmAlgoResults$predictorWts)
 			
 			stopifnot(identical(names(rmAlgoResults$predictedResponse), rownames(lmData)))
 			stopifnot(identical(names(rmAlgoResults$cvPredictedResponse), rownames(lmData)))
@@ -427,6 +429,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			rmAlgoResults$predictedResponse <- lassoPredictedResponse
 			rmAlgoResults$cvPredictedResponse <- lassoLmCvFit$cvPred
 			rmAlgoResults$techDetails <- lassoResultsObj
+			rmAlgoResults$eqnStr <- getLmEquationString(rmAlgoResults$predictorWts)
 			
 			# Feature selection algorithms are expected to find additional 
 			# predictors. The entry updates the starting inputData(), adding
@@ -660,6 +663,45 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 	#----[Show Technical Details in 'Technical Details' Tab]--------------------------------
 	output$techDetails <- renderPrint({
 		rmAlgoResults <- algoResults()
+		
+		if ("eqnStr" %in% names(rmAlgoResults)){
+			cat("PREDICTED RESPONSE AS A FUNCTION OF INPUT VARIABLES:")
+			cat("\n\n")
+			
+			eqnStr <- rmAlgoResults$eqnStr
+			if (nchar(eqnStr) < 60){
+				cat(eqnStr)
+			} else{
+				# Print equation over multiple lines.
+				eqnElements <- str_split(eqnStr, "\\+")[[1]]
+				cat(eqnElements[1])
+				
+				numTerms <- length(eqnElements)
+				if (numTerms > 1){
+					cat("+")
+					charCount <- 0
+					#-------------------------------------------
+					for (i in (2:numTerms)){
+						eqnTerm <- eqnElements[i]
+						charCount <- charCount + nchar(eqnTerm)
+						cat(eqnTerm)
+						if (i != numTerms){
+							cat("+")
+							if (charCount > 60){
+								charCount <- 0
+								cat("\n     ")
+							}
+						}
+					}
+					#-------------------------------------------
+				}
+			}
+			
+			cat("\n")
+			#cat(paste0(rep("_", 100), collapse = ""))
+			cat("\n")
+		}
+		
 		summary(rmAlgoResults$techDetails)
 	})
 	
@@ -674,6 +716,8 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 				pcResults[i, "ANNOT"] <-  geneSetPathwayAnalysis::geneAnnotTab[name, "SHORT_ANNOT"]
 			} 
 		}
+		pcResults$PARCOR <- round(pcResults$PARCOR, 3)
+		pcResults$PVAL   <- signif(pcResults$PVAL, 3)
 		
 		DT::datatable(pcResults, rownames=FALSE, colnames=colnames(pcResults), filter='top', 
 									style='bootstrap',
