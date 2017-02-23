@@ -2,37 +2,44 @@
 % Please edit documentation in R/parCorPatternComparison.R
 \name{parCorPatternComparison}
 \alias{parCorPatternComparison}
-\title{Compare an input pattern against a set of patterns, excluding the effect
-of a fixed pattern.}
+\title{Compare an input pattern against a set of patterns, excluding the predictive
+effect of a fixed pattern or set of patterns.}
 \usage{
-parCorPatternComparison(x, Y, z)
+parCorPatternComparison(x, Y, Z, updateProgress = NULL)
 }
 \arguments{
 \item{x}{An N element input pattern specified as either a vector or a
 1 x N matrix or data frame.}
 
-\item{Y}{A k x N matrix with k patterns for comparison with the input pattern x
+\item{Y}{An N element  pattern specified as a vector for comparison with the input
+pattern x or a k x N matrix with k patterns for comparison with the input pattern x
 specified along the rows, with rownames set appropriately.}
 
-\item{z}{An N element  pattern specified as either a vector or a
-1 x N matrix or data frame. This is the pattern whose effect (with respect to
-a linear model) is to be excluded when comparing x with each row entry of Y.}
+\item{Z}{An N element  pattern specified as a vector or a k x N matrix of
+patterns specified along the rows. These are the patterns whose effect (with respect 
+to a linear model) is to be excluded when comparing x with Y or each row entry of Y.}
+
+\item{updateProgress}{A optional function to be invoked with each computed
+partial correlation to indicate progress.}
 }
 \value{
 A data frame with pattern comparison results (ordered by PARCOR):
 NAME: Name of entry in Y being compared.
-PARCOR: Partial correlation between x and the entry in Y with respect to z.
+PARCOR: Partial correlation between x and the entry in Y with respect to Z.
 PVAL: p-value.
 }
 \description{
-Compare an input pattern against a set of patterns, excluding the effect
-of a fixed pattern.
+Compare an input pattern against a set of patterns, excluding the predictive
+effect of a fixed pattern or set of patterns.
 }
 \examples{
 x <- exprs(getAct(rcellminerData::drugData))["609699", ]
 Y <- rcellminer::getAllFeatureData(rcellminerData::molData)[["exp"]][1:100, ]
-z <- rcellminer::getAllFeatureData(rcellminerData::molData)[["exp"]]["SLFN11", ]
-results <- parCorPatternComparison(x, Y, z)
+Z <- rcellminer::getAllFeatureData(rcellminerData::molData)[["exp"]][c("SLFN11", "JAG1"), ]
+results <- parCorPatternComparison(x, Y, Z)
+Y <- rcellminer::getAllFeatureData(rcellminerData::molData)[["exp"]][1, , drop=TRUE]
+Z <- rcellminer::getAllFeatureData(rcellminerData::molData)[["exp"]]["SLFN11", , drop=TRUE]
+results <- parCorPatternComparison(x, Y, Z)
 
 }
 \concept{
