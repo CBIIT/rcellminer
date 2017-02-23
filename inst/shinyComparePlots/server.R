@@ -135,11 +135,19 @@ shinyServer(function(input, output, session) {
 		if (input$selectedTissuesOnly){
 			shiny::validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
 		}
-		shiny::validate(need(validateEntry(input$xPrefix, input$xId, input$xDataset,
-												 srcContent = srcContentReactive()),
+		
+		xId <- getMatchedIds(input$xPrefix, input$xId, input$xDataset, srcContent = srcContentReactive())
+		
+		shiny::validate(need(length(xId) > 0, 
 												 paste("ERROR:", paste0(input$xPrefix, input$xId), "not found.")))
-		xData <- getFeatureData(input$xPrefix, input$xId, input$xDataset, 
-														srcContent = srcContentReactive())
+		
+		if (length(xId) > 1){
+			warningMsg <- paste0("Other identifiers matching x-axis ID: ",
+													 paste0(xId[-1], collapse = ", "), ".")
+			showNotification(warningMsg, duration = 10, type = "message")
+			xId <- xId[1]
+		}
+		xData <- getFeatureData(input$xPrefix, xId, input$xDataset, srcContent = srcContentReactive())
 		
 		if (input$xDataset != input$yDataset){
 			# Restrict numeric feature data to xDataset/yDataset-matched cell lines.
@@ -156,11 +164,19 @@ shinyServer(function(input, output, session) {
 		if (input$selectedTissuesOnly){
 			shiny::validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
 		}
-		shiny::validate(need(validateEntry(input$yPrefix, input$yId, input$yDataset,
-												 srcContent = srcContentReactive()),
+		
+		yId <- getMatchedIds(input$yPrefix, input$yId, input$yDataset, srcContent = srcContentReactive())
+		
+		shiny::validate(need(length(yId) > 0, 
 												 paste("ERROR:", paste0(input$yPrefix, input$yId), "not found.")))
-		yData <- getFeatureData(input$yPrefix, input$yId, input$yDataset, 
-														srcContent = srcContentReactive())
+		
+		if (length(yId) > 1){
+			warningMsg <- paste0("Other identifiers matching y-axis ID: ",
+													 paste0(yId[-1], collapse = ", "), ".")
+			showNotification(warningMsg, duration = 10, type = "message")
+			yId <- yId[1]
+		}
+		yData <- getFeatureData(input$yPrefix, yId, input$yDataset, srcContent = srcContentReactive())
 		
 		if (input$xDataset != input$yDataset){
 			# Restrict numeric feature data to xDataset/yDataset-matched cell lines.

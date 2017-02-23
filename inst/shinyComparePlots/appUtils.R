@@ -3,6 +3,40 @@ source("regressionModels.R")
 # Helper functions.
 #--------------------------------------------------------------------------------------------------
 
+isDrugActivityType <- function(prefix){
+	# TO DO: Make configurable.
+	drugActTypePrefixes <- "act"
+	if (prefix %in% drugActTypePrefixes){
+		return(TRUE)
+	} else{
+		return(FALSE)
+	}
+}
+
+getMatchedIds <- function(prefix, id, dataSource, srcContent){
+	dat <- srcContent[[dataSource]][["molPharmData"]][[prefix]]
+	idSet <- rcellminer::removeMolDataType(rownames(dat))
+	
+	if(id %in% idSet){
+		return(id)
+	}
+	
+	matchedIds <- NULL
+	
+	i <- which(toupper(id) == toupper(idSet))
+	if (length(i) == 1){
+		# Straightforward case-insensitive match.
+		matchedIds <- unname(idSet[i])
+	} else{
+		# For drugs: try to match synonyms to source-specific identifiers.
+		if (require(rcellminerUtils) && isDrugActivityType(prefix)){
+			matchedIds <- rcellminerUtils::getDbDrugIds(drugName = id, dbName = dataSource)	
+		}
+	}
+	
+	return(matchedIds)
+}
+
 validateEntry <- function(prefix, id, dataSource, srcContent) {
 	molPharmData <- srcContent[[dataSource]][["molPharmData"]]
 	

@@ -90,11 +90,11 @@ shinyUI(
 	          	id="input_container", 
 	            selectInput("xDataset", "x-Axis Dataset", choices=dataSourceChoices, selected = "nci60"),
 	            uiOutput("xPrefixUi"),
-	            textInput("xId", "ID: (e.g. 94600 or SLFN11); Case-Sensitive", "SLFN11"), 
+	            textInput("xId", "ID: (e.g. 94600 or SLFN11)", "SLFN11"), 
 	          	
 	            selectInput("yDataset", "y-Axis Dataset", choices=dataSourceChoices, selected = "nci60"),
 	            uiOutput("yPrefixUi"),
-	          	textInput("yId", "ID: (e.g. 94600 or SLFN11); Case-Sensitive", "94600"), 
+	          	textInput("yId", "ID: (e.g. 94600 or SLFN11)", "94600"), 
 	                
 	            checkboxInput("showColor", "Show Color?", value=TRUE),
 	        	  checkboxInput("selectedTissuesOnly", "Selected Tissues Only?", value=FALSE),
