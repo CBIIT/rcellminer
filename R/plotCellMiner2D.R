@@ -12,6 +12,7 @@
 #' @param showTrendLine boolean, whether to show the trendline 
 #' @param showTitle boolean, whether to show the title
 #' @param alpha value from 0-1, where 0 indicates transparent points
+#' @param numberColPrefix a prefix to add to column names that start with a number that causes issues with ggplot (DEFAULT: X)
 #' 
 #' @return a ggplot object
 #' 
@@ -44,7 +45,7 @@
 plotCellMiner2D <- function(df, xCol="x", yCol="y", xLabel=xCol, yLabel=yCol, 
 														title=NULL, colorPalette=NULL, classCol=NULL, tooltipCol=NULL, 
 														showLegend=FALSE, showTrendLine=TRUE, showTitle=TRUE, 
-														alpha=1) {
+														alpha=1, numberColPrefix="X") {
 	
 	# nci60DrugActZ <- exprs(getAct(rcellminerData::drugData))
 	# nci60GeneExpZ <- getAllFeatureData(rcellminerData::molData)[["exp"]]
@@ -72,6 +73,20 @@ plotCellMiner2D <- function(df, xCol="x", yCol="y", xLabel=xCol, yLabel=yCol,
 	# showTitle <- TRUE
 	# alpha <- 1
 	
+	# Fix column names if they start with a number 
+	if (grepl("^[0-9]", xCol)) {
+		tmpXCol <- paste0(numberColPrefix, xCol)
+		df[, tmpXCol] <- df[, xCol]
+		xCol <- tmpXCol
+	}
+
+	if (grepl("^[0-9]", yCol)) {
+		tmpYCol <- paste0(numberColPrefix, yCol)
+		df[, tmpYCol] <- df[, yCol]
+		yCol <- tmpYCol
+	}
+
+	# Create title 
 	if(is.null(title)) {
 		corResults <- cor.test(df[,xCol], df[,yCol], use="pairwise.complete.obs")
 		title <- paste0(paste(yLabel, '~', xLabel),

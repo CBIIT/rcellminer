@@ -7,7 +7,7 @@
 plotCellMiner2D(df, xCol = "x", yCol = "y", xLabel = xCol,
   yLabel = yCol, title = NULL, colorPalette = NULL, classCol = NULL,
   tooltipCol = NULL, showLegend = FALSE, showTrendLine = TRUE,
-  showTitle = TRUE, alpha = 1)
+  showTitle = TRUE, alpha = 1, numberColPrefix = "X")
 }
 \arguments{
 \item{df}{a data.frame with at least two columns}
@@ -33,6 +33,8 @@ plotCellMiner2D(df, xCol = "x", yCol = "y", xLabel = xCol,
 \item{showTitle}{boolean, whether to show the title}
 
 \item{alpha}{value from 0-1, where 0 indicates transparent points}
+
+\item{numberColPrefix}{a prefix to add to column names that start with a number that causes issues with ggplot (DEFAULT: X)}
 }
 \value{
 a ggplot object
