@@ -4,36 +4,44 @@
 \alias{plotCellMiner2D}
 \title{Make a simple 2d plot using two variables with ggplot2}
 \usage{
-plotCellMiner2D(df, xCol = "x", yCol = "y", xPlotLabel = xCol,
-  yPlotLabel = yCol, title = NULL, showColorTissues = TRUE,
-  showLegend = TRUE, showTrendLine = TRUE, showTitle = TRUE)
+plotCellMiner2D(df, xCol = "x", yCol = "y", xLabel = xCol,
+  yLabel = yCol, title = NULL, colorPalette = NULL, classCol = NULL,
+  tooltipCol = NULL, showLegend = FALSE, showTrendLine = TRUE,
+  showTitle = TRUE, alpha = 1)
 }
 \arguments{
 \item{df}{a data.frame with at least two columns}
 
-\item{xCol}{the name of the column in df with the "x" data}
+\item{xCol}{the name of the column in df with the "x" data. See Note}
 
-\item{yCol}{the name of the column in df with the "y" data}
+\item{yCol}{the name of the column in df with the "y" data. See Note}
 
-\item{xPlotLabel}{the x plot label}
+\item{xLabel}{the x plot label}
 
-\item{yPlotLabel}{the y plot label}
+\item{yLabel}{the y plot label}
 
-\item{title}{the plot title, if null the correlation will appear (DEFAULT: null)}
+\item{title}{the plot title, if null the correlation will appear (DEFAULT: NULL)}
 
-\item{showColorTissues}{boolean, whether to show tissue colors}
+\item{colorPalette}{a named vector with the names classes and value colors (DEFAULT: NULL)}
 
-\item{showLegend}{boolean, whether to show the legend}
+\item{classCol}{the name of the column with the classes. Values in column of df must be a factor (DEFAULT: NULL)}
+
+\item{showLegend}{boolean, whether to show the legend (DEFAULT: FALSE)}
 
 \item{showTrendLine}{boolean, whether to show the trendline}
 
-\item{showTitle}{NNNNN}
+\item{showTitle}{boolean, whether to show the title}
+
+\item{alpha}{value from 0-1, where 0 indicates transparent points}
 }
 \value{
 a ggplot object
 }
 \description{
 Make a simple 2d plot using two variables with ggplot2
+}
+\note{
+Uses ggplot aes_string() which uses parse() to turn your text expression into a proper R symbol that can be resolved within the data.frame. Avoid numbers and spaces in
 }
 \examples{
 \dontrun{
@@ -48,7 +56,7 @@ df <- as.data.frame(t(rbind(nci60DrugActZ["94600",], nci60GeneExpZ["SLFN11",])))
 colnames(df) <- c("y", "x")
 df <- cbind(df, colorTab)
 # Plot data
-plotCellMiner2D(df, xCol="x", yCol="y", xPlotLabel="SLFN11", yPlotLabel="94600")
+plotCellMiner2D(df, xCol="x", yCol="y", xLabel="SLFN11", yLabel="94600")
 plotCellMiner2D(df, xCol="x", yCol="y", showTrendLine = FALSE, showTitle = FALSE)
 plotCellMiner2D(df, xCol="x", yCol="y", showTrendLine = FALSE, showLegend = FALSE)
 }

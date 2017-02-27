@@ -1,15 +1,17 @@
 #' Make a simple 2d plot using two variables with ggplot2 
 #' 
 #' @param df a data.frame with at least two columns 
-#' @param xCol the name of the column in df with the "x" data
-#' @param yCol the name of the column in df with the "y" data 
-#' @param xPlotLabel the x plot label
-#' @param yPlotLabel the y plot label
-#' @param title the plot title, if null the correlation will appear (DEFAULT: null)
-#' @param showColorTissues boolean, whether to show tissue colors 
-#' @param showLegend boolean, whether to show the legend 
+#' @param xCol the name of the column in df with the "x" data. See Note
+#' @param yCol the name of the column in df with the "y" data. See Note
+#' @param xLabel the x plot label
+#' @param yLabel the y plot label
+#' @param title the plot title, if null the correlation will appear (DEFAULT: NULL)
+#' @param classCol the name of the column with the classes. Values in column of df must be a factor (DEFAULT: NULL)
+#' @param colorPalette a named vector with the names classes and value colors (DEFAULT: NULL)
+#' @param showLegend boolean, whether to show the legend (DEFAULT: FALSE)
 #' @param showTrendLine boolean, whether to show the trendline 
-#' @param showTitle NNNNN
+#' @param showTitle boolean, whether to show the title
+#' @param alpha value from 0-1, where 0 indicates transparent points
 #' 
 #' @return a ggplot object
 #' 
@@ -26,50 +28,76 @@
 #' colnames(df) <- c("y", "x")
 #' df <- cbind(df, colorTab)
 #' # Plot data
-#' plotCellMiner2D(df, xCol="x", yCol="y", xPlotLabel="SLFN11", yPlotLabel="94600")
+#' plotCellMiner2D(df, xCol="x", yCol="y", xLabel="SLFN11", yLabel="94600")
 #' plotCellMiner2D(df, xCol="x", yCol="y", showTrendLine = FALSE, showTitle = FALSE)
 #' plotCellMiner2D(df, xCol="x", yCol="y", showTrendLine = FALSE, showLegend = FALSE)
 #' }
 #' 
 #' @author Augustin Luna <augustin AT mail.nih.gov>
 #' 
-#' @importFrom ggplot2 ggplot geom_point theme_bw scale_colour_manual xlab ylab geom_smooth ggtitle theme
+#' @note Uses ggplot aes_string() which uses parse() to turn your text expression into a proper R symbol that can be resolved within the data.frame. Avoid numbers and spaces in 
+#' 
+#' @importFrom ggplot2 ggplot geom_point theme_bw scale_colour_manual xlab ylab geom_smooth ggtitle theme aes_string
 #' 
 #' @concept rcellminer
 #' @export
-plotCellMiner2D <- function(df, xCol="x", yCol="y", xPlotLabel=xCol, yPlotLabel=yCol, 
-														title=NULL, showColorTissues=TRUE, showLegend=TRUE, 
-														showTrendLine=TRUE, showTitle=TRUE) {
+plotCellMiner2D <- function(df, xCol="x", yCol="y", xLabel=xCol, yLabel=yCol, 
+														title=NULL, colorPalette=NULL, classCol=NULL, tooltipCol=NULL, 
+														showLegend=FALSE, showTrendLine=TRUE, showTitle=TRUE, 
+														alpha=1) {
+	
+	# nci60DrugActZ <- exprs(getAct(rcellminerData::drugData))
+	# nci60GeneExpZ <- getAllFeatureData(rcellminerData::molData)[["exp"]]
+	# # Load colors
+	# colorTab <- loadNciColorSet(returnDf=TRUE)
+	# tissueColorTab <- unique(colorTab[, c("tissues", "colors")])
+	# # Merge data
+	# xCol <- "SLFN11"
+	# yCol <- "94600"
+	# classCol <- "tissues"
+	# xLabel <- xCol
+	# yLabel <- yCol
+	# title <- NULL
+	# df <- data.frame(y=nci60DrugActZ[yCol,], x=nci60GeneExpZ[xCol,])
+	# yCol <- "X94600" # MUST NOT BE A NUMBER
+	# colnames(df) <- c(yCol, xCol)
+	# df <- cbind(df, colorTab)
+	# df[, classCol] <- as.factor(df[, classCol])
+	# colorPalette <- tissueColorTab[, "colors"]
+	# names(colorPalette) <- tissueColorTab[, classCol]
+	# colors <- rep("blue", nrow(df))
+	# colors[1:10, "colors"] <- "red"
+	# showLegend <- FALSE
+	# showTrendLine <- TRUE
+	# showTitle <- TRUE
+	# alpha <- 1
+	
 	if(is.null(title)) {
 		corResults <- cor.test(df[,xCol], df[,yCol], use="pairwise.complete.obs")
-		title <- paste0(paste(yPlotLabel, '~', xPlotLabel),
+		title <- paste0(paste(yLabel, '~', xLabel),
 										', r=', round(corResults$estimate, 2),
 										' p=', signif(corResults$p.value, 2))
 	}
 
-	# Get colors 
-	t1 <- loadNciColorSet(returnDf = TRUE)
-	t2 <- unique(t1[, c("tissues", "colors")])
-	colors <- t2$colors
-	names(colors) <- t2$tissues
-	
 	# Plot image
 	p1 <- ggplot(data=df, aes_string(x=xCol, y=yCol))
-	p1 <- p1 + geom_point(aes(colour = tissues))
 	p1 <- p1 + theme_bw()
 	
-	if(showColorTissues) {
-		p1 <- p1 + scale_colour_manual(values=colors)
+	if(!is.null(colorPalette) && !is.null(classCol)) {
+		p1 <- p1 + geom_point(aes_string(color=classCol, text=tooltipCol), alpha=alpha)
+		p1 <- p1 + scale_colour_manual(name="", values=colorPalette)
+	} else {
+		p1 <- p1 + geom_point(aes_string(text=tooltipCol), color="#0000FF", alpha=alpha)
 	}
 
-	if(!is.null(xPlotLabel)) {
-		p1 <- p1 + xlab(xPlotLabel)		
+	if(!is.null(xLabel)) {
+		p1 <- p1 + xlab(xLabel)		
 	} else {
 		p1 <- p1 + xlab(xCol)				
 	}
 
-	if(!is.null(yPlotLabel)) {
-		p1 <- p1 + ylab(yPlotLabel)		
+	if(!is.null(yLabel)) {
+		p1 <- p1 + ylab(yLabel)		
 	} else {
 		p1 <- p1 + ylab(yCol)				
 	}
@@ -88,3 +116,5 @@ plotCellMiner2D <- function(df, xCol="x", yCol="y", xPlotLabel=xCol, yPlotLabel=
 	
 	return(p1)
 }
+
+
