@@ -11,7 +11,7 @@
 #' @param showLegend boolean, whether to show the legend (DEFAULT: FALSE)
 #' @param showTrendLine boolean, whether to show the trendline 
 #' @param showTitle boolean, whether to show the title
-#' @param alpha value from 0-1, where 0 indicates transparent points
+#' @param alpha value from 0-1, where 0 indicates transparent points (DEFAULT: 1, not transparent)
 #' @param numberColPrefix a prefix to add to column names that start with a number that causes issues with ggplot (DEFAULT: X)
 #' 
 #' @return a ggplot object

@@ -32,7 +32,7 @@ plotCellMiner2D(df, xCol = "x", yCol = "y", xLabel = xCol,
 
 \item{showTitle}{boolean, whether to show the title}
 
-\item{alpha}{value from 0-1, where 0 indicates transparent points}
+\item{alpha}{value from 0-1, where 0 indicates transparent points (DEFAULT: 1, not transparent)}
 
 \item{numberColPrefix}{a prefix to add to column names that start with a number that causes issues with ggplot (DEFAULT: X)}
 }
