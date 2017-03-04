@@ -6,6 +6,10 @@ library(geneSetPathwayAnalysis)
 library(jsonlite)
 library(stringr)
 library(glmnet)
+library(ggplot2)
+library(plotly)
+library(svglite)
+
 #library(tooltipsterR)
 
 if (!require(rcellminerUtils)){
@@ -33,6 +37,8 @@ if(file.exists("srcContent.rds")) {
 
 shinyServer(function(input, output, session) {
 	#----[Reactive Variables]---------------------------------------------------------------
+	globalReactiveValues <- reactiveValues(inputsValid = TRUE)
+	
 	isPackageLoadingComplete <- reactive({
 		srcContentReactive()
 
@@ -136,10 +142,15 @@ shinyServer(function(input, output, session) {
 			shiny::validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
 		}
 		
-		xId <- getMatchedIds(input$xPrefix, input$xId, input$xDataset, srcContent = srcContentReactive())
+		xPrefix <- input$xPrefix
+		if (!is.character(xPrefix)){
+			xPrefix <- "exp"
+		}
+		
+		xId <- getMatchedIds(xPrefix, input$xId, input$xDataset, srcContent = srcContentReactive())
 		
 		shiny::validate(need(length(xId) > 0, 
-												 paste("ERROR:", paste0(input$xPrefix, input$xId), "not found.")))
+												 paste("ERROR:", paste0(xPrefix, input$xId), "not found.")))
 		
 		if (length(xId) > 1){
 			warningMsg <- paste0("Other identifiers matching x-axis ID: ",
@@ -147,7 +158,7 @@ shinyServer(function(input, output, session) {
 			showNotification(warningMsg, duration = 10, type = "message")
 			xId <- xId[1]
 		}
-		xData <- getFeatureData(input$xPrefix, xId, input$xDataset, srcContent = srcContentReactive())
+		xData <- getFeatureData(xPrefix, xId, input$xDataset, srcContent = srcContentReactive())
 		
 		if (input$xDataset != input$yDataset){
 			# Restrict numeric feature data to xDataset/yDataset-matched cell lines.
@@ -165,10 +176,18 @@ shinyServer(function(input, output, session) {
 			shiny::validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
 		}
 		
-		yId <- getMatchedIds(input$yPrefix, input$yId, input$yDataset, srcContent = srcContentReactive())
+		yPrefix <- input$yPrefix
+		if (!is.character(yPrefix)){
+			yPrefix <- "act"
+		}
 		
-		shiny::validate(need(length(yId) > 0, 
-												 paste("ERROR:", paste0(input$yPrefix, input$yId), "not found.")))
+		yId <- getMatchedIds(yPrefix, input$yId, input$yDataset, srcContent = srcContentReactive())
+		
+		if (length(yId) == 0){
+			globalReactiveValues$inputsValid <- FALSE
+			shiny::validate(need(FALSE, paste("ERROR:", paste0(yPrefix, input$yId), "not found.")))
+		}
+		
 		
 		if (length(yId) > 1){
 			warningMsg <- paste0("Other identifiers matching y-axis ID: ",
@@ -176,7 +195,7 @@ shinyServer(function(input, output, session) {
 			showNotification(warningMsg, duration = 10, type = "message")
 			yId <- yId[1]
 		}
-		yData <- getFeatureData(input$yPrefix, yId, input$yDataset, srcContent = srcContentReactive())
+		yData <- getFeatureData(yPrefix, yId, input$yDataset, srcContent = srcContentReactive())
 		
 		if (input$xDataset != input$yDataset){
 			# Restrict numeric feature data to xDataset/yDataset-matched cell lines.
@@ -204,9 +223,15 @@ shinyServer(function(input, output, session) {
   }
 
 	# Alternative plotting
-	output$rChartsAlternative <- renderPlot({
-		makePlotStatic(xData(), yData(), input$showColor, input$showColorTissues, input$xDataset,
+	output$rChartsAlternative <- renderPlotly({
+		p1 <- makePlotStatic(xData(), yData(), input$showColor, input$showColorTissues, input$xDataset,
 									 input$selectedTissuesOnly, srcContent = srcContentReactive())
+		g1 <- ggplotly(p1, width=800, height=800)
+		g2 <- config(p = g1, collaborate=FALSE, cloud=FALSE, displaylogo=FALSE, 
+								 modeBarButtonsToRemove=c("select2d", "sendDataToCloud", "pan2d", "resetScale2d",
+								 												 "hoverClosestCartesian", "hoverCompareCartesian", 
+								 												 "lasso2d", "zoomIn2d", "zoomOut2d"))
+		g2
 	})
 	#--------------------------------------------------------------------------------------
 
@@ -386,19 +411,40 @@ shinyServer(function(input, output, session) {
                                  choices=c("Molecular Data"="molData", "Drug Data"="drug"), selected="molData"),
                      DT::dataTableOutput("patternComparison"))
 
-		if(input$hasRCharts == "TRUE") {
+		#if(input$hasRCharts == "TRUE") {
+		if (FALSE) {
 			tabsetPanel(type="tabs",
 									#tabPanel("Plot Data", htmlOutput("genUrl"), showOutput("rCharts", "highcharts")),
 									tabPanel("Plot Data", showOutput("rCharts", "highcharts")),
 									tab1, tab2, tab3
 			)
 		} else {
-			tabsetPanel(type="tabs",
+			#xData <- xData()
+			#yData <- yData()
+			# cat("xData: ", str(xData), sep = "\n")
+			# cat("yData: ", str(yData), sep = "\n")
+			if (!globalReactiveValues$inputsValid) {
+				plotPanel <- tabPanel("Plot Data", p("error (IF) !!!!"))
+			} else {
+				plotPanel <- tabPanel("Plot Data", plotlyOutput("rChartsAlternative"))
+				#plotPanel <- tabPanel("Plot Data", p("error (ELSE) !!!!"))
+			}
+			# # cat("plotPanel: ", str(plotPanel), sep = "\n")
+			tsPanel <- tabsetPanel(#type="tabs",
 									#tabPanel("Plot Data", htmlOutput("genUrl"), plotOutput("rChartsAlternative", width=600, height=600)),
-									tabPanel("Plot Data", plotOutput("rChartsAlternative", width=600, height=600)),
-									tab1, tab2, tab3
+				plotPanel, tab1, tab2, tab3
 			)
+			#cat("tsPanel: ", str(tsPanel), sep = "\n")
 		}
+		#globalReactiveValues$inputsValid <- TRUE
+		return(tsPanel)
+	})
+	
+
+	
+	observe({
+		input$yId
+		globalReactiveValues$inputsValid <- TRUE
 	})
 	#**********************************************************************************************
 	output$metadataPanel = renderUI({
