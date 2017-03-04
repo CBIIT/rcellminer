@@ -241,16 +241,35 @@ makePlotStatic <- function(xData, yData, showColor, showColorTissues, dataSource
 	df <- getPlotData(xData, yData, showColor, showColorTissues, dataSource, selectedTissuesOnly=FALSE,
 										srcContent)
 	
-	corResults <-cor.test(df[,xData$uniqName], df[,yData$uniqName], use="pairwise.complete.obs")
+	# colorTab <- loadNciColorSet(returnDf=TRUE)
+	# tissueColorTab <- unique(colorTab[, c("tissues", "colors")])
+	tooltipCol <- "tooltip"
 	
-	title <- paste0(paste(yData$plotLabel, '~', xData$plotLabel),
-									', r=', round(corResults$estimate, 2),
-									' p=', signif(corResults$p.value, 2))
+	# Plot parameters 
+	classCol <- "tissues"
+	colorPalette <- df[, "color"]
+	names(colorPalette) <- df[, classCol]
 	
-	plot(df[, xData$uniqName], df[, yData$uniqName], xlab=xData$plotLabel, ylab=yData$plotLabel, 
-			 col=df[,"color"], pch=16, main=title)
-	formula <- as.formula(paste(yData$uniqName, "~", xData$uniqName))
-	abline(lm(formula, df), col="red")
+	
+	# Merge data
+	df[, classCol] <- as.factor(df[, classCol])
+	df$tooltip <- df[, "name"]
+	
+	p1 <- rcellminer::plotCellMiner2D(df, xCol="x", yCol="y", xLabel = xData$plotLabel, yLabel = yData$plotLabel,
+												colorPalette=colorPalette, classCol=classCol, tooltipCol=tooltipCol)
+	
+	# corResults <-cor.test(df[,xData$uniqName], df[,yData$uniqName], use="pairwise.complete.obs")
+	# 
+	# title <- paste0(paste(yData$plotLabel, '~', xData$plotLabel),
+	# 								', r=', round(corResults$estimate, 2),
+	# 								' p=', signif(corResults$p.value, 2))
+	# 
+	# plot(df[, xData$uniqName], df[, yData$uniqName], xlab=xData$plotLabel, ylab=yData$plotLabel, 
+	# 		 col=df[,"color"], pch=16, main=title)
+	# formula <- as.formula(paste(yData$uniqName, "~", xData$uniqName))
+	# abline(lm(formula, df), col="red")
+	
+	return(p1)
 }
 
 getLmEquationString <- function(predictorWts, orderByDecrAbsVal = TRUE, numSigDigits = 3){
