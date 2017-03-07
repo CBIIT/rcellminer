@@ -37,14 +37,11 @@ if(file.exists("srcContent.rds")) {
 
 shinyServer(function(input, output, session) {
 	#----[Reactive Variables]---------------------------------------------------------------
-	globalReactiveValues <- reactiveValues(inputsValid = TRUE)
+	# Record current input validity status, data type prefix values.
+	globalReactiveValues <- reactiveValues(
+		#inputsValid = TRUE, xInputValid = TRUE, yInputValid = TRUE,
+		xPrefix = NULL, yPrefix = NULL)
 	
-	isPackageLoadingComplete <- reactive({
-		srcContentReactive()
-
-		return(TRUE)
-	})
-
 	# Provides a srcContent (list-based) data structure containing all molecular profiling
 	# drug response, and feature/sample annotation data required for the application 
 	# (for data sources specified in the config.json file).
@@ -64,6 +61,12 @@ shinyServer(function(input, output, session) {
 		}
 		
 		return(srcContent)
+	})
+	
+	isPackageLoadingComplete <- reactive({
+		srcContentReactive()
+		
+		return(TRUE)
 	})
 
 	# Provides the set of all possible feature identifiers available for plotting along
@@ -138,71 +141,80 @@ shinyServer(function(input, output, session) {
 	# Provides an a list object with x-axis feature-related data, including numeric data,
 	# data type prefix, data source, and plot label.
 	xData <- reactive({
+		#cat("--- ENTERING xData()", sep = "\n")
 		if (input$selectedTissuesOnly){
 			shiny::validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
 		}
 		
 		xPrefix <- input$xPrefix
 		if (!is.character(xPrefix)){
-			xPrefix <- "exp"
+			xPrefix <- srcContentReactive()[[input$xDataset]][["defaultFeatureX"]]
 		}
 		
 		xId <- getMatchedIds(xPrefix, input$xId, input$xDataset, srcContent = srcContentReactive())
 		
-		shiny::validate(need(length(xId) > 0, 
-												 paste("ERROR:", paste0(xPrefix, input$xId), "not found.")))
-		
-		if (length(xId) > 1){
-			warningMsg <- paste0("Other identifiers matching x-axis ID: ",
-													 paste0(xId[-1], collapse = ", "), ".")
-			showNotification(warningMsg, duration = 10, type = "message")
-			xId <- xId[1]
+		if (length(xId) == 0){
+			#globalReactiveValues$xInputValid <- FALSE
+			shiny::validate(need(FALSE, paste("ERROR:", paste0(xPrefix, input$xId), "not found.")))
+		} else{
+			#globalReactiveValues$xInputValid <- TRUE
+			globalReactiveValues$xPrefix <- xPrefix
+			if (length(xId) > 1){
+				warningMsg <- paste0("Other identifiers matching x-axis ID: ",
+														 paste0(xId[-1], collapse = ", "), ".")
+				showNotification(warningMsg, duration = 10, type = "message")
+				xId <- xId[1]
+			}
+			xData <- getFeatureData(xPrefix, xId, input$xDataset, srcContent = srcContentReactive())
+			
+			if (input$xDataset != input$yDataset){
+				# Restrict numeric feature data to xDataset/yDataset-matched cell lines.
+				matchedLinesTab <- matchedCellLinesTab()
+				xData$data <- xData$data[matchedLinesTab[, "xDataset"]]
+			}
 		}
-		xData <- getFeatureData(xPrefix, xId, input$xDataset, srcContent = srcContentReactive())
 		
-		if (input$xDataset != input$yDataset){
-			# Restrict numeric feature data to xDataset/yDataset-matched cell lines.
-			matchedLinesTab <- matchedCellLinesTab()
-			xData$data <- xData$data[matchedLinesTab[, "xDataset"]]
-		}
-
+		#cat("--- returning from xData()", sep = "\n")
 		return(xData)
 	})
 	
 	# Provides an a list object with y-axis feature-related data, including numeric data,
 	# data type prefix, data source, and plot label.
 	yData <- reactive({
+		#cat("--- ENTERING yData()", sep = "\n")
 		if (input$selectedTissuesOnly){
 			shiny::validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
 		}
 		
 		yPrefix <- input$yPrefix
 		if (!is.character(yPrefix)){
-			yPrefix <- "act"
+			yPrefix <- srcContentReactive()[[input$yDataset]][["defaultFeatureY"]]
 		}
 		
 		yId <- getMatchedIds(yPrefix, input$yId, input$yDataset, srcContent = srcContentReactive())
 		
 		if (length(yId) == 0){
-			globalReactiveValues$inputsValid <- FALSE
+			#globalReactiveValues$yInputValid <- FALSE
 			shiny::validate(need(FALSE, paste("ERROR:", paste0(yPrefix, input$yId), "not found.")))
+		} else{
+			#globalReactiveValues$yInputValid <- TRUE
+			globalReactiveValues$yPrefix <- yPrefix
+			if (length(yId) > 1){
+				warningMsg <- paste0("Other identifiers matching y-axis ID: ",
+														 paste0(yId[-1], collapse = ", "), ".")
+				showNotification(warningMsg, duration = 10, type = "message")
+				yId <- yId[1]
+			}
+			yData <- getFeatureData(yPrefix, yId, input$yDataset, srcContent = srcContentReactive())
+			
+			if (input$xDataset != input$yDataset){
+				# Restrict numeric feature data to xDataset/yDataset-matched cell lines.
+				matchedLinesTab <- matchedCellLinesTab()
+				yData$data <- yData$data[matchedLinesTab[, "yDataset"]]
+			}
 		}
 		
-		
-		if (length(yId) > 1){
-			warningMsg <- paste0("Other identifiers matching y-axis ID: ",
-													 paste0(yId[-1], collapse = ", "), ".")
-			showNotification(warningMsg, duration = 10, type = "message")
-			yId <- yId[1]
-		}
-		yData <- getFeatureData(yPrefix, yId, input$yDataset, srcContent = srcContentReactive())
-		
-		if (input$xDataset != input$yDataset){
-			# Restrict numeric feature data to xDataset/yDataset-matched cell lines.
-			matchedLinesTab <- matchedCellLinesTab()
-			yData$data <- yData$data[matchedLinesTab[, "yDataset"]]
-		}
-		
+		#cat("--- returning from yData()", sep = "\n")
 		return(yData)
 	})
 
@@ -412,40 +424,49 @@ shinyServer(function(input, output, session) {
                      DT::dataTableOutput("patternComparison"))
 
 		#if(input$hasRCharts == "TRUE") {
-		if (FALSE) {
-			tabsetPanel(type="tabs",
+		if (TRUE) {
+			tsPanel <- tabsetPanel(type="tabs",
 									#tabPanel("Plot Data", htmlOutput("genUrl"), showOutput("rCharts", "highcharts")),
 									tabPanel("Plot Data", showOutput("rCharts", "highcharts")),
 									tab1, tab2, tab3
 			)
 		} else {
-			#xData <- xData()
-			#yData <- yData()
-			# cat("xData: ", str(xData), sep = "\n")
-			# cat("yData: ", str(yData), sep = "\n")
 			if (!globalReactiveValues$inputsValid) {
-				plotPanel <- tabPanel("Plot Data", p("error (IF) !!!!"))
+				plotPanel <- tabPanel("Plot Data", plotlyOutput("rChartsAlternative", width = 800, height = 800))
+				#cat("--- Made plotPanel (globalReactiveValues$inputsValid == TRUE).", sep = "\n")
 			} else {
-				plotPanel <- tabPanel("Plot Data", plotlyOutput("rChartsAlternative"))
-				#plotPanel <- tabPanel("Plot Data", p("error (ELSE) !!!!"))
+				plotPanel <- tabPanel("Plot Data", p("error (IF) !!!!"))
+				#cat("--- Made plotPanel (globalReactiveValues$inputsValid == FALSE).", sep = "\n")
 			}
-			# # cat("plotPanel: ", str(plotPanel), sep = "\n")
-			tsPanel <- tabsetPanel(#type="tabs",
-									#tabPanel("Plot Data", htmlOutput("genUrl"), plotOutput("rChartsAlternative", width=600, height=600)),
-				plotPanel, tab1, tab2, tab3
-			)
-			#cat("tsPanel: ", str(tsPanel), sep = "\n")
+			tsPanel <- tabsetPanel(plotPanel, tab1, tab2, tab3)
 		}
-		#globalReactiveValues$inputsValid <- TRUE
+
 		return(tsPanel)
 	})
 	
-
+	# observe({
+	# 	input$yId
+	# 	globalReactiveValues$inputsValid <- TRUE
+	# })
+	# observe({
+	# 	cat(paste0("--- In observe(), globalReactiveValues$xInputValid: ", globalReactiveValues$xInputValid), sep = "\n")
+	# 	cat(paste0("--- In observe(), globalReactiveValues$yInputValid: ", globalReactiveValues$yInputValid), sep = "\n")
+	# 	if (globalReactiveValues$xInputValid && globalReactiveValues$yInputValid){
+	# 		globalReactiveValues$inputsValid <- TRUE 
+	# 	} else{
+	# 		globalReactiveValues$inputsValid <- FALSE
+	# 	}
+	# 	cat(paste0("--- In observe(), globalReactiveValues$inputsValid: ", globalReactiveValues$inputsValid), sep = "\n")
+	# }, priority = 1)
 	
-	observe({
-		input$yId
-		globalReactiveValues$inputsValid <- TRUE
-	})
+	# This observer is apparently needed, because without it, there is no longer reactivity
+	# with respect to changes to xId or yId.
+	# observe({
+	# 	input$xId
+	# 	input$yId
+	# 	globalReactiveValues$xInputValid <- TRUE
+	# 	globalReactiveValues$yInputValid <- TRUE
+	# }, priority = -1)
 	#**********************************************************************************************
 	output$metadataPanel = renderUI({
 		#verbatimTextOutput("log") can be used for debugging
@@ -510,16 +531,26 @@ shinyServer(function(input, output, session) {
 
   output$xPrefixUi <- renderUI({
   	srcContent <- srcContentReactive()
-  	selectInput("xPrefix", "x-Axis Type",
-  							choices = srcContent[[input$xDataset]][["featurePrefixes"]],
-  							selected = srcContent[[input$xDataset]][["defaultFeatureX"]])
+  	
+  	# The last selected (data type) prefix is recorded in 
+  	# globalReactiveValues$xPrefix whenever xData() is updated. When the data set 
+  	# is changed, we try to use this same data type prefix, if it is available.
+  	prefixChoices <- srcContent[[input$xDataset]][["featurePrefixes"]]
+  	selectedPrefix <- globalReactiveValues$xPrefix
+  	if ((is.null(selectedPrefix)) || (!(selectedPrefix %in% prefixChoices))){
+  		selectedPrefix <- srcContent[[input$xDataset]][["defaultFeatureX"]]
+  	}
+  	selectInput("xPrefix", "x-Axis Type", choices = prefixChoices, selected = selectedPrefix)
   })
 
   output$yPrefixUi <- renderUI({
   	srcContent <- srcContentReactive()
-  	selectInput("yPrefix", "y-Axis Type",
-  							choices = srcContent[[input$yDataset]][["featurePrefixes"]],
-  							selected = srcContent[[input$yDataset]][["defaultFeatureY"]])
+  	prefixChoices <- srcContent[[input$yDataset]][["featurePrefixes"]]
+  	selectedPrefix <- globalReactiveValues$yPrefix
+  	if ((is.null(selectedPrefix)) || (!(selectedPrefix %in% prefixChoices))){
+  		selectedPrefix <- srcContent[[input$yDataset]][["defaultFeatureY"]]
+  	}
+  	selectInput("yPrefix", "y-Axis Type", choices = prefixChoices, selected = selectedPrefix)
   })
 
   output$xIdUi <- renderUI({
