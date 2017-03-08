@@ -237,8 +237,8 @@ makePlot <- function(xData, yData, showColor, showColorTissues, dataSource, sele
 
 
 makePlotStatic <- function(xData, yData, showColor, showColorTissues, dataSource, 
-													 selectedTissuesOnly=FALSE, srcContent) {
-	df <- getPlotData(xData, yData, showColor, showColorTissues, dataSource, selectedTissuesOnly=FALSE,
+													 selectedTissuesOnly, srcContent) {
+	df <- getPlotData(xData, yData, showColor, showColorTissues, dataSource, selectedTissuesOnly,
 										srcContent)
 	
 	# colorTab <- loadNciColorSet(returnDf=TRUE)
