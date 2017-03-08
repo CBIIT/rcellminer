@@ -38,9 +38,7 @@ if(file.exists("srcContent.rds")) {
 shinyServer(function(input, output, session) {
 	#----[Reactive Variables]---------------------------------------------------------------
 	# Record current input validity status, data type prefix values.
-	globalReactiveValues <- reactiveValues(
-		#inputsValid = TRUE, xInputValid = TRUE, yInputValid = TRUE,
-		xPrefix = NULL, yPrefix = NULL)
+	globalReactiveValues <- reactiveValues(xPrefix = NULL, yPrefix = NULL)
 	
 	# Provides a srcContent (list-based) data structure containing all molecular profiling
 	# drug response, and feature/sample annotation data required for the application 
@@ -141,7 +139,6 @@ shinyServer(function(input, output, session) {
 	# Provides an a list object with x-axis feature-related data, including numeric data,
 	# data type prefix, data source, and plot label.
 	xData <- reactive({
-		#cat("--- ENTERING xData()", sep = "\n")
 		if (input$selectedTissuesOnly){
 			shiny::validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
 		}
@@ -154,10 +151,8 @@ shinyServer(function(input, output, session) {
 		xId <- getMatchedIds(xPrefix, input$xId, input$xDataset, srcContent = srcContentReactive())
 		
 		if (length(xId) == 0){
-			#globalReactiveValues$xInputValid <- FALSE
 			shiny::validate(need(FALSE, paste("ERROR:", paste0(xPrefix, input$xId), "not found.")))
 		} else{
-			#globalReactiveValues$xInputValid <- TRUE
 			globalReactiveValues$xPrefix <- xPrefix
 			if (length(xId) > 1){
 				warningMsg <- paste0("Other identifiers matching x-axis ID: ",
@@ -174,14 +169,12 @@ shinyServer(function(input, output, session) {
 			}
 		}
 		
-		#cat("--- returning from xData()", sep = "\n")
 		return(xData)
 	})
 	
 	# Provides an a list object with y-axis feature-related data, including numeric data,
 	# data type prefix, data source, and plot label.
 	yData <- reactive({
-		#cat("--- ENTERING yData()", sep = "\n")
 		if (input$selectedTissuesOnly){
 			shiny::validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
 		}
@@ -194,10 +187,8 @@ shinyServer(function(input, output, session) {
 		yId <- getMatchedIds(yPrefix, input$yId, input$yDataset, srcContent = srcContentReactive())
 		
 		if (length(yId) == 0){
-			#globalReactiveValues$yInputValid <- FALSE
 			shiny::validate(need(FALSE, paste("ERROR:", paste0(yPrefix, input$yId), "not found.")))
 		} else{
-			#globalReactiveValues$yInputValid <- TRUE
 			globalReactiveValues$yPrefix <- yPrefix
 			if (length(yId) > 1){
 				warningMsg <- paste0("Other identifiers matching y-axis ID: ",
@@ -214,7 +205,6 @@ shinyServer(function(input, output, session) {
 			}
 		}
 		
-		#cat("--- returning from yData()", sep = "\n")
 		return(yData)
 	})
 
@@ -424,49 +414,20 @@ shinyServer(function(input, output, session) {
                      DT::dataTableOutput("patternComparison"))
 
 		#if(input$hasRCharts == "TRUE") {
-		if (TRUE) {
+		if (FALSE) {
 			tsPanel <- tabsetPanel(type="tabs",
 									#tabPanel("Plot Data", htmlOutput("genUrl"), showOutput("rCharts", "highcharts")),
 									tabPanel("Plot Data", showOutput("rCharts", "highcharts")),
 									tab1, tab2, tab3
 			)
 		} else {
-			if (!globalReactiveValues$inputsValid) {
-				plotPanel <- tabPanel("Plot Data", plotlyOutput("rChartsAlternative", width = 800, height = 800))
-				#cat("--- Made plotPanel (globalReactiveValues$inputsValid == TRUE).", sep = "\n")
-			} else {
-				plotPanel <- tabPanel("Plot Data", p("error (IF) !!!!"))
-				#cat("--- Made plotPanel (globalReactiveValues$inputsValid == FALSE).", sep = "\n")
-			}
+			plotPanel <- tabPanel("Plot Data", plotlyOutput("rChartsAlternative", width = 800, height = 800))
 			tsPanel <- tabsetPanel(plotPanel, tab1, tab2, tab3)
 		}
 
 		return(tsPanel)
 	})
 	
-	# observe({
-	# 	input$yId
-	# 	globalReactiveValues$inputsValid <- TRUE
-	# })
-	# observe({
-	# 	cat(paste0("--- In observe(), globalReactiveValues$xInputValid: ", globalReactiveValues$xInputValid), sep = "\n")
-	# 	cat(paste0("--- In observe(), globalReactiveValues$yInputValid: ", globalReactiveValues$yInputValid), sep = "\n")
-	# 	if (globalReactiveValues$xInputValid && globalReactiveValues$yInputValid){
-	# 		globalReactiveValues$inputsValid <- TRUE 
-	# 	} else{
-	# 		globalReactiveValues$inputsValid <- FALSE
-	# 	}
-	# 	cat(paste0("--- In observe(), globalReactiveValues$inputsValid: ", globalReactiveValues$inputsValid), sep = "\n")
-	# }, priority = 1)
-	
-	# This observer is apparently needed, because without it, there is no longer reactivity
-	# with respect to changes to xId or yId.
-	# observe({
-	# 	input$xId
-	# 	input$yId
-	# 	globalReactiveValues$xInputValid <- TRUE
-	# 	globalReactiveValues$yInputValid <- TRUE
-	# }, priority = -1)
 	#**********************************************************************************************
 	output$metadataPanel = renderUI({
 		#verbatimTextOutput("log") can be used for debugging
