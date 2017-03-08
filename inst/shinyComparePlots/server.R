@@ -291,11 +291,18 @@ shinyServer(function(input, output, session) {
 	#----[Render Data Table in 'Compare Patterns' Tab]-------------------------------------
 	output$patternComparison <- DT::renderDataTable({
 		srcContent <- srcContentReactive()
-		dat <- xData()
+		
+		if (input$patternComparisonSeed == "xPattern"){
+			dat <- xData()
+			pcDataset <- input$xDataset
+		} else{
+			dat <- yData()
+			pcDataset <- input$yDataset
+		}
 
 		if (input$selectedTissuesOnly){
 			if ((length(input$showColorTissues) > 0) && (!("all" %in% input$showColorTissues))){
-				matchedSamples <- getTissueTypeSamples(input$showColorTissues, input$xDataset, srcContent)
+				matchedSamples <- getTissueTypeSamples(input$showColorTissues, pcDataset, srcContent)
 				dat$data <- dat$data[intersect(matchedSamples, names(dat$data))]
 			}
 		}
@@ -304,12 +311,12 @@ shinyServer(function(input, output, session) {
 
 	  if(input$patternComparisonType == "drug") {
 	    results <- patternComparison(dat$data,
-	    														 srcContent[[input$xDataset]][["molPharmData"]][["act"]][, selectedLines])
+	    														 srcContent[[pcDataset]][["molPharmData"]][["act"]][, selectedLines])
 	    results$ids <- rownames(results)
-	    results$NAME <- srcContent[[input$xDataset]][["drugInfo"]][rownames(results), "NAME"]
+	    results$NAME <- srcContent[[pcDataset]][["drugInfo"]][rownames(results), "NAME"]
 
-	    if ("MOA" %in% colnames(srcContent[[input$xDataset]][["drugInfo"]])){
-	    	results$MOA <- srcContent[[input$xDataset]][["drugInfo"]][rownames(results), "MOA"]
+	    if ("MOA" %in% colnames(srcContent[[pcDataset]][["drugInfo"]])){
+	    	results$MOA <- srcContent[[pcDataset]][["drugInfo"]][rownames(results), "MOA"]
 	    	results <- results[, c("ids", "NAME", "MOA", "COR", "PVAL")]
 	    	colnames(results) <- c("ID", "Name", "MOA", "Correlation", "P-Value")
 	    } else{
@@ -317,7 +324,7 @@ shinyServer(function(input, output, session) {
 	    	colnames(results) <- c("ID", "Name", "Correlation", "P-Value")
 	    }
 	  } else {
-	    molPharmData <- srcContent[[input$xDataset]][["molPharmData"]]
+	    molPharmData <- srcContent[[pcDataset]][["molPharmData"]]
 	    molData <- molPharmData[setdiff(names(molPharmData), "act")]
 	    molData <- lapply(molData, function(X) X[, selectedLines])
 	    results <- patternComparison(dat$data, molData)
@@ -409,8 +416,15 @@ shinyServer(function(input, output, session) {
                      DT::dataTableOutput("ids"))
 		tab3 <- tabPanel("Compare Patterns",
 										 includeMarkdown("www/files/help.md"),
-                     selectInput("patternComparisonType", "Pattern Comparison to x-Axis Entry",
-                                 choices=c("Molecular Data"="molData", "Drug Data"="drug"), selected="molData"),
+										 fluidRow(
+                     	column(3, selectInput("patternComparisonType", "Pattern Comparison",
+                                 						choices=c("Molecular Data"="molData", "Drug Data"="drug"), 
+                     												selected="molData")),
+										 	column(3, selectInput("patternComparisonSeed", "With Respect to",
+										 												choices=c("x-Axis Entry"="xPattern", 
+										 																	"y-Axis Entry"="yPattern"), 
+										 												selected="xPattern"))
+										 ),
                      DT::dataTableOutput("patternComparison"))
 
 		#if(input$hasRCharts == "TRUE") {
