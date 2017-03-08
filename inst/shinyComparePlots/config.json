@@ -7,17 +7,22 @@
           {
             "eSetListName":"exp",
             "featurePrefix":"exp",
-            "displayName":"Expression (Z-Score)"
+            "displayName":"mRNA Expression (Z-Score)"
           },
           {
             "eSetListName":"xai",
             "featurePrefix":"xai",
-            "displayName":"Expression (Avg. log2 Int.)"
+            "displayName":"mRNA Expression (Avg. log2 Int.)"
+          },
+          {
+            "eSetListName":"met",
+            "featurePrefix":"met",
+            "displayName":"DNA Methylation"
           },
           {
             "eSetListName":"mut",
             "featurePrefix":"mut",
-            "displayName":"Mutations"
+            "displayName":"DNA Mutation"
           },
           {
             "eSetListName":"cop",
@@ -38,12 +43,149 @@
             "eSetListName":"pro",
             "featurePrefix":"pro",
             "displayName":"Protein (RPLA)"
+          },
+          {
+            "eSetListName":"swa",
+            "featurePrefix":"swa",
+            "displayName":"Protein (SWATH-MS)"
           }
         ],
         "DrugData":[
           {
             "featurePrefix":"act",
             "displayName":"Drug Activity",
+            "drugAnnotIdCol":"NSC",
+            "drugAnnotNameCol":"NAME",
+            "drugAnnotMoaCol":"MOA"
+          }
+        ]
+      }
+    }
+  },
+  "ccle":{
+    "displayName":"CCLE",
+    "packages":{
+      "ccleData":{
+        "MolData":[
+          {
+            "eSetListName":"exp",
+            "featurePrefix":"exp",
+            "displayName":"mRNA Expression (log2)"
+          },
+          {
+            "eSetListName":"mut",
+            "featurePrefix":"mut",
+            "displayName":"DNA Mutation"
+          },
+          {
+            "eSetListName":"cop",
+            "featurePrefix":"cop",
+            "displayName":"DNA Copy Number"
+          },
+          {
+            "eSetListName":"mda",
+            "featurePrefix":"mda",
+            "displayName":"Metadata"
+          }
+        ],
+        "DrugData":[
+          {
+            "featurePrefix":"act",
+            "displayName":"Drug Activity (-log10[IC50M])",
+            "drugAnnotIdCol":"NA",
+            "drugAnnotNameCol":"NA",
+            "drugAnnotMoaCol":"NA"
+          }
+        ]
+      }
+    }
+  },
+  "gdscDec15":{
+    "displayName":"GDSC",
+    "packages":{
+      "gdscDataDec15":{
+        "MolData":[
+          {
+            "eSetListName":"exp",
+            "featurePrefix":"exp",
+            "displayName":"mRNA Expression (log2)"
+          },
+          {
+            "eSetListName":"met",
+            "featurePrefix":"met",
+            "displayName":"DNA Methylation"
+          },
+          {
+            "eSetListName":"mut",
+            "featurePrefix":"mut",
+            "displayName":"DNA Mutation"
+          },
+          {
+            "eSetListName":"mda",
+            "featurePrefix":"mda",
+            "displayName":"Metadata"
+          }
+        ],
+        "DrugData":[
+          {
+            "featurePrefix":"act",
+            "displayName":"Drug Activity (-log10[IC50M])",
+            "drugAnnotIdCol":"EXTENDED_NAME",
+            "drugAnnotNameCol":"NAME",
+            "drugAnnotMoaCol":"MOA"
+          }
+        ]
+      }
+    }
+  },
+  "ctrp":{
+    "displayName":"CTRP",
+    "packages":{
+      "ctrpData":{
+        "MolData":[
+          {
+            "eSetListName":"exp",
+            "featurePrefix":"exp",
+            "displayName":"mRNA Expression (log2)"
+          },
+          {
+            "eSetListName":"mut",
+            "featurePrefix":"mut",
+            "displayName":"DNA Mutation"
+          },
+          {
+            "eSetListName":"cop",
+            "featurePrefix":"cop",
+            "displayName":"DNA Copy Number"
+          }
+        ],
+        "DrugData":[
+          {
+            "featurePrefix":"act",
+            "displayName":"Drug Activity (AUC)",
+            "drugAnnotIdCol":"ID",
+            "drugAnnotNameCol":"NAME",
+            "drugAnnotMoaCol":"MOA"
+          }
+        ]
+      }
+    }
+  },
+  "nciSclc":{
+    "displayName":"NCI/DTP SCLC",
+    "packages":{
+      "nciSclcData":{
+        "MolData":[
+          {
+            "eSetListName":"exp",
+            "featurePrefix":"exp",
+            "displayName":"mRNA Expression (log2)"
+          }
+        ],
+        "DrugData":[
+          {
+            "featurePrefix":"act",
+            "displayName":"Drug Activity (-log10[IC50M])",
             "drugAnnotIdCol":"NSC",
             "drugAnnotNameCol":"NAME",
             "drugAnnotMoaCol":"MOA"
