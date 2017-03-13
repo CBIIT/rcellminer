@@ -69,49 +69,121 @@ shinyServer(function(input, output, session) {
 
 	# Provides the set of all possible feature identifiers available for plotting along
 	# the x-axis of the 2-D scatter plot (and for use in pattern comparisons).
-	xIdChoices <- reactive({
-		srcContent <- srcContentReactive()
-
-		t1 <- lapply(srcContent[[input$xDataset]][["molPharmData"]], function(x) {
-			return(unname(removeMolDataType(rownames(x))))
-		})
-		l1 <- unique(unname(unlist(t1)))
-
-		t2 <- srcContent[[input$xDataset]][["drugInfo"]]
-		l2 <- unname(removeMolDataType(rownames(t2)))
-
-		l3 <- c(l1, l2)
-
-		return(l3)
-	})
+	# xIdChoices <- reactive({
+	# 	srcContent <- srcContentReactive()
+	# 
+	# 	t1 <- lapply(srcContent[[input$xDataset]][["molPharmData"]], function(x) {
+	# 		return(unname(removeMolDataType(rownames(x))))
+	# 	})
+	# 	l1 <- unique(unname(unlist(t1)))
+	# 
+	# 	t2 <- srcContent[[input$xDataset]][["drugInfo"]]
+	# 	l2 <- unname(removeMolDataType(rownames(t2)))
+	# 
+	# 	l3 <- c(l1, l2)
+	# 
+	# 	return(l3)
+	# })
 
 	# Provides the set of all possible feature identifiers available for plotting along
 	# the y-axis of the 2-D scatter plot.
-	yIdChoices <- reactive({
+	# yIdChoices <- reactive({
+	# 	srcContent <- srcContentReactive()
+	# 
+	# 	t1 <- lapply(srcContent[[input$yDataset]][["molPharmData"]], function(x) {
+	# 		return(unname(removeMolDataType(rownames(x))))
+	# 	})
+	# 	l1 <- unique(unname(unlist(t1)))
+	# 
+	# 	t2 <- srcContent[[input$yDataset]][["drugInfo"]]
+	# 	l2 <- unname(removeMolDataType(rownames(t2)))
+	# 
+	# 	l3 <- c(l1, l2)
+	# 
+	# 	return(l3)
+	# })
+	
+	
+	# Returns all valid OncoTree types with respect to
+	# the xDataset cell line OncoTree types AND user-selected tissue
+	# types for inclusion or exclusion. These types need not be
+	# mutually exclusive, given the nested OncoTree structure.
+	# NOTE: with added data packages, always verify that matched cell
+	# line OncoTree tissue type annotations are consistent across packages.
+	analysisTissueTypes <- reactive({
 		srcContent <- srcContentReactive()
-
-		t1 <- lapply(srcContent[[input$yDataset]][["molPharmData"]], function(x) {
-			return(unname(removeMolDataType(rownames(x))))
-		})
-		l1 <- unique(unname(unlist(t1)))
-
-		t2 <- srcContent[[input$yDataset]][["drugInfo"]]
-		l2 <- unname(removeMolDataType(rownames(t2)))
-
-		l3 <- c(l1, l2)
-
-		return(l3)
+		tissueToSamplesMap <- srcContent[[input$xDataset]][["tissueToSamplesMap"]]
+		tissueTypes <- names(tissueToSamplesMap)
+		selectedTissues <- input$selectedTissues
+		
+		if (input$tissueSelectionMode == "Include"){
+			if (!("all" %in% selectedTissues)){
+				selectedLines <- unique(c(tissueToSamplesMap[selectedTissues], recursive = TRUE))
+				# For which tissue types are ALL lines in selectedLines?
+				allInSelectedLines <- vapply(tissueToSamplesMap, function(x){
+					all(x %in% selectedLines)
+				}, logical(1))
+				tissueTypes <- names(tissueToSamplesMap[allInSelectedLines])
+			}
+		} else{ # input$tissueSelectionMode == "Exclude"
+			if (!("none" %in% selectedTissues)){
+				selectedLines <- unique(c(tissueToSamplesMap[selectedTissues], recursive = TRUE))
+				# For which tissue types are NO lines in selectedLines?
+				notInSelectedLines <- vapply(tissueToSamplesMap, function(x){
+					length(intersect(x, selectedLines)) == 0
+				}, logical(1))
+				tissueTypes <- names(tissueToSamplesMap[notInSelectedLines])
+			}
+		}
+		return(sort(unique(tissueTypes)))
 	})
 	
 	# Provides a data frame with columns indicating the matched cell lines between
 	# the input$xDataset (column 1) and the input$yDataset (column 2).
+	# matchedCellLinesTab <- reactive({
+	# 	shiny::validate(need(require(rcellminerUtils),
+	# 											 "ERROR: x and y axis data sets must be the same."))
+	# 	matchedCellLinesTab <- getMatchedCellLines(c(input$xDataset, input$yDataset))
+	# 	shiny::validate(need(nrow(matchedCellLinesTab) > 0, 
+	# 											 "There are no shared cell lines between the selected datasets."))
+	# 	colnames(matchedCellLinesTab) <- c("xDataset", "yDataset")
+	# 	return(matchedCellLinesTab)
+	# })
+	
+	# Provides a data frame with columns indicating the matched cell lines between
+	# the input$xDataset (column 1) and the input$yDataset (column 2).
+	# The cell line pairing will be updated to reflect restrictions based on:
+	# --- matched cell lines across databases (if input$xDataset != input$yDataset)
+	# --- user tissue type selections.
 	matchedCellLinesTab <- reactive({
-		shiny::validate(need(require(rcellminerUtils),
-												 "ERROR: x and y axis data sets must be the same."))
-		matchedCellLinesTab <- getMatchedCellLines(c(input$xDataset, input$yDataset))
-		shiny::validate(need(nrow(matchedCellLinesTab) > 0, 
-												 "There are no shared cell lines between the selected datasets."))
-		colnames(matchedCellLinesTab) <- c("xDataset", "yDataset")
+		srcContent <- srcContentReactive()
+		analysisTissueTypes <- analysisTissueTypes()
+		
+		if (input$xDataset == input$yDataset){
+			matchedCellLinesTab <- data.frame(
+				xDataset = srcContent[[input$xDataset]]$sampleData[, "Name"],
+				stringsAsFactors = FALSE
+			)
+			matchedCellLinesTab$yDataset <- matchedCellLinesTab$xDataset
+		} else{
+			shiny::validate(need(require(rcellminerUtils),
+													 "ERROR: x and y axis data sets must be the same."))
+			matchedCellLinesTab <- getMatchedCellLines(c(input$xDataset, input$yDataset))
+			shiny::validate(need(nrow(matchedCellLinesTab) > 0, 
+													 "There are no shared cell lines between the selected datasets."))
+			colnames(matchedCellLinesTab) <- c("xDataset", "yDataset")
+		}
+		stopifnot(all(!duplicated(matchedCellLinesTab$xDataset)))
+		rownames(matchedCellLinesTab) <- matchedCellLinesTab$xDataset
+		
+		tissueMatchedLines <- getTissueTypeSamples(analysisTissueTypes, input$xDataset, srcContent)
+		tissueMatchedLines <- intersect(tissueMatchedLines, rownames(matchedCellLinesTab))
+		
+		shiny::validate(need(length(tissueMatchedLines) > 0, 
+												 "There are no cell lines of the selected tissue type(s)."))
+		
+		matchedCellLinesTab <- matchedCellLinesTab[tissueMatchedLines, ]
+		
 		return(matchedCellLinesTab)
 	})
 	
@@ -138,11 +210,12 @@ shinyServer(function(input, output, session) {
 	
 	# Provides an a list object with x-axis feature-related data, including numeric data,
 	# data type prefix, data source, and plot label.
+	# Note that use of reactive matchedLinesTab() ensures that xData() and yData() are
+	# current and coupled, reflecting matched cell lines (even when different x any y data 
+	# sources are selected) of whatever tissue types are selected.
 	xData <- reactive({
-		if (input$selectedTissuesOnly){
-			shiny::validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
-		}
-		
+		shiny::validate(need(length(input$selectedTissues) > 0, "Please select tissue types."))
+
 		xPrefix <- input$xPrefix
 		if (!is.character(xPrefix)){
 			xPrefix <- srcContentReactive()[[input$xDataset]][["defaultFeatureX"]]
@@ -162,11 +235,8 @@ shinyServer(function(input, output, session) {
 			}
 			xData <- getFeatureData(xPrefix, xId, input$xDataset, srcContent = srcContentReactive())
 			
-			if (input$xDataset != input$yDataset){
-				# Restrict numeric feature data to xDataset/yDataset-matched cell lines.
-				matchedLinesTab <- matchedCellLinesTab()
-				xData$data <- xData$data[matchedLinesTab[, "xDataset"]]
-			}
+			matchedLinesTab <- matchedCellLinesTab()
+			xData$data <- xData$data[matchedLinesTab[, "xDataset"]]
 		}
 		
 		return(xData)
@@ -174,10 +244,11 @@ shinyServer(function(input, output, session) {
 	
 	# Provides an a list object with y-axis feature-related data, including numeric data,
 	# data type prefix, data source, and plot label.
+	# Note that use of reactive matchedLinesTab() ensures that xData() and yData() are
+	# current and coupled, reflecting matched cell lines (even when different x any y data 
+	# sources are selected) of whatever tissue types are selected.
 	yData <- reactive({
-		if (input$selectedTissuesOnly){
-			shiny::validate(need(length(input$showColorTissues) > 0, "Please select tissue types."))
-		}
+		shiny::validate(need(length(input$selectedTissues) > 0, "Please select tissue types."))
 		
 		yPrefix <- input$yPrefix
 		if (!is.character(yPrefix)){
@@ -198,16 +269,13 @@ shinyServer(function(input, output, session) {
 			}
 			yData <- getFeatureData(yPrefix, yId, input$yDataset, srcContent = srcContentReactive())
 			
-			if (input$xDataset != input$yDataset){
-				# Restrict numeric feature data to xDataset/yDataset-matched cell lines.
-				matchedLinesTab <- matchedCellLinesTab()
-				yData$data <- yData$data[matchedLinesTab[, "yDataset"]]
-			}
+			matchedLinesTab <- matchedCellLinesTab()
+			yData$data <- yData$data[matchedLinesTab[, "yDataset"]]
 		}
 		
 		return(yData)
 	})
-
+	
 	#----[outputs]--------------------------------------------------------------------------
 
   #----[Render Application Title]------------------------------------------------------
@@ -219,19 +287,19 @@ shinyServer(function(input, output, session) {
 		output$rCharts <- renderChart({
 			h1 <- makePlot(xData = xData(), yData = yData(), showColor = input$showColor,
 										 showColorTissues = input$showColorTissues, dataSource = input$xDataset,
-										 selectedTissuesOnly = input$selectedTissuesOnly, 
 										 srcContent = srcContentReactive(), dom="rCharts")
 		})
   }
 
 	# Alternative plotting
 	output$rChartsAlternative <- renderPlotly({
-		p1 <- makePlotStatic(xData(), yData(), input$showColor, input$showColorTissues, input$xDataset,
-									 input$selectedTissuesOnly, srcContent = srcContentReactive())
+		p1 <- makePlotStatic(xData = xData(), yData = yData(), showColor = input$showColor, 
+												 showColorTissues = input$showColorTissues, dataSource = input$xDataset, 
+												 srcContent = srcContentReactive())
 		g1 <- ggplotly(p1, width=800, height=800)
-		g2 <- config(p = g1, collaborate=FALSE, cloud=FALSE, displaylogo=FALSE, 
+		g2 <- config(p = g1, collaborate=FALSE, cloud=FALSE, displaylogo=FALSE,
 								 modeBarButtonsToRemove=c("select2d", "sendDataToCloud", "pan2d", "resetScale2d",
-								 												 "hoverClosestCartesian", "hoverCompareCartesian", 
+								 												 "hoverClosestCartesian", "hoverCompareCartesian",
 								 												 "lasso2d", "zoomIn2d", "zoomOut2d"))
 		g2
 	})
@@ -242,8 +310,9 @@ shinyServer(function(input, output, session) {
   output$table <- DT::renderDataTable({
   	# Column selection below is to restrict to cell line, x, y features,
   	# and tissue type information (source-provided + OncoTree).
-  	dlDataTab <- getPlotData(xData(), yData(), input$showColor, input$showColorTissues,
-  													 input$xDataset, input$selectedTissuesOnly, srcContent = srcContentReactive())
+  	dlDataTab <- getPlotData(xData = xData(), yData = yData(), showColor = input$showColor, 
+  		showColorTissues = input$showColorTissues, dataSource = input$xDataset, 
+  		srcContent = srcContentReactive())
   	dlDataTabCols <- c(colnames(dlDataTab)[1:4], paste0("OncoTree", 1:4))
   	dlDataTab <- dlDataTab[, dlDataTabCols]
 
@@ -299,15 +368,7 @@ shinyServer(function(input, output, session) {
 			dat <- yData()
 			pcDataset <- input$yDataset
 		}
-
-		if (input$selectedTissuesOnly){
-			if ((length(input$showColorTissues) > 0) && (!("all" %in% input$showColorTissues))){
-				matchedSamples <- getTissueTypeSamples(input$showColorTissues, pcDataset, srcContent)
-				dat$data <- dat$data[intersect(matchedSamples, names(dat$data))]
-			}
-		}
-
-	  selectedLines <- names(dat$data)
+		selectedLines <- names(dat$data)
 
 	  if(input$patternComparisonType == "drug") {
 	    results <- patternComparison(dat$data,
@@ -492,8 +553,9 @@ shinyServer(function(input, output, session) {
     	paste(filename, extension, sep=".")
     },
     content = function(file) {
-    	df <- getPlotData(xData(), yData(), input$showColor, input$showColorTissues,
-    										input$xDataset, input$selectedTissuesOnly, srcContent = srcContentReactive())
+    	df <- getPlotData(xData = xData(), yData = yData(), showColor = input$showColor, 
+    		showColorTissues = input$showColorTissues, dataSource = input$xDataset, 
+    		srcContent = srcContentReactive())
 
     	# Column selection below is to restrict to cell line, x, y features,
     	# and tissue type information (source-provided + OncoTree).
@@ -528,21 +590,33 @@ shinyServer(function(input, output, session) {
   	selectInput("yPrefix", "y-Axis Type", choices = prefixChoices, selected = selectedPrefix)
   })
 
-  output$xIdUi <- renderUI({
-  	updateSelectizeInput(session, inputId='xId', choices=xIdChoices(), selected="SLFN11", server=TRUE)
-  	selectizeInput('xId', label="ID: (e.g. 94600 or SLFN11); Case-Sensitive", choices=NULL, options=list(maxOptions=5))
-  })
-
-  output$yIdUi <- renderUI({
-  	updateSelectizeInput(session, inputId='yId', choices=yIdChoices(), selected="94600", server=TRUE)
-  	selectizeInput('yId', label="ID: (e.g. 94600 or SLFN11); Case-Sensitive", choices=NULL, options=list(maxOptions=5))
+  # output$xIdUi <- renderUI({
+  # 	updateSelectizeInput(session, inputId='xId', choices=xIdChoices(), selected="SLFN11", server=TRUE)
+  # 	selectizeInput('xId', label="ID: (e.g. 94600 or SLFN11); Case-Sensitive", choices=NULL, options=list(maxOptions=5))
+  # })
+  # 
+  # output$yIdUi <- renderUI({
+  # 	updateSelectizeInput(session, inputId='yId', choices=yIdChoices(), selected="94600", server=TRUE)
+  # 	selectizeInput('yId', label="ID: (e.g. 94600 or SLFN11); Case-Sensitive", choices=NULL, options=list(maxOptions=5))
+  # })
+  
+  output$selectTissuesUi <- renderUI({
+  	srcContent <- srcContentReactive()
+  	tissueToSamplesMap <- srcContent[[input$xDataset]][["tissueToSamplesMap"]]
+  	tissueTypes <- sort(unique(names(tissueToSamplesMap)))
+  	
+  	if (input$tissueSelectionMode == "Include"){
+  		selectInput("selectedTissues", label = NULL, choices=c("all", tissueTypes),
+  								multiple=TRUE, selected="all")
+  	} else{ # input$tissueSelectionMode == "Exclude"
+  		selectInput("selectedTissues", label = NULL, choices=c("none", tissueTypes),
+  								multiple=TRUE, selected="none")
+  	}
   })
 
   output$showColorTissuesUi <- renderUI({
-  	srcContent <- srcContentReactive()
-  	tissueTypes <- names(srcContent[[input$xDataset]][["tissueToSamplesMap"]])
-  	selectInput("showColorTissues", "Color Specific Tissues?",
-  							choices=c("all", unique(tissueTypes)), multiple=TRUE, selected="all")
+  	selectInput("showColorTissues", "Tissues to Color",
+  							choices=analysisTissueTypes(), multiple=TRUE)
 	})
 
   #----[observers]-----------------------------------------------------------------------

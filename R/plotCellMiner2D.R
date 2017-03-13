@@ -101,10 +101,10 @@ plotCellMiner2D <- function(df, xCol="x", yCol="y", xLabel=xCol, yLabel=yCol,
 	p1 <- p1 + theme_bw()
 	
 	if(!is.null(colorPalette) && !is.null(classCol)) {
-		p1 <- p1 + geom_point(aes_string(color=classCol, text=tooltipCol), alpha=alpha)
+		p1 <- p1 + geom_point(aes_string(color=classCol, text=tooltipCol), alpha=alpha, size = 3)
 		p1 <- p1 + scale_colour_manual(name="", values=colorPalette)
 	} else {
-		p1 <- p1 + geom_point(aes_string(text=tooltipCol), color="#0000FF", alpha=alpha)
+		p1 <- p1 + geom_point(aes_string(text=tooltipCol), color="#0000FF", alpha=alpha, size = 3)
 	}
 
 	if(!is.null(xLabel)) {
@@ -120,7 +120,7 @@ plotCellMiner2D <- function(df, xCol="x", yCol="y", xLabel=xCol, yLabel=yCol,
 	}
 	
 	if(showTrendLine) {
-		p1 <- p1 + geom_smooth(method = "lm", se = FALSE, color = "red")
+		p1 <- p1 + geom_smooth(method = "lm", se = FALSE, color = "red", size = 1)
 	}
 	
 	if(showTitle) {

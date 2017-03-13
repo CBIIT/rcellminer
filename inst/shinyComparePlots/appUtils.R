@@ -75,9 +75,8 @@ getTissueTypeSamples <- function(tissueTypes, dataSource, srcContent){
 	return(unique(matchedSamples))
 }
 
-
 getPlotData <- function(xData, yData, showColor, showColorTissues, dataSource=NULL,
-												selectedTissuesOnly, srcContent){
+												srcContent){
 	if (is.null(dataSource)){
 		dataSource <- xData$dataSource
 	}
@@ -102,59 +101,55 @@ getPlotData <- function(xData, yData, showColor, showColorTissues, dataSource=NU
 	df$x <- df[,xData$uniqName]
 	df$y <- df[,yData$uniqName]
 	
-	# NOTE: making assumption that tissue type sets are disjoint, which may not hold
-	# once hierarchy of tissue types is introduced (OK, i.e., disjoint at OncoTree1 level).
-	if (showColor) {
-		if (("all" %in% showColorTissues) || selectedTissuesOnly) {
-			sampleTissueTypes <- srcContent[[dataSource]]$sampleData[rownames(df), "OncoTree1"]
-			colorsToUse <- srcContent[[dataSource]]$tissueColorMap[sampleTissueTypes]
-		} else {
-			colorsToUse <- rep("rgba(0,0,255,0.3)", nrow(df)) #blue
-			names(colorsToUse) <- rownames(df)
-			
-			matchedSamples <- getTissueTypeSamples(showColorTissues, dataSource, srcContent)
-			matchedSamples <- intersect(matchedSamples, rownames(df))
-			colorsToUse[matchedSamples] <- "rgba(255,0,0,0.7)" # red
-		}
-	} else{
-		colorsToUse <- rep("rgba(0,0,255,0.3)", nrow(df)) #blue
-	}
-	
-	df$color <- colorsToUse
-	
-	# Restrict to rows with no NAs in either column x or column y.
+	# RESTRICT (to rows with no NAs in either column x or column y).
 	notNaData <- (!is.na(df[, xData$uniqName])) & (!is.na(df[, yData$uniqName]))
 	df <- df[notNaData, ]
 	
-	if (selectedTissuesOnly){
-		if((length(showColorTissues) > 0) && (!("all" %in% showColorTissues))){
-			matchedSamples <- getTissueTypeSamples(showColorTissues, dataSource, srcContent)
-			df <- df[intersect(matchedSamples, rownames(df)), ]
+	if (nrow(df) > 0){
+		cellLineSet <- rownames(df)
+		# ADD COLOR COLUMN --------------------------------------------------------------------
+		if (showColor){
+			# Are there any cell lines to highlight in red?
+			highlightedLineSet <- character(0)
+			if (length(showColorTissues) > 0){
+				highlightedLineSet <- unname(intersect(cellLineSet,
+					getTissueTypeSamples(showColorTissues, dataSource, srcContent)))
+			}
+			
+			if (length(highlightedLineSet) > 0){
+				colorsToUse <- rep("rgba(0,0,255,0.3)", nrow(df)) #blue
+				names(colorsToUse) <- rownames(df)
+				colorsToUse[highlightedLineSet] <- "rgba(255,0,0,0.7)" # red
+			} else{
+				sampleTissueTypes <- srcContent[[dataSource]]$sampleData[rownames(df), "OncoTree1"]
+				colorsToUse <- srcContent[[dataSource]]$tissueColorMap[sampleTissueTypes]
+			}
+		} else{
+			colorsToUse <- rep("rgba(0,0,255,0.3)", nrow(df)) #blue
 		}
-	}
-	
-	# Add OncoTree tissue type information, and guaranteed non-NA tissue type for 
-	# use in plotting code, etc.
-	df$OncoTree1 <- srcContent[[dataSource]]$sampleData[rownames(df), "OncoTree1"]
-	df$OncoTree2 <- srcContent[[dataSource]]$sampleData[rownames(df), "OncoTree2"]
-	df$OncoTree3 <- srcContent[[dataSource]]$sampleData[rownames(df), "OncoTree3"]
-	df$OncoTree4 <- srcContent[[dataSource]]$sampleData[rownames(df), "OncoTree4"]
-	df$PlotTissueType <- ifelse(is.na(df$tissues),
-															paste0(df$OncoTree1, ifelse(is.na(df$OncoTree2), "", 
-																													paste0(":", df$OncoTree2))), 
-															df$tissues)
-	if (any(is.na(df$PlotTissueType))){
-		df$PlotTissueType[which(is.na(df$PlotTissueType))] <- "TISSUE_TYPE_NA"
+		df$color <- colorsToUse
+		
+		# ADD ONCOTREE TISSUE TYPE COLUMNS ----------------------------------------------------
+		df$OncoTree1 <- srcContent[[dataSource]]$sampleData[rownames(df), "OncoTree1"]
+		df$OncoTree2 <- srcContent[[dataSource]]$sampleData[rownames(df), "OncoTree2"]
+		df$OncoTree3 <- srcContent[[dataSource]]$sampleData[rownames(df), "OncoTree3"]
+		df$OncoTree4 <- srcContent[[dataSource]]$sampleData[rownames(df), "OncoTree4"]
+		df$PlotTissueType <- ifelse(is.na(df$tissues),
+																paste0(df$OncoTree1, ifelse(is.na(df$OncoTree2), "", 
+																														paste0(":", df$OncoTree2))), 
+																df$tissues)
+		if (any(is.na(df$PlotTissueType))){
+			df$PlotTissueType[which(is.na(df$PlotTissueType))] <- "TISSUE_TYPE_NA"
+		}
 	}
 	
 	return(df)
 }
 
 
-makePlot <- function(xData, yData, showColor, showColorTissues, dataSource, selectedTissuesOnly,
+makePlot <- function(xData, yData, showColor, showColorTissues, dataSource,
 										 srcContent, dom="rCharts", showPValue = TRUE) {
-	df <- getPlotData(xData, yData, showColor, showColorTissues, dataSource, selectedTissuesOnly,
-										srcContent)
+	df <- getPlotData(xData, yData, showColor, showColorTissues, dataSource, srcContent)
 	
 	# Scatter plot
 	h1 <- rCharts::Highcharts$new()
@@ -237,9 +232,8 @@ makePlot <- function(xData, yData, showColor, showColorTissues, dataSource, sele
 
 
 makePlotStatic <- function(xData, yData, showColor, showColorTissues, dataSource, 
-													 selectedTissuesOnly, srcContent) {
-	df <- getPlotData(xData, yData, showColor, showColorTissues, dataSource, selectedTissuesOnly,
-										srcContent)
+													 srcContent) {
+	df <- getPlotData(xData, yData, showColor, showColorTissues, dataSource, srcContent)
 	
 	# colorTab <- loadNciColorSet(returnDf=TRUE)
 	# tissueColorTab <- unique(colorTab[, c("tissues", "colors")])

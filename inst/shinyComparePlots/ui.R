@@ -97,8 +97,9 @@ shinyUI(
 	          	textInput("yId", "ID: (e.g. 94600 or SLFN11)", "94600"), 
 	                
 	            checkboxInput("showColor", "Show Color?", value=TRUE),
-	        	  checkboxInput("selectedTissuesOnly", "Selected Tissues Only?", value=FALSE),
-	                
+
+	          	radioButtons("tissueSelectionMode", "Select Tissues", c("Include", "Exclude")),
+	          	uiOutput("selectTissuesUi"),
 	            uiOutput("showColorTissuesUi"),
 	            
 	            # Generate a hidden input with TRUE or FALSE if rCharts is installed
