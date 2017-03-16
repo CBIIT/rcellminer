@@ -248,18 +248,12 @@ makePlotStatic <- function(xData, yData, showColor, showColorTissues, dataSource
 	tooltipCol <- "tooltip"
 	
 	# Plot parameters 
-	classCol <- "tissues"
+	classCol <- "color"
 	colorPalette <- df[, "color"]
 	names(colorPalette) <- df[, classCol]
 	
-	cat("===========================================", sep = "\n")
-	cat("colorPalette", sep = "\n")
-	cat(names(table(colorPalette)), sep = "\n")
-	cat(table(colorPalette), "\n")
-	
 	# Merge data
 	df[, classCol] <- as.factor(df[, classCol])
-	#df$tooltip <- df[, "name"]
 
 	p1 <- rcellminer::plotCellMiner2D(df, xCol="x", yCol="y", xLabel = xData$plotLabel, yLabel = yData$plotLabel,
 												colorPalette=colorPalette, classCol=classCol, tooltipCol=tooltipCol)

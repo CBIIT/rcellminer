@@ -323,6 +323,7 @@ shinyServer(function(input, output, session) {
 												 showColorTissues = input$showColorTissues, dataSource = input$xDataset, 
 												 srcContent = srcContentReactive())
 		g1 <- ggplotly(p1, width=plotWidth, height=plotHeight, tooltip=tooltipCol)
+		g1 <- layout(g1, margin=list(t = 75))
 		g2 <- config(p = g1, collaborate=FALSE, cloud=FALSE, displaylogo=FALSE,
 								 modeBarButtonsToRemove=c("select2d", "sendDataToCloud", "pan2d", "resetScale2d",
 								 												 "hoverClosestCartesian", "hoverCompareCartesian",
