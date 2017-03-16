@@ -53,9 +53,7 @@ if("rCharts" %in% installed.packages()) {
 
 colorSet <- loadNciColorSet(returnDf=TRUE)
 
-# NOTE: Size is not automatically set for rChartsAlternative output
-plotHeight <- 800
-plotWidth <- 800
+
 
 shinyUI(
 	navbarPage(appTitle, 

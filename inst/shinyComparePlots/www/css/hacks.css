@@ -1,3 +1,12 @@
 .d3heatmap .axis text, .d3heatmap-tip {
 	font-family: "Helvetica Neue" !important;
 }
+
+g.hovertext > path {
+  fill: rgb(255,255,255) !important;
+  stroke: rgb(0,0,0) !important;
+}
+
+.nums {
+  fill: rgb(0,0,0) !important;
+}

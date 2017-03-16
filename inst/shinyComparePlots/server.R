@@ -35,6 +35,7 @@ if(file.exists("srcContent.rds")) {
         srcContent <- readRDS("srcContent.rds")
 }
 
+
 shinyServer(function(input, output, session) {
 	#----[Reactive Variables]---------------------------------------------------------------
 	# Record current input validity status, data type prefix values.
@@ -111,12 +112,34 @@ shinyServer(function(input, output, session) {
 	# NOTE: with added data packages, always verify that matched cell
 	# line OncoTree tissue type annotations are consistent across packages.
 	analysisTissueTypes <- reactive({
+		# Note: We want this code to re-run whenever either 
+		# input$tissueSelectionMode OR  input$selectedTissues change.
+		# BUT, *reactivity can be based on the selectedTissues alone*,
+		# because switching the tissueSelectionMode will always trigger
+		# a change to a distinct (default) selectedTissues value (e.g.,
+		# "all" in the case of "Include", or "none" in the case of 
+		# "Exclude"). 
+		# Without the isolate() around input$tisssueSelectionMode (below),
+		# this code actually runs twice upon a change to the
+		# tissueSelectionMode, with the first run having an invalid
+		# selectedTissues value (because the reativity relative
+		# to the tissueSelectionMode appears to trigger the code below
+		# before the selectedValues changes, for the first run). Then
+		# the update of the selectedValues to the default value triggers
+		# a second run. This behavior causes a bug-like re-drawing of
+		# the 2D plot, etc.)
+		tissueSelectionMode <- isolate(input$tissueSelectionMode)
+		selectedTissues <- input$selectedTissues
+		
+		# cat("--- Entering analysisTissueTypes()", sep = "\n")
+		# cat(paste0("Selection Mode: ", tissueSelectionMode), sep = "\n")
+		# cat(paste0("Selected Tissues: ", selectedTissues), sep = "\n")
+		
 		srcContent <- srcContentReactive()
 		tissueToSamplesMap <- srcContent[[input$xDataset]][["tissueToSamplesMap"]]
 		tissueTypes <- names(tissueToSamplesMap)
-		selectedTissues <- input$selectedTissues
 		
-		if (input$tissueSelectionMode == "Include"){
+		if (tissueSelectionMode == "Include"){
 			if (!("all" %in% selectedTissues)){
 				selectedLines <- unique(c(tissueToSamplesMap[selectedTissues], recursive = TRUE))
 				# For which tissue types are ALL lines in selectedLines?
@@ -125,7 +148,7 @@ shinyServer(function(input, output, session) {
 				}, logical(1))
 				tissueTypes <- names(tissueToSamplesMap[allInSelectedLines])
 			}
-		} else{ # input$tissueSelectionMode == "Exclude"
+		} else{ # tissueSelectionMode == "Exclude"
 			if (!("none" %in% selectedTissues)){
 				selectedLines <- unique(c(tissueToSamplesMap[selectedTissues], recursive = TRUE))
 				# For which tissue types are NO lines in selectedLines?
@@ -135,6 +158,9 @@ shinyServer(function(input, output, session) {
 				tissueTypes <- names(tissueToSamplesMap[notInSelectedLines])
 			}
 		}
+		
+		#cat("--- LEAVING analysisTissueTypes()", sep = "\n")
+		
 		return(sort(unique(tissueTypes)))
 	})
 	
@@ -296,7 +322,7 @@ shinyServer(function(input, output, session) {
 		p1 <- makePlotStatic(xData = xData(), yData = yData(), showColor = input$showColor, 
 												 showColorTissues = input$showColorTissues, dataSource = input$xDataset, 
 												 srcContent = srcContentReactive())
-		g1 <- ggplotly(p1, width=800, height=800)
+		g1 <- ggplotly(p1, width=plotWidth, height=plotHeight, tooltip=tooltipCol)
 		g2 <- config(p = g1, collaborate=FALSE, cloud=FALSE, displaylogo=FALSE,
 								 modeBarButtonsToRemove=c("select2d", "sendDataToCloud", "pan2d", "resetScale2d",
 								 												 "hoverClosestCartesian", "hoverCompareCartesian",
@@ -496,7 +522,7 @@ shinyServer(function(input, output, session) {
 									tab1, tab2, tab3
 			)
 		} else {
-			plotPanel <- tabPanel("Plot Data", plotlyOutput("rChartsAlternative", width = 800, height = 800))
+			plotPanel <- tabPanel("Plot Data", plotlyOutput("rChartsAlternative", width = plotWidth, height = plotHeight))
 			tsPanel <- tabsetPanel(plotPanel, tab1, tab2, tab3)
 		}
 

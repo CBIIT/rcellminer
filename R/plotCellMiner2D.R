@@ -101,10 +101,10 @@ plotCellMiner2D <- function(df, xCol="x", yCol="y", xLabel=xCol, yLabel=yCol,
 	p1 <- p1 + theme_bw()
 	
 	if(!is.null(colorPalette) && !is.null(classCol)) {
-		p1 <- p1 + geom_point(aes_string(color=classCol, text=tooltipCol), alpha=alpha, size = 3)
+		p1 <- p1 + suppressWarnings(geom_point(aes_string(color=classCol, text=tooltipCol), alpha=alpha, size = 3))
 		p1 <- p1 + scale_colour_manual(name="", values=colorPalette)
 	} else {
-		p1 <- p1 + geom_point(aes_string(text=tooltipCol), color="#0000FF", alpha=alpha, size = 3)
+		p1 <- p1 + suppressWarnings(geom_point(aes_string(text=tooltipCol), color="#0000FF", alpha=alpha, size = 3))
 	}
 
 	if(!is.null(xLabel)) {
@@ -120,7 +120,7 @@ plotCellMiner2D <- function(df, xCol="x", yCol="y", xLabel=xCol, yLabel=yCol,
 	}
 	
 	if(showTrendLine) {
-		p1 <- p1 + geom_smooth(method = "lm", se = FALSE, color = "red", size = 1)
+		p1 <- p1 + geom_smooth(method = "lm", se = FALSE, color = "red", size = 0.25)
 	}
 	
 	if(showTitle) {
@@ -128,7 +128,9 @@ plotCellMiner2D <- function(df, xCol="x", yCol="y", xLabel=xCol, yLabel=yCol,
 	}
 	
 	if(!showLegend) {
-		p1 <- p1 + theme(legend.position="none")
+		p1 <- p1 + theme(legend.position="none", plot.title = element_text(size=16),
+										 axis.title.x = element_text(size=17),
+										 axis.title.y = element_text(size=17))
 	}
 	
 	return(p1)
