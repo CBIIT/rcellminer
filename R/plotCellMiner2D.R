@@ -11,10 +11,13 @@
 #' @param showLegend boolean, whether to show the legend (DEFAULT: FALSE)
 #' @param showTrendLine boolean, whether to show the trendline 
 #' @param showTitle boolean, whether to show the title
+#' @param singleColor a color to be used for all points when a color palette is not provided (DEFAULT: blue)
 #' @param alpha value from 0-1, where 0 indicates transparent points (DEFAULT: 1, not transparent)
 #' @param numberColPrefix a prefix to add to column names that start with a number that causes issues with ggplot (DEFAULT: X)
+#' @param xLimVal a two entry vector (min, max) to set the x-axis
+#' @param yLimVal a two entry vector (min, max) to set the y-axis
 #' 
-#' @notes TROUBLESHOOTING NOTES: 1) Avoid ":" in colnames
+#' @note TROUBLESHOOTING NOTES: 1) Avoid ":" in colnames
 #' 
 #' @return a ggplot object
 #' 
@@ -46,8 +49,8 @@
 #' @export
 plotCellMiner2D <- function(df, xCol="x", yCol="y", xLabel=xCol, yLabel=yCol, 
 														title=NULL, colorPalette=NULL, classCol=NULL, tooltipCol=NULL, 
-														showLegend=FALSE, showTrendLine=TRUE, showTitle=TRUE, 
-														alpha=1, numberColPrefix="X") {
+														showLegend=FALSE, showTrendLine=TRUE, showTitle=TRUE, singleColor="#0000FF",
+														alpha=1, numberColPrefix="X", xLimVal=NULL, yLimVal=NULL) {
 	
 	# nci60DrugActZ <- exprs(getAct(rcellminerData::drugData))
 	# nci60GeneExpZ <- getAllFeatureData(rcellminerData::molData)[["exp"]]
@@ -104,7 +107,7 @@ plotCellMiner2D <- function(df, xCol="x", yCol="y", xLabel=xCol, yLabel=yCol,
 		p1 <- p1 + suppressWarnings(geom_point(aes_string(color=classCol, text=tooltipCol), alpha=alpha, size = 3))
 		p1 <- p1 + scale_colour_manual(name="", values=colorPalette)
 	} else {
-		p1 <- p1 + suppressWarnings(geom_point(aes_string(text=tooltipCol), color="#0000FF", alpha=alpha, size = 3))
+		p1 <- p1 + suppressWarnings(geom_point(aes_string(text=tooltipCol), color=singleColor, alpha=alpha, size = 3))
 	}
 
 	if(!is.null(xLabel)) {
@@ -131,6 +134,14 @@ plotCellMiner2D <- function(df, xCol="x", yCol="y", xLabel=xCol, yLabel=yCol,
 		p1 <- p1 + theme(legend.position="none", plot.title = element_text(size=16),
 										 axis.title.x = element_text(size=17),
 										 axis.title.y = element_text(size=17))
+	}
+	
+	if(!is.null(xLimVal)) {
+		p1 <- p1 + xlim(xLimVal[1], xLimVal[2])
+	}
+	
+	if(!is.null(yLimVal)) {
+		p1 <- p1 + ylim(yLimVal[1], yLimVal[2])
 	}
 	
 	return(p1)
