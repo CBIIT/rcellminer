@@ -232,7 +232,7 @@ makePlot <- function(xData, yData, showColor, showColorTissues, dataSource,
 
 
 makePlotStatic <- function(xData, yData, showColor, showColorTissues, dataSource, 
-													 srcContent) {
+													 srcContent, xLimVals = NULL, yLimVals = NULL) {
 	df <- getPlotData(xData, yData, showColor, showColorTissues, dataSource, srcContent)
 	df$tooltip <- paste0(
 		"Cell: ", df$name, "\n",
@@ -254,9 +254,13 @@ makePlotStatic <- function(xData, yData, showColor, showColorTissues, dataSource
 	
 	# Merge data
 	df[, classCol] <- as.factor(df[, classCol])
-
+	
+	cat("xAxis Limits: ", paste0(xLimVals, collapse = " "), sep = "\n")
+	cat("yAxis Limits: ", paste0(yLimVals, collapse = " "), sep = "\n")
+	
 	p1 <- rcellminer::plotCellMiner2D(df, xCol="x", yCol="y", xLabel = xData$plotLabel, yLabel = yData$plotLabel,
-												colorPalette=colorPalette, classCol=classCol, tooltipCol=tooltipCol)
+												colorPalette=colorPalette, classCol=classCol, tooltipCol=tooltipCol,
+												xLimVal = xLimVals, yLimVal = yLimVals)
 	
 	return(p1)
 }

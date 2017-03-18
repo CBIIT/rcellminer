@@ -64,8 +64,15 @@ loadSourceContent <- function(srcConfig){
 			pkgMolDataInfo <- srcConfig$packages[[pkgName]][["MolData"]]
 			rownames(pkgMolDataInfo) <- pkgMolDataInfo$eSetListName
 			
+			if (!("dataMin" %in% colnames(pkgMolDataInfo))){
+				pkgMolDataInfo$dataMin <- NA
+			}
+			if (!("dataMax" %in% colnames(pkgMolDataInfo))){
+				pkgMolDataInfo$dataMax <- NA
+			}
+			
 			featureInfoTab <- rbind(featureInfoTab, 
-															pkgMolDataInfo[, c("featurePrefix", "displayName")])
+				pkgMolDataInfo[, c("featurePrefix", "displayName", "dataMin", "dataMax")])
 			
 			pkgMolDataMats <- getAllFeatureData(pkgEnv$molData)
 			if (is.null(sampleData)){ 
@@ -118,8 +125,15 @@ loadSourceContent <- function(srcConfig){
 			data("drugData", package=pkgName, envir=pkgEnv)
 			pkgDrugDataInfo <- srcConfig$packages[[pkgName]][["DrugData"]]
 			
+			if (!("dataMin" %in% colnames(pkgDrugDataInfo))){
+				pkgDrugDataInfo$dataMin <- NA
+			}
+			if (!("dataMax" %in% colnames(pkgDrugDataInfo))){
+				pkgDrugDataInfo$dataMax <- NA
+			}
+			
 			featureInfoTab <- rbind(featureInfoTab, 
-															pkgDrugDataInfo[, c("featurePrefix", "displayName")])
+				pkgDrugDataInfo[, c("featurePrefix", "displayName", "dataMin", "dataMax")])
 			
 			dat <- exprs(getAct(pkgEnv$drugData))
 			if (is.null(sampleData)){ 
@@ -260,6 +274,25 @@ loadSourceContent <- function(srcConfig){
 		src$defaultFeatureX <- src$featurePrefixes[2]
 		src$defaultFeatureY <- src$featurePrefixes[1]
 	}
+	
+	# Check/set feature range information ----------------------------------------
+	stopifnot(all(rownames(featureInfoTab) %in% names(src$molPharmData)))
+	stopifnot(c("dataMin", "dataMax") %in% colnames(featureInfoTab))
+	
+	src$featureValRanges <- list()
+	for (dataType in rownames(featureInfoTab)){
+		datRange <- range(as.numeric(src$molPharmData[[dataType]]), na.rm = TRUE)
+		datRange[1] <- floor(datRange[1])
+		datRange[2] <- ceiling(datRange[2])
+		if (!is.na(featureInfoTab[dataType, "dataMin"])){
+			datRange[1] <- min(datRange[1], featureInfoTab[dataType, "dataMin"])
+		}
+		if (!is.na(featureInfoTab[dataType, "dataMax"])){
+			datRange[2] <- max(datRange[2], featureInfoTab[dataType, "dataMax"])
+		}
+		src$featureValRanges[[dataType]] <- datRange
+	}
+	#-----------------------------------------------------------------------------
 	
 	return(src)
 }

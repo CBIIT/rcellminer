@@ -319,8 +319,34 @@ shinyServer(function(input, output, session) {
 
 	# Alternative plotting
 	output$rChartsAlternative <- renderPlotly({
-		p1 <- makePlotStatic(xData = xData(), yData = yData(), showColor = input$showColor, 
+		#-----[range check]----------------------------------------------------------
+		# Note: Until a better solution can be found, these checks are needed.
+		# The issue is that upon a data source change, there appears to be a moment 
+		# when the xData() or yData() are invalidated, but the input$xAxisRange
+		# or input$yAxisRange (from the sliderInput UI element) are not yet updated.
+		# As such, the data value range can be out of synch with the invalidated
+		# axis ranges. In the most extreme case, there are no points in the
+		# specified range. The reactive code is quickly re-run with the proper
+		# inputs, correcting the plot, but the error flashes briefly in a buggy 
+		# looking way. 
+		# Below we do a range check and quietly exit if something is amiss.
+		#****************************************************************************
+		xData <- xData()
+		xValRange <- range(xData$data, na.rm = TRUE)
+		xLimits <- input$xAxisRange
+		
+		yData <- yData()
+		yValRange <- range(yData$data, na.rm = TRUE)
+		yLimits <- input$yAxisRange
+		
+		# req(FALSE) causes immediate but quiet exit. 
+		req((xLimits[1] <= xValRange[1]) && (xValRange[2] <= xLimits[2]))
+		req((yLimits[1] <= yValRange[1]) && (yValRange[2] <= yLimits[2]))
+		#----------------------------------------------------------------------------
+		
+		p1 <- makePlotStatic(xData = xData, yData = yData, showColor = input$showColor, 
 												 showColorTissues = input$showColorTissues, dataSource = input$xDataset, 
+												 xLimVals = xLimits, yLimVals = yLimits,
 												 srcContent = srcContentReactive())
 		g1 <- ggplotly(p1, width=plotWidth, height=plotHeight, tooltip=tooltipCol)
 		g1 <- layout(g1, margin=list(t = 75))
@@ -615,6 +641,44 @@ shinyServer(function(input, output, session) {
   		selectedPrefix <- srcContent[[input$yDataset]][["defaultFeatureY"]]
   	}
   	selectInput("yPrefix", "y-Axis Type", choices = prefixChoices, selected = selectedPrefix)
+  })
+  
+  output$xAxisRangeUi <- renderUI({
+  	srcContent <- srcContentReactive()
+  	req(input$xDataset)
+  	req(input$xPrefix)
+  	valRange <- srcContent[[input$xDataset]][["featureValRanges"]][[input$xPrefix]]
+  	
+  	xData <- NULL
+  	try(xData <- xData())
+  	if (is.null(xData)){
+  		xInitSliderVals <- valRange
+  	} else{
+  		xDataRange <- range(xData$data, na.rm = TRUE)
+  		xInitSliderVals <- c((xDataRange[1] - 0.1), (xDataRange[2] + 0.1))
+  	}
+  	
+  	sliderInput("xAxisRange", "x-Axis Range", 
+  							min = valRange[1], max = valRange[2], value = xInitSliderVals, step = 0.5)
+  })
+  
+  output$yAxisRangeUi <- renderUI({
+  	srcContent <- srcContentReactive()
+  	req(input$yDataset)
+  	req(input$yPrefix)
+  	valRange <- srcContent[[input$yDataset]][["featureValRanges"]][[input$yPrefix]]
+  	
+  	yData <- NULL
+  	try(yData <- yData())
+  	if (is.null(yData)){
+  		yInitSliderVals <- valRange
+  	} else{
+  		yDataRange <- range(yData$data, na.rm = TRUE)
+  		yInitSliderVals <- c((yDataRange[1] - 0.1), (yDataRange[2] + 0.1))
+  	}
+  	
+  	sliderInput("yAxisRange", "y-Axis Range", 
+  							min = valRange[1], max = valRange[2], value = yInitSliderVals, step = 0.5)
   })
 
   # output$xIdUi <- renderUI({
