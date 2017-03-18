@@ -322,14 +322,16 @@ shinyServer(function(input, output, session) {
 		#-----[range check]----------------------------------------------------------
 		# Note: Until a better solution can be found, these checks are needed.
 		# The issue is that upon a data source change, there appears to be a moment 
-		# when the xData() or yData() are invalidated, but the input$xAxisRange
+		# when the xData() or yData() are updated, but the input$xAxisRange
 		# or input$yAxisRange (from the sliderInput UI element) are not yet updated.
 		# As such, the data value range can be out of synch with the invalidated
 		# axis ranges. In the most extreme case, there are no points in the
 		# specified range. The reactive code is quickly re-run with the proper
 		# inputs, correcting the plot, but the error flashes briefly in a buggy 
 		# looking way. 
-		# Below we do a range check and quietly exit if something is amiss.
+		# Below we do a range check and quietly exit if something is amiss (knowing
+		# that the reactivity will ensure that the code is re-run with a proper
+		# set of inputs once thing settle down).
 		#****************************************************************************
 		xData <- xData()
 		xValRange <- range(xData$data, na.rm = TRUE)
@@ -368,6 +370,8 @@ shinyServer(function(input, output, session) {
   		srcContent = srcContentReactive())
   	dlDataTabCols <- c(colnames(dlDataTab)[1:4], paste0("OncoTree", 1:4))
   	dlDataTab <- dlDataTab[, dlDataTabCols]
+  	dlDataTab[, 2] <- round(dlDataTab[, 2], 3)
+  	dlDataTab[, 3] <- round(dlDataTab[, 3], 3)
 
   	DT::datatable(dlDataTab, rownames=FALSE, colnames=colnames(dlDataTab),
   								filter='top', style='bootstrap',
@@ -645,9 +649,12 @@ shinyServer(function(input, output, session) {
   
   output$xAxisRangeUi <- renderUI({
   	srcContent <- srcContentReactive()
-  	req(input$xDataset)
-  	req(input$xPrefix)
-  	valRange <- srcContent[[input$xDataset]][["featureValRanges"]][[input$xPrefix]]
+  	
+  	# Note: req() ensures values are available or 'truthy' (not NULL, "", FALSE, empty, etc.),
+  	# returning the value if so; otherwise the operation is stopped with a silent exception.
+  	# The idea is to exit quietly if inputs are momentarily in an invalid state, as might
+  	# occur when the app is first loading, etc.
+  	valRange <- srcContent[[req(input$xDataset)]][["featureValRanges"]][[req(input$xPrefix)]]
   	
   	xData <- NULL
   	try(xData <- xData())
@@ -655,7 +662,8 @@ shinyServer(function(input, output, session) {
   		xInitSliderVals <- valRange
   	} else{
   		xDataRange <- range(xData$data, na.rm = TRUE)
-  		xInitSliderVals <- c((xDataRange[1] - 0.1), (xDataRange[2] + 0.1))
+  		delta <- 0.05 * (xDataRange[2] - xDataRange[1])
+  		xInitSliderVals <- c((xDataRange[1] - delta), (xDataRange[2] + delta))
   	}
   	
   	sliderInput("xAxisRange", "x-Axis Range", 
@@ -664,9 +672,9 @@ shinyServer(function(input, output, session) {
   
   output$yAxisRangeUi <- renderUI({
   	srcContent <- srcContentReactive()
-  	req(input$yDataset)
-  	req(input$yPrefix)
-  	valRange <- srcContent[[input$yDataset]][["featureValRanges"]][[input$yPrefix]]
+  	
+ 		# Note: see comment in output#xAxisRangeUi explaining the use of req().
+  	valRange <- srcContent[[req(input$yDataset)]][["featureValRanges"]][[req(input$yPrefix)]]
   	
   	yData <- NULL
   	try(yData <- yData())
@@ -674,7 +682,8 @@ shinyServer(function(input, output, session) {
   		yInitSliderVals <- valRange
   	} else{
   		yDataRange <- range(yData$data, na.rm = TRUE)
-  		yInitSliderVals <- c((yDataRange[1] - 0.1), (yDataRange[2] + 0.1))
+  		delta <- 0.05 * (yDataRange[2] - yDataRange[1])
+  		yInitSliderVals <- c((yDataRange[1] - delta), (yDataRange[2] + delta))
   	}
   	
   	sliderInput("yAxisRange", "y-Axis Range", 
