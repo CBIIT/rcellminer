@@ -11,7 +11,7 @@ regressionModelsInput <- function(id, dataSourceChoices) {
 					 				id="rm_input_container", 
 					 				selectInput(ns("dataset"), "Dataset", choices=dataSourceChoices, selected = "nci60"),
 					 				uiOutput(ns("responseDataTypeUi")),
-					 				textInput(ns("responseId"), "Response ID: (Case-Sensitive, e.g., 609699)", "609699"),
+					 				textInput(ns("responseId"), "Response ID:", "609699"),
 					 				uiOutput(ns("predDataTypesUi")),
 					 				textInput(ns("predIds"), "Predictor IDS: (Case-Sensitive, e.g. SLFN11 BPTF)", "SLFN11 BPTF"),
 					 				radioButtons(ns("tissueSelectionMode"), "Select Tissues", c("Include", "Exclude")),
@@ -175,14 +175,23 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		shiny::validate(need(length(input$selectedTissues) > 0, "Please select tissue types."))
 		shiny::validate(need(length(input$predDataTypes) > 0,
 												 "Please select one or more predictor data types."))
-		shiny::validate(need(validateEntry(input$responseDataType, 
-																			 input$responseId, input$dataset,
-																			 srcContent = srcContentReactive()),
-			paste("ERROR:", paste0(input$responseDataType, input$responseId), "not found.")))
 		
-		yData <- getFeatureData(input$responseDataType, input$responseId, input$dataset, 
-														srcContent = srcContentReactive())
-		yData$data <- na.exclude(yData$data)
+		responseId <- getMatchedIds(input$responseDataType, input$responseId, 
+																input$dataset, srcContent = srcContentReactive())
+		if (length(responseId) == 0){
+			shiny::validate(need(FALSE, 
+				paste("ERROR:", paste0("(", input$responseDataType, ") ", input$responseId), "not found.")))
+		} else{
+			if (length(responseId) > 1){
+				warningMsg <- paste0("Other identifiers matching response variable ID: ",
+														 paste0(responseId[-1], collapse = ", "), ".")
+				showNotification(warningMsg, duration = 10, type = "message")
+				responseId <- responseId[1]
+			}
+			yData <- getFeatureData(input$responseDataType, responseId, input$dataset, 
+															srcContent = srcContentReactive())
+			yData$data <- na.exclude(yData$data)
+		}
 		
 		dataTab <- data.frame(CellLine = names(yData$data), stringsAsFactors = FALSE)
 		rownames(dataTab) <- dataTab$CellLine
