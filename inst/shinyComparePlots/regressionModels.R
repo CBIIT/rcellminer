@@ -548,65 +548,75 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 	
 	#--------------------------------------------------------------------------------------
 	
-	if(require(rCharts)) {
-		#----[Show 2D Actual vs. Predicted Response Scatter Plot in 'Plot' Tab]----------------
-		output$plot <- renderChart({
-			rmAlgoResults <- algoResults()
+	#----[Show 2D Actual vs. Predicted Response Scatter Plot in 'Plot' Tab]----------------
+	output$plot <- renderPlotly({
+		rmAlgoResults <- algoResults()
+		
+		responseData <- rmResponseData()
+		if (!is.null(rmAlgoResults$updatedInputData)){
+			# Feature selection algorithms will add additional predictors, and
+			# may drop cell lines with missing values for candidate predictors,
+			# requiring update of response data below.
+			updatedInputData <- rmAlgoResults$updatedInputData
 			
-			responseData <- rmResponseData()
-			if (!is.null(rmAlgoResults$updatedInputData)){
-				# Feature selection algorithms will add additional predictors, and
-				# may drop cell lines with missing values for candidate predictors,
-				# requiring update of response data below.
-				updatedInputData <- rmAlgoResults$updatedInputData
-				
-				# First column has cell line names, second column has response data.
-				responseData$data <- setNames(updatedInputData[, 2, drop = TRUE], 
-																			rownames(updatedInputData))
-			}
-			
-			predResponseData <- list()
-			predResponseData$name <- paste0("predicted_", responseData$name)
-			predResponseData$data <- rmAlgoResults$predictedResponse
-			predResponseData$plotLabel <- predResponseData$name
-			predResponseData$uniqName  <- predResponseData$name
-			predResponseData$dataSource <- responseData$dataSource
-			
-			h1 <- makePlot(xData = predResponseData, yData = responseData, showColor = TRUE,
-							showColorTissues = "all", dataSource = input$dataset,
-							selectedTissuesOnly = FALSE, srcContent = srcContentReactive(), 
-							dom="rm-plot", showPValue = FALSE)
-		})
+			# First column has cell line names, second column has response data.
+			responseData$data <- setNames(updatedInputData[, 2, drop = TRUE], 
+																		rownames(updatedInputData))
+		}
+		
+		predResponseData <- list()
+		predResponseData$name <- paste0("predicted_", responseData$name)
+		predResponseData$data <- rmAlgoResults$predictedResponse
+		predResponseData$plotLabel <- predResponseData$name
+		predResponseData$uniqName  <- predResponseData$name
+		predResponseData$dataSource <- responseData$dataSource
+		
+		p1 <- makePlotStatic(xData = predResponseData, yData = responseData, showColor = FALSE, 
+												 showColorTissues = character(0), dataSource = input$dataset, 
+												 srcContent = srcContentReactive())
+		g1 <- ggplotly(p1, width=plotWidth, height=plotHeight, tooltip=tooltipCol)
+		g1 <- layout(g1, margin=list(t = 75))
+		g2 <- config(p = g1, collaborate=FALSE, cloud=FALSE, displaylogo=FALSE,
+								 modeBarButtonsToRemove=c("select2d", "sendDataToCloud", "pan2d", "resetScale2d",
+								 												 "hoverClosestCartesian", "hoverCompareCartesian",
+								 												 "lasso2d", "zoomIn2d", "zoomOut2d"))
+		g2
+	})
 	
-		#----[Show 2D Actual vs. CV-Predicted Response Scatter Plot in 'Cross-Validation' Tab]-
-		output$cvPlot <- renderChart({
-			rmAlgoResults <- algoResults()
+	#----[Show 2D Actual vs. CV-Predicted Response Scatter Plot in 'Cross-Validation' Tab]-
+	output$cvPlot <- renderPlotly({
+		rmAlgoResults <- algoResults()
+		
+		responseData <- rmResponseData()
+		if (!is.null(rmAlgoResults$updatedInputData)){
+			# Feature selection algorithms will add additional predictors, and
+			# may drop cell lines with missing values for candidate predictors,
+			# requiring update of response data below.
+			updatedInputData <- rmAlgoResults$updatedInputData
 			
-			responseData <- rmResponseData()
-			if (!is.null(rmAlgoResults$updatedInputData)){
-				# Feature selection algorithms will add additional predictors, and
-				# may drop cell lines with missing values for candidate predictors,
-				# requiring update of response data below.
-				updatedInputData <- rmAlgoResults$updatedInputData
-				
-				# First column has cell line names, second column has response data.
-				responseData$data <- setNames(updatedInputData[, 2, drop = TRUE], 
-																			rownames(updatedInputData))
-			}
-			
-			cvPredResponseData <- list()
-			cvPredResponseData$name <- paste0("cv_predicted_", responseData$name)
-			cvPredResponseData$data <- rmAlgoResults$cvPredictedResponse
-			cvPredResponseData$plotLabel <- cvPredResponseData$name
-			cvPredResponseData$uniqName  <- cvPredResponseData$name
-			cvPredResponseData$dataSource <- responseData$dataSource
-			
-			h1 <- makePlot(xData = cvPredResponseData, yData = responseData, showColor = TRUE,
-										 showColorTissues = "all", dataSource = input$dataset,
-										 selectedTissuesOnly = FALSE, srcContent = srcContentReactive(), 
-										 dom="rm-cvPlot", showPValue = FALSE)
-		})
-	}
+			# First column has cell line names, second column has response data.
+			responseData$data <- setNames(updatedInputData[, 2, drop = TRUE], 
+																		rownames(updatedInputData))
+		}
+		
+		cvPredResponseData <- list()
+		cvPredResponseData$name <- paste0("cv_predicted_", responseData$name)
+		cvPredResponseData$data <- rmAlgoResults$cvPredictedResponse
+		cvPredResponseData$plotLabel <- cvPredResponseData$name
+		cvPredResponseData$uniqName  <- cvPredResponseData$name
+		cvPredResponseData$dataSource <- responseData$dataSource
+		
+		p1 <- makePlotStatic(xData = cvPredResponseData, yData = responseData, showColor = FALSE, 
+												 showColorTissues = character(0), dataSource = input$dataset, 
+												 srcContent = srcContentReactive())
+		g1 <- ggplotly(p1, width=plotWidth, height=plotHeight, tooltip=tooltipCol)
+		g1 <- layout(g1, margin=list(t = 75))
+		g2 <- config(p = g1, collaborate=FALSE, cloud=FALSE, displaylogo=FALSE,
+								 modeBarButtonsToRemove=c("select2d", "sendDataToCloud", "pan2d", "resetScale2d",
+								 												 "hoverClosestCartesian", "hoverCompareCartesian",
+								 												 "lasso2d", "zoomIn2d", "zoomOut2d"))
+		g2
+	})
 	
 	#----[Show Input + Predicted Response Data in 'Data' Tab]-------------------------------
 	output$data <- DT::renderDataTable({
@@ -777,9 +787,11 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 																		tags$hr(),
 																		DT::dataTableOutput(ns("patternCompResults")))
 		
-		if (require(rCharts)){
-			plotTabPanel   <- tabPanel("Plot", showOutput(ns("plot"), "highcharts"))
-			cvPlotTabPanel <- tabPanel("Cross-Validation", showOutput(ns("cvPlot"), "highcharts"))
+		if (require(plotly)){
+			plotTabPanel   <- tabPanel("Plot", 
+																 plotlyOutput(ns("plot"),   width = plotWidth, height = plotHeight))
+			cvPlotTabPanel <- tabPanel("Cross-Validation", 
+																 plotlyOutput(ns("cvPlot"), width = plotWidth, height = plotHeight))
 			tabsetPanel(type = "tabs", heatmapTabPanel, dataTabPanel, plotTabPanel, 
 									cvPlotTabPanel, techDetailsTabPanel, patternCompTabPanel)
 		} else{
