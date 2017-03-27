@@ -30,7 +30,8 @@ getMatchedIds <- function(prefix, id, dataSource, srcContent){
 	} else{
 		# For drugs: try to match synonyms to source-specific identifiers.
 		if (require(rcellminerUtils) && isDrugActivityType(prefix)){
-			matchedIds <- rcellminerUtils::getDbDrugIds(drugName = id, dbName = dataSource)	
+			matchedIds <- rcellminerUtils::getDbDrugIds(drugName = id, dbName = dataSource)
+			matchedIds <- intersect(matchedIds, idSet)
 		}
 	}
 	
