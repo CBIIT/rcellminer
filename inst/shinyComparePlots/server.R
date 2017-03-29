@@ -247,10 +247,10 @@ shinyServer(function(input, output, session) {
 			xPrefix <- srcContentReactive()[[input$xDataset]][["defaultFeatureX"]]
 		}
 		
-		xId <- getMatchedIds(xPrefix, input$xId, input$xDataset, srcContent = srcContentReactive())
+		xId <- getMatchedIds(xPrefix, trimws(input$xId), input$xDataset, srcContent = srcContentReactive())
 		
 		if (length(xId) == 0){
-			shiny::validate(need(FALSE, paste("ERROR:", paste0(xPrefix, input$xId), "not found.")))
+			shiny::validate(need(FALSE, paste("ERROR:", paste0(xPrefix, input$xId), "not found. Please use the Search IDs tab to find available IDs for each dataset.")))
 		} else{
 			globalReactiveValues$xPrefix <- xPrefix
 			if (length(xId) > 1){
@@ -281,10 +281,10 @@ shinyServer(function(input, output, session) {
 			yPrefix <- srcContentReactive()[[input$yDataset]][["defaultFeatureY"]]
 		}
 		
-		yId <- getMatchedIds(yPrefix, input$yId, input$yDataset, srcContent = srcContentReactive())
+		yId <- getMatchedIds(yPrefix, trimws(input$yId), input$yDataset, srcContent = srcContentReactive())
 		
 		if (length(yId) == 0){
-			shiny::validate(need(FALSE, paste("ERROR:", paste0(yPrefix, input$yId), "not found.")))
+			shiny::validate(need(FALSE, paste("ERROR:", paste0(yPrefix, input$yId), "not found. Please use the Search IDs tab to find available IDs for each dataset.")))
 		} else{
 			globalReactiveValues$yPrefix <- yPrefix
 			if (length(yId) > 1){
@@ -392,7 +392,7 @@ shinyServer(function(input, output, session) {
   	dlDataTab[, 3] <- round(dlDataTab[, 3], 3)
 
   	DT::datatable(dlDataTab, rownames=FALSE, colnames=colnames(dlDataTab),
-  								filter='top', style='bootstrap',
+  								filter='top', style='bootstrap', selection="none",
   								options=list(pageLength = nrow(dlDataTab)))
   })
 	#--------------------------------------------------------------------------------------
@@ -427,7 +427,7 @@ shinyServer(function(input, output, session) {
     colnames(results) <- c("ID", "Name", "Drug MOA")
 
     DT::datatable(results, rownames=FALSE, colnames=colnames(results),
-    							filter='top', style='bootstrap',
+    							filter='top', style='bootstrap', selection = "none",
     							options=list(pageLength = 10))
   })
 	#--------------------------------------------------------------------------------------
@@ -494,7 +494,7 @@ shinyServer(function(input, output, session) {
 	  results[, "P-Value"] <- signif(results[, "P-Value"], 3)
 		
 	  DT::datatable(results, rownames=FALSE, colnames=colnames(results),
-	  							filter='top', style='bootstrap',
+	  							filter='top', style='bootstrap', selection = "none",
 	  							options=list(lengthMenu = c(10, 25, 50, 100), pageLength = 10))
 	})
 
@@ -507,7 +507,7 @@ shinyServer(function(input, output, session) {
 		colnames(jsonFrame) <- c("Data Type", "Platform", "Platform Information", "Normalization Method")
 		
 		DT::datatable(jsonFrame, rownames=FALSE, colnames=colnames(jsonFrame),
-									filter='top', style='bootstrap',
+									filter='top', style='bootstrap', selection = "none",
 									options=list(pageLength = 10))
 	})
 	#---------------------------------------------------------------------------------------
@@ -571,7 +571,8 @@ shinyServer(function(input, output, session) {
 									tab1, tab2, tab3
 			)
 		} else {
-			plotPanel <- tabPanel("Plot Data", plotlyOutput("rChartsAlternative", width = plotWidth, height = plotHeight))
+			plotPanel <- tabPanel("Plot Data", plotlyOutput("rChartsAlternative", width = plotWidth, height = plotHeight),
+														br(), br(), p("Plot point tooltips provide additional information."))
 			tsPanel <- tabsetPanel(plotPanel, tab1, tab2, tab3)
 		}
 
@@ -606,7 +607,7 @@ shinyServer(function(input, output, session) {
 		sourceName <- metaConfig[[input$mdataSource]][["displayName"]]
 		visibleText <- paste("Select here to learn more about ", sourceName, sep="")
 	
-		a(visibleText, href=paste(urlString))
+		a(visibleText, href=paste(urlString), target = "_blank")
 	})
 	#**********************************************************************************************
   output$downloadData <- downloadHandler(

@@ -16,7 +16,7 @@
 
 # Contact/Feedback
 
-Please send comments and feedback to [[TBA]]
+Please send comments and feedback to aluna AT jimmy.harvard.edu and vinodh.rajapakse AT nih.gov
 
 # Usage
 This application simplifies the exploration of datasets connected to the NCI-60. Users are allows to view both molecular data and drug activity for cell lines. The example shows a scatterplot of PAXX (C9orf142) gene expression and Bleomycin (NSC294979) activity within the NCI60. In the application, point colors represent tissues of origin for the cell lines.
@@ -29,15 +29,15 @@ Please see the Metadata tab for information data.
 
 ## Mechanisms of Action
 
-* NCI60: [[LINK]]
+* NCI60: [Mechanism of Action Description](https://raw.githubusercontent.com/cannin/rcellminer/devel/inst/extdata/Drug_MOA_Key.txt)
 
 ## Gene Sets in Regression Tab
 
-[[SOMETHING]]
+Gene sets expertly curated by the CellMiner team.
 
 ## Gene Annotations
 
-[[SOMETHING]]
+Gene annotations are based on membership in CellMiner gene sets or other literature-based annotations.
 
 # About CellMinerCDB
 The CellMinerCDB application was developed using R and Shiny by:

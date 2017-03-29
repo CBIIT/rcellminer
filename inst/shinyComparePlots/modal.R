@@ -20,7 +20,7 @@ loadingModal <- function() {
 					class="modal-header",
 					tags$h4(
 						class="modal-title",
-						"Loading Data ..."
+						"Loading Data ... (~30 seconds)"
 					)
 				),
 				tags$div(

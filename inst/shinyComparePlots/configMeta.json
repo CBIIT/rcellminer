@@ -10,7 +10,7 @@
         		"dataType":"Drug Activity",
         		"platform":"Sulforhodamine assay",
         		"platformInfo":"Negative log10 (GI50) values of assay",
-        		"normalizeMethod":"NA"
+        		"normalizeMethod":"--"
         	},
         	{
         		"dataType":"Expression (Z-Score)",
@@ -34,7 +34,7 @@
         		"dataType":"Mutations",
         		"platform":"ABI 3730 Sequencer",
         		"platformInfo":"Sequencing for NCI-60 for mutations in known human cancer genes",
-        		"normalizeMethod":"NA"
+        		"normalizeMethod":"--"
         	},
         	{
         		"dataType":"DNA Copy Number",
@@ -69,7 +69,7 @@
         		"dataType":"Drug Activity (-log10[IC50M])",
         		"platform":"Pharmacological Profiling",
         		"platformInfo":"8-point dose response curves",
-        		"normalizeMethod":"NA"
+        		"normalizeMethod":"--"
         	},
         	{
         		"dataType":"Expression (log2)",
@@ -133,19 +133,19 @@
         		"dataType":"Expression (log2)",
         		"platform":"Affymetrix U133+2 arrays",
         		"platformInfo":"--",
-        		"normalizeMethod":"NA"
+        		"normalizeMethod":"--"
         	},
         	{
         		"dataType":"Mutations",
         		"platform":"Oncomap 3.0 core",
         		"platformInfo":"--",
-        		"normalizeMethod":"NA"
+        		"normalizeMethod":"--"
         	},
         		{
 	        	"dataType":"DNA Copy Number",
         		"platform":"Affymetrix SNP6.0 Arrays",
         		"platformInfo":"Pharmacological Profiling",
-        		"normalizeMethod":"NA"
+        		"normalizeMethod":"--"
 	      	}
         ]
       }
@@ -154,7 +154,7 @@
   "nciSclc":{
     "displayName":"NCI/DTP SCLC",
     "fullName": "NCI/DTP Small Cell Lung Cancer Data Set",
-    "url": "NA",
+    "url": "--",
     "packages":{
       "nciSclcData":{
         "MetaData":[
@@ -162,13 +162,13 @@
             "dataType":"Expression (log2)",
         		"platform":"TBD",
         		"platformInfo":"TBD",
-        		"normalizeMethod":"NA"
+        		"normalizeMethod":"--"
           },
           {
             "dataType":"Drug Activity (-log10[IC50M])",
         		"platform":"TBD",
         		"platformInfo":"TBD",
-        		"normalizeMethod":"NA"
+        		"normalizeMethod":"--"
           }
        	]
       }

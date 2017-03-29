@@ -177,11 +177,11 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		shiny::validate(need(length(input$predDataTypes) > 0,
 												 "Please select one or more predictor data types."))
 		
-		responseId <- getMatchedIds(input$responseDataType, input$responseId, 
+		responseId <- getMatchedIds(input$responseDataType, trimws(input$responseId), 
 																input$dataset, srcContent = srcContentReactive())
 		if (length(responseId) == 0){
 			shiny::validate(need(FALSE, 
-				paste("ERROR:", paste0("(", input$responseDataType, ") ", input$responseId), "not found.")))
+				paste("ERROR:", paste0("(", input$responseDataType, ") ", input$responseId), "not found. Please use the Univariate Analyses Search IDs tab to find available IDs for each dataset.")))
 		} else{
 			if (length(responseId) > 1){
 				warningMsg <- paste0("Other identifiers matching response variable ID: ",
@@ -392,7 +392,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			
 			# Check and update: lines with missing predictor data may have been removed.
 			shiny::validate(need(nrow(lassoPredData) > 10, 
-													 "Insufficient number of cell lines (without   NA-free data for candidate predictor set)."))
+													 "10 or more cell lines (with NA-free data for candidate predictor set) are required to run LASSO"))
 			lassoResponseVec <- lassoResponseVec[rownames(lassoPredData)]
 			
 			#-----[glmnet]--------------------------------------------------------------
@@ -403,7 +403,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			lassoPredictorWts <- lassoPredictorWts[lassoPredictorWts != 0]
 			
 			shiny::validate(need(length(lassoPredictorWts) > 0, 
-													 "No predictor variables selected by Lasso algorithm."))
+													 "No predictor variables selected by LASSO algorithm."))
 			
 			lassoPredictorWts <- lassoPredictorWts[order(abs(lassoPredictorWts), decreasing = TRUE)]
 			
@@ -648,7 +648,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			dat <- cbind(CellLine = rownames(dat), dat)	
 		}
 
-		DT::datatable(dat, rownames=FALSE, colnames=colnames(dat), filter='top', 
+		DT::datatable(dat, rownames=FALSE, colnames=colnames(dat), filter='top', selection = "none",
 									style='bootstrap', options=list(pageLength = nrow(dat)))
 	})
 	
@@ -743,7 +743,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		pcResults$PVAL   <- signif(pcResults$PVAL, 3)
 		
 		DT::datatable(pcResults, rownames=FALSE, colnames=colnames(pcResults), filter='top', 
-									style='bootstrap',
+									style='bootstrap', selection = "none",
 									options=list(lengthMenu = c(10, 25, 50, 100), pageLength = 10))
 	})
 	
@@ -785,11 +785,13 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 																						min=1, max=maxNumHiLoResponseLines, 
 																						value=20, width = "50%"),
 																checkboxInput(ns("useHeatmapRowColorScale"), "Use Row Z-Score Color Scale", FALSE),
-																d3heatmapOutput(ns("heatmap")))
+																d3heatmapOutput(ns("heatmap")),
+															    p("Select cell line or feature name to highlight heatmap columns or rows, respectively."))
 		techDetailsTabPanel <- tabPanel("Technical Details", verbatimTextOutput(ns("techDetails")))
 		patternCompTabPanel <- tabPanel("Partial Correlation", 
 																		selectInput(ns("pcGeneSets"), "Select Gene Sets",
-																								choices  = c(names(geneSetPathwayAnalysis::geneSets), "All Genes"),
+																								#choices  = c(names(geneSetPathwayAnalysis::geneSets), "All Genes"),
+																								choices = names(geneSetPathwayAnalysis::geneSets),
 																								selected = "All Gene Sets",
 																								multiple=TRUE),
 																		selectInput(ns("pcDataTypes"), "Select Data Types",
@@ -848,7 +850,8 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 	output$selectInputGeneSetsUi <- renderUI({
 		ns <- session$ns
 		selectInput(ns("inputGeneSets"), "Select Gene Sets",
-								choices  = c(names(geneSetPathwayAnalysis::geneSets), "All Genes"),
+								#choices  = c(names(geneSetPathwayAnalysis::geneSets), "All Genes"),
+								choices = names(geneSetPathwayAnalysis::geneSets),
 								selected = "All Gene Sets",
 								multiple=TRUE)
 	})
