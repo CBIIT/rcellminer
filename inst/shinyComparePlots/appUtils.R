@@ -2,17 +2,6 @@ source("regressionModels.R")
 #--------------------------------------------------------------------------------------------------
 # Helper functions.
 #--------------------------------------------------------------------------------------------------
-
-isDrugActivityType <- function(prefix){
-	# TO DO: Make configurable.
-	drugActTypePrefixes <- "act"
-	if (prefix %in% drugActTypePrefixes){
-		return(TRUE)
-	} else{
-		return(FALSE)
-	}
-}
-
 getMatchedIds <- function(prefix, id, dataSource, srcContent){
 	dat <- srcContent[[dataSource]][["molPharmData"]][[prefix]]
 	idSet <- rcellminer::removeMolDataType(rownames(dat))
@@ -29,7 +18,7 @@ getMatchedIds <- function(prefix, id, dataSource, srcContent){
 		matchedIds <- unname(idSet[i])
 	} else{
 		# For drugs: try to match synonyms to source-specific identifiers.
-		if (require(rcellminerUtils) && isDrugActivityType(prefix)){
+		if (require(rcellminerUtils) && isDrugActivityDataType(prefix)){
 			matchedIds <- rcellminerUtils::getDbDrugIds(drugName = id, dbName = dataSource)
 			matchedIds <- intersect(matchedIds, idSet)
 		}

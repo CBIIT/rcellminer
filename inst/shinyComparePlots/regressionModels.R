@@ -53,7 +53,8 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			}
 			
 			# ----[restrict to selected gene set genes if necessary]--------------------
-			if ((!is.null(geneSetNames)) && (!("All Genes" %in% geneSetNames))){
+			if ((isGeneProtDataType(dType)) && 
+					(!is.null(geneSetNames)) && (!("All Genes" %in% geneSetNames))){
 				geneSetNames <- intersect(geneSetNames, names((geneSetPathwayAnalysis::geneSets)))
 				if (length(geneSetNames) > 0){
 					genes <- sort(unique(c(geneSetPathwayAnalysis::geneSets[geneSetNames], 
@@ -357,6 +358,9 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			lassoPredData <- t(getFeatureDataMatrix(dataSet = input$dataset,
 				dataTypes = input$predDataTypes, srcContent = srcContent,
 				responseVec = lassoResponseVec, geneSetNames = input$inputGeneSets))
+			
+			shiny::validate(need((!is.null(lassoPredData)) && (ncol(lassoPredData) > 0),
+			 "Insufficient admissible data to run lasso algorithm."))
 			
 			# Check if user has supplied starting predictors, and add their data if
 			# it isn't already included.
