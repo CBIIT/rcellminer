@@ -341,9 +341,22 @@ shinyServer(function(input, output, session) {
 		yValRange <- range(yData$data, na.rm = TRUE)
 		yLimits <- input$yAxisRange
 		
-		# req(FALSE) causes immediate but quiet exit. 
+		
+		# req(FALSE) causes immediate but quiet exit.
+		req(!any(is.null(xValRange)), !any(is.null(xLimits)))
+		req(!any(is.null(yValRange)), !any(is.null(yLimits)))
+		req(!any(is.na(xValRange)), !any(is.na(xLimits)))
+		req(!any(is.na(yValRange)), !any(is.na(yLimits)))
+		
 		req((xLimits[1] <= xValRange[1]) && (xValRange[2] <= xLimits[2]))
 		req((yLimits[1] <= yValRange[1]) && (yValRange[2] <= yLimits[2]))
+		
+		cat("xAxis Limits: ", paste0(xLimits, collapse = " "), sep = "\n")
+		cat("X_VAL_RANGE: ",  paste0(xValRange, collapse = " "), sep = "\n")
+		
+		cat("yAxis Limits: ", paste0(yLimits, collapse = " "), sep = "\n")
+		cat("Y_VAL_RANGE: ",  paste0(yValRange, collapse = " "), sep = "\n")
+		cat("-------------------------------------------", sep = "\n")
 		#----------------------------------------------------------------------------
 		
 		p1 <- makePlotStatic(xData = xData, yData = yData, showColor = input$showColor, 
@@ -662,7 +675,7 @@ shinyServer(function(input, output, session) {
   		xInitSliderVals <- valRange
   	} else{
   		xDataRange <- range(xData$data, na.rm = TRUE)
-  		delta <- 0.05 * (xDataRange[2] - xDataRange[1])
+  		delta <- max((0.05 * (xDataRange[2] - xDataRange[1])), 0.1)
   		xInitSliderVals <- c((xDataRange[1] - delta), (xDataRange[2] + delta))
   	}
   	
@@ -682,7 +695,7 @@ shinyServer(function(input, output, session) {
   		yInitSliderVals <- valRange
   	} else{
   		yDataRange <- range(yData$data, na.rm = TRUE)
-  		delta <- 0.05 * (yDataRange[2] - yDataRange[1])
+  		delta <- max((0.05 * (yDataRange[2] - yDataRange[1])), 0.1)
   		yInitSliderVals <- c((yDataRange[1] - delta), (yDataRange[2] + delta))
   	}
   	
