@@ -334,12 +334,17 @@ shinyServer(function(input, output, session) {
 		# set of inputs once thing settle down).
 		#****************************************************************************
 		xData <- xData()
+		yData <- yData()
+		shiny::validate(need(xData$uniqName != yData$uniqName, 
+			"Please select distinct x and y axis variables."))
+		
 		xValRange <- range(xData$data, na.rm = TRUE)
 		xLimits <- input$xAxisRange
 		
-		yData <- yData()
 		yValRange <- range(yData$data, na.rm = TRUE)
 		yLimits <- input$yAxisRange
+		
+		
 		
 		
 		# req(FALSE) causes immediate but quiet exit.
