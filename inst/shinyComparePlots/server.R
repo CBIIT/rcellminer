@@ -737,6 +737,11 @@ shinyServer(function(input, output, session) {
   	selectInput("showColorTissues", "Tissues to Color",
   							choices=analysisTissueTypes(), multiple=TRUE)
 	})
+  
+  output$ipAddress <- renderText({
+  	# debug
+  	text <- readLines("http://api.ipify.org")
+  })
 
   #----[observers]-----------------------------------------------------------------------
 
