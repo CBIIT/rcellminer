@@ -27,4 +27,3 @@ crossCorsSpearman(drugActData[c("94600"), ], drugActData[c("727625", "670655"), 
 \concept{
 rcellminer
 }
-

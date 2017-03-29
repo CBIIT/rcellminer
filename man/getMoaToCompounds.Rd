@@ -20,4 +20,3 @@ moaToCompounds <- getMoaToCompounds()
 \concept{
 rcellminer
 }
-

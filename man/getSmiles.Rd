@@ -24,4 +24,3 @@ getSmiles(nscSet)
 \concept{
 rcellminer
 }
-

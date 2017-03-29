@@ -41,4 +41,3 @@ Run Shiny App
 \concept{
 rcellminer
 }
-

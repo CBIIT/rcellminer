@@ -35,4 +35,3 @@ selectCorrelatedRows(vec, mat)
 \concept{
 rcellminer
 }
-

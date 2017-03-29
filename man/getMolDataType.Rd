@@ -23,4 +23,3 @@ Get the molecular data type prefixes for a set of features.
 \concept{
 rcellminer
 }
-

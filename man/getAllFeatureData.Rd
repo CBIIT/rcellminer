@@ -20,4 +20,3 @@ Returns a list of feature data matrices.
 \concept{
 rcellminerData
 }
-

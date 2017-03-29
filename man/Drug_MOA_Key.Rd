@@ -13,4 +13,3 @@ abbreviations used in CellMiner.
 rcellminer
 }
 \keyword{data}
-

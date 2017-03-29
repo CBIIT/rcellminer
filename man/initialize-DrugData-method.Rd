@@ -29,4 +29,3 @@ Seems to be required for definition of a constructor.
 \concept{
 rcellminerData
 }
-

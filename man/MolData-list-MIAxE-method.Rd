@@ -23,4 +23,3 @@ Returns a MolData object.
 \concept{
 rcellminerData
 }
-

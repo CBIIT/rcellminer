@@ -26,4 +26,3 @@ loadNciColorSet()
 \concept{
 rcellminer
 }
-

@@ -45,4 +45,3 @@ results <- parCorPatternComparison(x, Y, Z)
 \concept{
 rcellminer
 }
-

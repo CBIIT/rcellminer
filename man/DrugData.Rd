@@ -25,4 +25,3 @@ Returns a DrugData object.
 \concept{
 rcellminerData
 }
-

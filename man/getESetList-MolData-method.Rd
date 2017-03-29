@@ -19,4 +19,3 @@ Returns a list of eSet objects.
 \concept{
 rcellminerData
 }
-

@@ -2,8 +2,8 @@
 % Please edit documentation in R/DrugData-class.R
 \docType{class}
 \name{DrugData-class}
-\alias{.DrugData}
 \alias{DrugData-class}
+\alias{.DrugData}
 \title{An S4 class to represent drug activity and related data recorded for a set of
 biological samples.}
 \arguments{
@@ -23,7 +23,7 @@ respect to the same samples associated with act.}
 
 \item{\code{sampleData}}{A MIAxE object capturing sample and other data set information.}
 }}
+
 \concept{
 rcellminerData
 }
-

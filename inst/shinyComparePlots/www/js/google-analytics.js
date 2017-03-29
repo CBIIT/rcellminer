@@ -20,6 +20,92 @@ $(document).ready(function() {
   	var predIds = $("#rm-predIds").val();
   	var tmp = {"d": dataset, "r": responseId, "p": predIds};
   	//console.log("rmModels : " + JSON.stringify(tmp));
-    ga('send', 'event', 'rmModels', JSON.stringify(tmp));
+    //ga('send', 'event', 'rmModels', JSON.stringify(tmp));
   });
+  
+	// Table search
+	$('input[type="search"]').change(function() {
+		var label = "tableSearch";
+		var action = "";
+		ga('send', 'event', label, action);
+		
+		console.log(label + " " + action);
+	});
+	
+	// Dropdowns
+	$('select[id]').change(function() { 
+		var id = $(this).attr("id");
+		
+		var label = "dropdown";
+		var action = id;
+		ga('send', 'event', label, action);
+		
+		console.log(label + " " + action);
+	});
+	
+	// Checkboxes, sliders
+	$('input[id]').change(function() { 
+		var id = $(this).attr("id");
+		
+		var label = "checkbox_slider";
+		var action = id;
+		ga('send', 'event', label, action);
+		
+		console.log(label + " " + action);
+	});
+	
+	// Select Multi, Radio
+	$('input[type]').change(function() { 
+		var id = $(this).attr("type");
+		
+		var label = "selectizeMulti_radio";
+		var action = "";
+		ga('send', 'event', label, action);
+		
+		console.log(label + " " + action);
+	});
+	
+	// Selectize
+	$('div[data-value]').click(function() { 
+		var id = $(this).attr("data-value"); 
+		
+		var label = "selectize";
+		var action = id;
+		ga('send', 'event', label, action);
+		
+		console.log(label + " " + action);
+	});
+	
+	// Tabs
+	$('a[data-value]').click(function() { 
+		var id = $(this).attr("data-value"); 
+		
+		var label = "tabs";
+		var action = id;
+		ga('send', 'event', label, action);
+		
+		console.log(label + " " + action);
+	});
+	
+	// Downloads
+	$('a[id]').click(function() { 
+		var id = $(this).attr("id");
+
+		var label = "downloads";
+		var action = id;
+		ga('send', 'event', label, action);
+		
+		console.log(label + " " + action);
+	});
+	
+	// Button
+	$('button[id]').click(function() { 
+		var id = $(this).attr("id");
+		
+		var label = "button";
+		var action = id;
+		ga('send', 'event', label, action);
+		
+		console.log(label + " " + action);
+	});
 });

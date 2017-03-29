@@ -29,4 +29,3 @@ getDrugMoaList("754365")
 \concept{
 rcellminer
 }
-

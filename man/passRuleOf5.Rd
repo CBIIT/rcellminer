@@ -34,4 +34,3 @@ passRuleOf5("C1=CN(C(=O)N=C1N)C2C(C(C(O2)CO)O)(F)F", verbose=TRUE)
 \concept{
 rcellminer
 }
-

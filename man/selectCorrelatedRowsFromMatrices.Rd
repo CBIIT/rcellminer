@@ -43,4 +43,3 @@ selectCorrelatedRowsFromMatrices(vec, matList)
 \concept{
 rcellminer
 }
-

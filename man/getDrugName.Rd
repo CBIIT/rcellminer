@@ -26,4 +26,3 @@ getDrugName(nscSet)
 \concept{
 rcellminer
 }
-

@@ -40,14 +40,13 @@ A list containing various assay values:
  }
 }
 }
-\author{
-Vinodh Rajapakse \email{vinodh.rajapakse AT nih.gov}
-}
 \references{
 \url{http://discover.nci.nih.gov/cellminer}
+}
+\author{
+Vinodh Rajapakse \email{vinodh.rajapakse AT nih.gov}
 }
 \concept{
 rcellminer
 }
 \keyword{data}
-

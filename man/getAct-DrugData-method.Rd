@@ -19,4 +19,3 @@ Returns an eSet object with drug activity data.
 \concept{
 rcellminerData
 }
-

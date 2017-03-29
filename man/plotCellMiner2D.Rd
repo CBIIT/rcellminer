@@ -7,7 +7,8 @@
 plotCellMiner2D(df, xCol = "x", yCol = "y", xLabel = xCol,
   yLabel = yCol, title = NULL, colorPalette = NULL, classCol = NULL,
   tooltipCol = NULL, showLegend = FALSE, showTrendLine = TRUE,
-  showTitle = TRUE, alpha = 1, numberColPrefix = "X")
+  showTitle = TRUE, singleColor = "#0000FF", alpha = 1,
+  numberColPrefix = "X", xLimVal = NULL, yLimVal = NULL)
 }
 \arguments{
 \item{df}{a data.frame with at least two columns}
@@ -32,9 +33,15 @@ plotCellMiner2D(df, xCol = "x", yCol = "y", xLabel = xCol,
 
 \item{showTitle}{boolean, whether to show the title}
 
+\item{singleColor}{a color to be used for all points when a color palette is not provided (DEFAULT: blue)}
+
 \item{alpha}{value from 0-1, where 0 indicates transparent points (DEFAULT: 1, not transparent)}
 
 \item{numberColPrefix}{a prefix to add to column names that start with a number that causes issues with ggplot (DEFAULT: X)}
+
+\item{xLimVal}{a two entry vector (min, max) to set the x-axis}
+
+\item{yLimVal}{a two entry vector (min, max) to set the y-axis}
 }
 \value{
 a ggplot object
@@ -43,6 +50,8 @@ a ggplot object
 Make a simple 2d plot using two variables with ggplot2
 }
 \note{
+TROUBLESHOOTING NOTES: 1) Avoid ":" in colnames
+
 Uses ggplot aes_string() which uses parse() to turn your text expression into a proper R symbol that can be resolved within the data.frame. Avoid numbers and spaces in
 }
 \examples{
@@ -70,4 +79,3 @@ Augustin Luna <augustin AT mail.nih.gov>
 \concept{
 rcellminer
 }
-

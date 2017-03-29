@@ -33,4 +33,3 @@ getActivityRangeStats(nscSet, concFormat="IC50MicroM")
 \concept{
 rcellminer
 }
-

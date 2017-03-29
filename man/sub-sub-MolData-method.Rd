@@ -21,4 +21,3 @@ Returns an indexed eSet object from a MolData object eSet list.
 \concept{
 rcellminerData
 }
-

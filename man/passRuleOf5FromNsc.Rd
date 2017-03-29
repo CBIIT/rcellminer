@@ -29,4 +29,3 @@ passRuleOf5FromNsc("94600", verbose=TRUE)
 \concept{
 rcellminer
 }
-

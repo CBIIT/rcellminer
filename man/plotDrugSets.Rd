@@ -33,4 +33,3 @@ plotDrugSets(drugAct, drugs, "Test")
 \concept{
 rcellminer
 }
-

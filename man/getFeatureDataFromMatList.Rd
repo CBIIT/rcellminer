@@ -32,4 +32,3 @@ featureData <- getFeatureDataFromMatList(featureSet, molDataMats)
 \concept{
 rcellminer
 }
-

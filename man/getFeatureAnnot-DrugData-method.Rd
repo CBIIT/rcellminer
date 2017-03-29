@@ -20,4 +20,3 @@ Returns a list of data frames with feature information.
 \concept{
 rcellminerData
 }
-

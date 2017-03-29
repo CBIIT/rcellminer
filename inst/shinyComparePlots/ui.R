@@ -107,7 +107,7 @@ shinyUI(
 	        	)
 	        ),
         mainPanel(
-        	uiOutput('tabsetPanel') 
+        	uiOutput('tabsetPanel')
         )
     	 )
 			)
@@ -137,6 +137,5 @@ shinyUI(
     tabPanel("About",
     	includeMarkdown("www/files/about.md") 
     )
-		
 	)
 )

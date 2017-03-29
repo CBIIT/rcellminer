@@ -11,4 +11,3 @@ A list of pre-computed fingerprints using getFingeprintList()
 rcellminer
 }
 \keyword{data}
-

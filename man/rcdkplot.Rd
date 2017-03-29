@@ -35,4 +35,3 @@ rcdkplot(tmp[[1]], width=300, height=300, main="Gemcitabine")
 \concept{
 rcellminer
 }
-

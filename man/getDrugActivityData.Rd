@@ -27,4 +27,3 @@ actData <- getDrugActivityData(nscSet)
 \concept{
 rcellminer
 }
-

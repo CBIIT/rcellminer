@@ -35,4 +35,3 @@ getMedSenLineActivity(idSet)
 \concept{
 rcellminer
 }
-

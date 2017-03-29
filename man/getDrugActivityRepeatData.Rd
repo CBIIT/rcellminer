@@ -34,4 +34,3 @@ actData <- getDrugActivityRepeatData(nscStr, concFormat='IC50MicroM')
 \concept{
 rcellminer
 }
-

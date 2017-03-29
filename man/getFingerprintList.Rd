@@ -44,4 +44,3 @@ rcdk::get.fingerprint
 \concept{
 rcellminer
 }
-

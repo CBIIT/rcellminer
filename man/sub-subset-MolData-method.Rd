@@ -23,4 +23,3 @@ Assigns an eSet object to a specified position in a MolData object eSet list.
 \concept{
 rcellminerData
 }
-

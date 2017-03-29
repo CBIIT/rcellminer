@@ -48,4 +48,4 @@ VignetteBuilder: knitr
 biocViews: aCGH, CellBasedAssays, CopyNumberVariation, GeneExpression,
     Pharmacogenomics, Pharmacogenetics, miRNA, Cheminformatics, Visualization,
     Software, SystemsBiology
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1

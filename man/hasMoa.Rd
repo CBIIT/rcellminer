@@ -22,4 +22,3 @@ hasMoa("754365")
 \concept{
 rcellminer
 }
-

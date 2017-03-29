@@ -28,4 +28,3 @@ molDataMats <- getMolDataMatrices()
 \concept{
 rcellminer
 }
-

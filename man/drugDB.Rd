@@ -38,14 +38,13 @@ A list containing response values and annotations:
   }
 }
 }
-\author{
-Vinodh Rajapakse \email{vinodh.rajapakse AT nih.gov}
-}
 \references{
 \url{http://discover.nci.nih.gov/cellminer/loadDownload.do}
+}
+\author{
+Vinodh Rajapakse \email{vinodh.rajapakse AT nih.gov}
 }
 \concept{
 rcellminer
 }
 \keyword{data}
-

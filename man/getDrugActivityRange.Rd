@@ -27,4 +27,3 @@ getDrugActivityRange(nscSet)
 \concept{
 rcellminer
 }
-

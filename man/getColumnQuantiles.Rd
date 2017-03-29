@@ -28,4 +28,3 @@ getColumnQuantiles(matrix(1:25, nrow=5), prob = 0.5)
 \concept{
 rcellminer
 }
-

@@ -2,8 +2,8 @@
 % Please edit documentation in R/MolData-class.R
 \docType{class}
 \name{MolData-class}
-\alias{.MolData}
 \alias{MolData-class}
+\alias{.MolData}
 \title{An S4 class to represent molecular data recorded for a set of biological samples.}
 \arguments{
 \item{...}{Other possible parameters.}
@@ -18,7 +18,7 @@ An S4 class to represent molecular data recorded for a set of biological samples
 
 \item{\code{sampleData}}{A MIAxE object capturing sample and other data set information.}
 }}
+
 \concept{
 rcellminerData
 }
-

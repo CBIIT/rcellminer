@@ -20,4 +20,3 @@ Returns an eSet object with drug repeat activity experiment data.
 \concept{
 rcellminerData
 }
-

@@ -39,4 +39,3 @@ pcResults <- patternComparison(drugAct["609699", ], molDataMats$exp, method="spe
 \concept{
 rcellminer
 }
-

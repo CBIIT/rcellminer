@@ -35,4 +35,3 @@ plotDrugActivityRepeats("609699", useZScore=TRUE, maxRepNum=3)
 \concept{
 rcellminer
 }
-

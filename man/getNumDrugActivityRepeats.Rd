@@ -29,4 +29,3 @@ getNumDrugActivityRepeats(nscSet)
 \concept{
 rcellminer
 }
-

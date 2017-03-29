@@ -31,4 +31,3 @@ Restricts a feature matrix to only include features associated with a specified 
 \concept{
 rcellminer
 }
-

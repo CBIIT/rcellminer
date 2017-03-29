@@ -20,4 +20,3 @@ Returns a data frame with sample information.
 \concept{
 rcellminerData
 }
-
