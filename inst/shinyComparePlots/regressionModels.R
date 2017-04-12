@@ -14,7 +14,7 @@ regressionModelsInput <- function(id, dataSourceChoices) {
 					 				textInput(ns("responseId"), "Response ID:", "609699"),
 					 				uiOutput(ns("predDataTypesUi")),
 					 				sliderInput(ns("minPredValueRange"), 
-					 										"Minimum Value Range (First Listed Predictor Type):", 
+					 										"Minimum Value Range (First Listed Data Type):", 
 					 										min=0, max=5, value=0, step = 0.25),
 					 				textInput(ns("predIds"), "Predictor IDS: (Case-Sensitive, e.g. SLFN11 BPTF)", "SLFN11 BPTF"),
 					 				radioButtons(ns("tissueSelectionMode"), "Select Tissues", c("Include", "Exclude")),
