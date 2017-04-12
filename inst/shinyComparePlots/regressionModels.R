@@ -13,6 +13,9 @@ regressionModelsInput <- function(id, dataSourceChoices) {
 					 				uiOutput(ns("responseDataTypeUi")),
 					 				textInput(ns("responseId"), "Response ID:", "609699"),
 					 				uiOutput(ns("predDataTypesUi")),
+					 				sliderInput(ns("minPredValueRange"), 
+					 										"Minimum Value Range (First Listed Predictor Type):", 
+					 										min=0, max=5, value=0, step = 0.25),
 					 				textInput(ns("predIds"), "Predictor IDS: (Case-Sensitive, e.g. SLFN11 BPTF)", "SLFN11 BPTF"),
 					 				radioButtons(ns("tissueSelectionMode"), "Select Tissues", c("Include", "Exclude")),
 					 				uiOutput(ns("selectTissuesUi")),
@@ -42,29 +45,43 @@ regressionModelsInput <- function(id, dataSourceChoices) {
 regressionModels <- function(input, output, session, srcContentReactive, appConfig) {
 	
 	#----[Utility Functions]----------------------------------------------------------------
-	# TO DO: Generalize and move elsewhere if possible.
-	getFeatureDataMatrix <- function(dataSet, dataTypes, srcContent, rmNaCols = TRUE,
-																	 responseVec = NULL, geneSetNames = NULL){
+	# TO DO: Move to rcellminerUtils (?)
+	getValueRange <- function(x, lowQtl = 0.05, highQtl = 0.95, naRm = TRUE){
+		xRange <- quantile(x, probs = c(lowQtl, highQtl), na.rm = TRUE)
+		return(unname(xRange[2] - xRange[1]))
+	}
+	
+	# TO DO: Move to appUtils.R (?)
+	getFeatureDataMatrix <- function(dataSetName, dataTypes, srcContent, rmNaCols = TRUE,
+																	 responseVec = NULL, geneSetNames = NULL, 
+																	 minValueRange = 0, valueRangeLowQtl = 0.05,
+																	 valueRangeHighQtl = 0.95) {
+		# Get gene set-associated genes, if necessary.
+		genes <- character(0)
+		if ((!is.null(geneSetNames)) && (!("All Genes" %in% geneSetNames))) {
+			geneSetNames <- intersect(geneSetNames, names((geneSetPathwayAnalysis::geneSets)))
+			if (length(geneSetNames) > 0) {
+				genes <- sort(unique(c(geneSetPathwayAnalysis::geneSets[geneSetNames], 
+															 recursive = TRUE)))
+			}
+		} 
+		
 		featureDataMat <- NULL
-		for (dType in dataTypes){
-			tmpData <- srcContent[[dataSet]][["molPharmData"]][[dType]]
+		for (dType in dataTypes) {
+			tmpData <- srcContent[[dataSetName]][["molPharmData"]][[dType]]
 			if (!is.null(responseVec)){
-				tmpData <- tmpData[, names(responseVec)]
+				# This ensures that any cell line set restrictions associated with the 
+				# response vector (e.g. by tissue type) are applied to the feature matrix.
+				tmpData <- tmpData[, names(responseVec), drop = FALSE]
 			}
 			
 			# ----[restrict to selected gene set genes if necessary]--------------------
-			if ((isGeneProtDataType(dType)) && 
-					(!is.null(geneSetNames)) && (!("All Genes" %in% geneSetNames))){
-				geneSetNames <- intersect(geneSetNames, names((geneSetPathwayAnalysis::geneSets)))
-				if (length(geneSetNames) > 0){
-					genes <- sort(unique(c(geneSetPathwayAnalysis::geneSets[geneSetNames], 
-																 recursive = TRUE)))
-					dataTypeGenes <- intersect(paste0(dType, genes), rownames(tmpData))
-					if (length(dataTypeGenes) > 0){
-						tmpData <- tmpData[dataTypeGenes, ]
-					} else{
-						tmpData <- NULL
-					}
+			if ((isGeneProtDataType(dType)) && (length(genes) > 0)) {
+				dataTypeGenes <- intersect(paste0(dType, genes), rownames(tmpData))
+				if (length(dataTypeGenes) > 0){
+					tmpData <- tmpData[dataTypeGenes, , drop = FALSE]
+				} else {
+					tmpData <- NULL
 				}
 			}
 			# --------------------------------------------------------------------------
@@ -72,11 +89,20 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			featureDataMat <- rbind(featureDataMat, tmpData)
 		}
 		
-		if (rmNaCols){
-			hasNaInCol <- apply(featureDataMat, MARGIN = 2, FUN = function(x){
+		# Remove columns with missing values (if requested).
+		if ((nrow(featureDataMat) > 0) && rmNaCols) {
+			hasNaInCol <- apply(featureDataMat, MARGIN = 2, FUN = function(x) {
 				any(is.na(x))
 			})
-			featureDataMat <- featureDataMat[, !hasNaInCol]
+			featureDataMat <- featureDataMat[, !hasNaInCol, drop = FALSE]
+		}
+		
+		# Filter features with limited range (if requested).
+		if (minValueRange > 0) {
+			valRange <- apply(featureDataMat, MARGIN = 1, FUN = getValueRange,
+												lowQtl = valueRangeLowQtl, highQtl = valueRangeHighQtl)
+			i <- which(valRange >= minValueRange)
+			featureDataMat <- featureDataMat[i, , drop = FALSE]	
 		}
 		
 		return(featureDataMat)
@@ -148,6 +174,15 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		return(scaledDat)			 
 	}
 	
+	isFeatureSelectionAlgorithm <- function(){
+		featureSelectionAlgorithms <- "Lasso" # TO DO: (perhaps) set from configuration.
+		if (input$algorithm %in% featureSelectionAlgorithms){
+			return(TRUE)
+		} else{
+			return(FALSE)
+		}
+	}
+	
 	summary.LassoResults <- function(x) {
 		stopifnot(inherits(x, "LassoResults"))
 		cat("\n\n")
@@ -179,10 +214,10 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		
 		responseId <- getMatchedIds(input$responseDataType, trimws(input$responseId), 
 																input$dataset, srcContent = srcContentReactive())
-		if (length(responseId) == 0){
+		if (length(responseId) == 0) {
 			shiny::validate(need(FALSE, 
 				paste("ERROR:", paste0("(", input$responseDataType, ") ", input$responseId), "not found. Please use the Univariate Analyses Search IDs tab to find available IDs for each dataset.")))
-		} else{
+		} else {
 			if (length(responseId) > 1){
 				warningMsg <- paste0("Other identifiers matching response variable ID: ",
 														 paste0(responseId[-1], collapse = ", "), ".")
@@ -200,9 +235,9 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		
 		featurePrefixes <- unname(srcContentReactive()[[input$dataset]][["featurePrefixes"]])
 		predIds <- stringr::str_split(stringr::str_trim(input$predIds), pattern = "\\s+")[[1]] 
-		for (id in predIds){
+		for (id in predIds) {
 			idPrefix <- rcellminer::getMolDataType(id)
-			if (idPrefix %in% featurePrefixes){
+			if (idPrefix %in% featurePrefixes) {
 				#------------------------------------------------------------------------------------
 				# This is for predictors ids of the form "expSLFN11". The explicit data type
 				# prefix indicates that one (and only one) specified data type is to be 
@@ -212,21 +247,21 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 					xData <- getFeatureData(idPrefix, id, input$dataset, srcContentReactive())
 					xData$data <- xData$data[names(yData$data)] # Match lines w/non-NA response data.
 					dataTab[, xData$uniqName] <- xData$data
-				} else{
+				} else {
 					warning(paste0(idPrefix, id), " not found.")
 				}
 				#------------------------------------------------------------------------------------
-			} else{
+			} else {
 				#------------------------------------------------------------------------------------
 				# This is for predictor ids of the form "SLFN11". An attempt will be made to
 				# retrieve data for this predictor from all data types specified in
 				# input$predDataTypes.
-				for (dataType in input$predDataTypes){
-					if (validateEntry(dataType, id, input$dataset, srcContentReactive())){
+				for (dataType in input$predDataTypes) {
+					if (validateEntry(dataType, id, input$dataset, srcContentReactive())) {
 						xData <- getFeatureData(dataType, id, input$dataset, srcContentReactive())
 						xData$data <- xData$data[names(yData$data)] # Match lines w/non-NA response data.
 						dataTab[, xData$uniqName] <- xData$data
-					} else{
+					} else {
 						warning(paste0(dataType, id), " not found.")
 					}
 				}
@@ -236,17 +271,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		
 		dataTab <- na.exclude(dataTab)
 		
-		# TO DO: Move appropriately.
-		isFeatureSelectionAlgorithm <- function(){
-			featureSelectionAlgorithms <- "Lasso" # TO DO: (perhaps) set from configuration.
-			if (input$algorithm %in% featureSelectionAlgorithms){
-				return(TRUE)
-			} else{
-				return(FALSE)
-			}
-		}
-		
-		if (!isFeatureSelectionAlgorithm()){
+		if (!isFeatureSelectionAlgorithm()) {
 			shiny::validate(need(ncol(dataTab) > 2,
 													 paste("ERROR: No data for specified predictors.")))
 		}
@@ -254,17 +279,18 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		shiny::validate(need(nrow(dataTab) > 0,
 												 paste("ERROR: All cell lines have missing response or predictor data.")))
 		
+		# Filter cell lines (rows) by tissue type (if requested) ----------------------------------------
 		# Accepting all available tissue types corrsponds to either,
 		# selecting 'all' if the Include radio button is selected, OR
 		# selecting 'none' if the Exclude radio button is selected.
 		allTissuesSelected <- ("all" %in% input$selectedTissues) || ("none" %in% input$selectedTissues)
-		if (!allTissuesSelected){
+		if (!allTissuesSelected) {
 			selectedTissueSamples <- getTissueTypeSamples(tissueTypes = input$selectedTissues, 
 																										dataSource = input$dataset,
 																										srcContent = srcContentReactive())
-			if (input$tissueSelectionMode == "Include"){
+			if (input$tissueSelectionMode == "Include") {
 				matchedLines <- intersect(rownames(dataTab), selectedTissueSamples)
-			} else{ # input$tissueSelectionMode == "Exclude"
+			} else { # input$tissueSelectionMode == "Exclude"
 				matchedLines <- setdiff(rownames(dataTab), selectedTissueSamples)
 			}
 			shiny::validate(need(matchedLines > 0,
@@ -272,7 +298,42 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			
 			dataTab <- dataTab[matchedLines, , drop = FALSE]
 		}
-
+		# -----------------------------------------------------------------------------------------------
+		
+		# Filter predictors by value range (if requested) -----------------------------------------------
+		# Note: this must follow the tissue type-based filtering done above, 
+		# or the range checks will not apply to the ultimately retained cell lines.
+		# Iteration detail: the predictor data begins in column 3, 
+		#  after the cell line name and response value columns.
+		# Iteration detail: (As noted in the interface), the predictor range-based filtering
+		#   is only done for predictors of the first specified predictor data type.
+		minValueRange <- input$minPredValueRange
+		rangeFilterDataType <- input$predDataTypes[1]
+		
+		if (minValueRange > 0) {
+			colsToDrop <- NULL
+			for (j in (3:ncol(dataTab))) {
+				predictorDataType <- rcellminer::getMolDataType(colnames(dataTab)[j])
+				if (predictorDataType != rangeFilterDataType) {
+					next
+				}
+				
+				if (getValueRange(dataTab[, j, drop = TRUE]) < minValueRange) {
+					colsToDrop <- c(colsToDrop, j)
+				}
+			}
+			
+			if (length(colsToDrop) > 0) {
+				dataTab[, colsToDrop] <- NULL
+			}
+		}
+		
+		if (!isFeatureSelectionAlgorithm()) {
+			shiny::validate(need(ncol(dataTab) > 2,
+				paste("ERROR: None of the selected predictors have the specified minimum value range.")))
+		}
+		# -----------------------------------------------------------------------------------------------
+		
 		return(dataTab)
 	})
 	
@@ -355,12 +416,13 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			
 			# First column has cell line names, second column has response data.
 			lassoResponseVec <- setNames(dataTab[, 2, drop = TRUE], rownames(dataTab))
-			lassoPredData <- t(getFeatureDataMatrix(dataSet = input$dataset,
+			lassoPredData <- t(getFeatureDataMatrix(dataSetName = input$dataset,
 				dataTypes = input$predDataTypes, srcContent = srcContent,
-				responseVec = lassoResponseVec, geneSetNames = input$inputGeneSets))
+				responseVec = lassoResponseVec, geneSetNames = input$inputGeneSets,
+				minValueRange = input$minPredValueRange))
 			
 			shiny::validate(need((!is.null(lassoPredData)) && (ncol(lassoPredData) > 0),
-			 "Insufficient admissible data to run lasso algorithm."))
+			 "Insufficient admissible predictor data to run lasso algorithm."))
 			
 			# Check if user has supplied starting predictors, and add their data if
 			# it isn't already included.
@@ -497,10 +559,13 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 												 "Initial predictors must be available for partial correlation computation."))
 		
 		# TO DO: investigate NA handling details in partial correlation computation.
-		comparisonData <- getFeatureDataMatrix(dataSet = input$dataset,
+		comparisonData <- getFeatureDataMatrix(dataSetName = input$dataset, 
 			dataTypes = input$pcDataTypes, srcContent = srcContent,
-			responseVec = responseVec, geneSetNames = input$pcGeneSets, 
-			rmNaCols = FALSE) 
+			responseVec = responseVec, geneSetNames = input$pcGeneSets,
+			minValueRange = input$minParCorDataValueRange,
+			rmNaCols = FALSE)
+		shiny::validate(need(nrow(comparisonData) > 0,
+												 "Initial data (satisfying range criteria) for partial correlation computation."))
 
 		N <- nrow(comparisonData)
 		
@@ -798,6 +863,9 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 																								choices  = srcContentReactive()[[input$dataset]][["featurePrefixes"]],
 																								selected = input$predDataTypes,
 																								multiple=TRUE),
+																		sliderInput(ns("minParCorDataValueRange"), 
+																								"Minimum Range (First Listed Data Type):", 
+																								min=0, max=5, value=0, step = 0.25),
 																		actionButton(ns("computeParCors"), "Run"),
 																		tags$hr(),
 																		DT::dataTableOutput(ns("patternCompResults")))
