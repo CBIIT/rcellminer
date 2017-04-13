@@ -9,6 +9,8 @@
 #' @param Z An N element  pattern specified as a vector or a k x N matrix of
 #' patterns specified along the rows. These are the patterns whose effect (with respect 
 #' to a linear model) is to be excluded when comparing x with Y or each row entry of Y.
+#' Note that for the partial correlation to be value, the pattern(s) in Z should 
+#' not overlap with those in x or Y.
 #' @param updateProgress A optional function to be invoked with each computed
 #' partial correlation to indicate progress.
 #' 
@@ -39,12 +41,19 @@ parCorPatternComparison <- function(x, Y, Z, updateProgress = NULL){
 		Z <- matrix(Z, nrow = 1, ncol = length(Z))
 	}
 	if (is.null(rownames(Y))){
-		rownames(Y) <- 1:nrow(Y)
+		rownames(Y) <- paste0("Y_", 1:nrow(Y))
 	}
+	if (is.null(rownames(Z))){
+		rownames(Z) <- paste0("Z_", 1:nrow(Z))
+	}
+	
 	if (any(duplicated(rownames(Y)))){
 		stop("Remove duplicate rownames in input matrix Y.")
 	}
-	
+	if (any(duplicated(rownames(Z)))){
+		stop("Remove duplicate rownames in input matrix Z.")
+	}
+
 	results <- data.frame(NAME = rownames(Y), PARCOR = NA, PVAL = NA,
 												stringsAsFactors = FALSE)
 	rownames(results) <- results$NAME
@@ -65,6 +74,30 @@ parCorPatternComparison <- function(x, Y, Z, updateProgress = NULL){
 	for (name in rownames(results)){
 		lmData[, "var_Y_n"] <- Y[name, , drop = TRUE]
 		notNa <- xzNotNa & (!is.na(Y[name, , drop=TRUE]))
+		
+		#----[check]-----------------------------------------------------------------
+		# Note: For the partial correlation to be valid, The variables being compared, 
+		# x and the current row of Y, should not be identical to the any of the Z 
+		# variables. We are removing the effect of the Z variables on the x and Y 
+		# variables by fitting linear models for these with respect to the Z variables. 
+		# The residual vectors from the above model fits are then correlated to obtain 
+		# the partial correlation. 
+		# If some of the Z variables are identical to either x or 
+		# the current Y, in theory, a zero residual vector should be obtained,
+		# making the above correlation computation invalid. In pratice, numerical
+		# imprecision will produce a residual vector with small, but non-zero,
+		# entries. If this were to be used in the mentioned correlation, a spurious
+		# partial correlation value would result.
+		xzMatch <- vapply(lmData[, c(-1, -2), drop = FALSE], function(z) {
+			identical(lmData[, "var_x"], z)
+		}, logical(1))
+		yzMatch <- vapply(lmData[, c(-1, -2), drop = FALSE], function(z) {
+			identical(lmData[, "var_Y_n"], z)
+		}, logical(1))
+		if (any(xzMatch) || any(yzMatch)){
+			next
+		}
+		#----------------------------------------------------------------------------
 
 		tmp <- cor.test(
 			residuals(lm(formula = var_x ~ .,   data = lmData[notNa, -2])), 
@@ -82,6 +115,7 @@ parCorPatternComparison <- function(x, Y, Z, updateProgress = NULL){
 		}
 	}
 	
+	results <- na.exclude(results)
 	results <- results[order(results$PARCOR, decreasing = TRUE), ]
 	
 	return(results)
