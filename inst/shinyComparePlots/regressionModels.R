@@ -565,7 +565,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			minValueRange = input$minParCorDataValueRange,
 			rmNaCols = FALSE)
 		shiny::validate(need(nrow(comparisonData) > 0,
-												 "Initial data (satisfying range criteria) for partial correlation computation."))
+												 "No data (satisfying range criteria) for partial correlation computation."))
 
 		N <- nrow(comparisonData)
 		
@@ -622,6 +622,74 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		}
 		
 		return(pcResults)
+	})
+	
+	# Returns a data frame with partial correlation-based pattern comparison results.
+	diffExpResultsTab <- eventReactive(input$computeDiffExp, {
+		shiny::validate(need(length(input$deGeneSets) > 0,
+												 "Please select one or more gene sets."))
+		shiny::validate(need(length(input$deDataTypes) > 0,
+												 "Please select one or more data types for differential expression analysis."))
+		
+		srcContent <- srcContentReactive()
+		
+		if (input$algorithm == "Lasso") {
+			rmAlgoResults <- algoResults()
+			if (!is.null(rmAlgoResults$updatedInputData)) {
+				# Feature selection algorithms will add additional predictors, and
+				# may drop cell lines with missing values for candidate predictors,
+				# requiring update of response data below.
+				dataTab <- rmAlgoResults$updatedInputData
+				
+				# First column has cell line names, second column has response data.
+				responseVec <- setNames(dataTab[, 2, drop = TRUE], rownames(dataTab))
+			}
+		} else {
+			responseData <- rmResponseData()
+			responseVec <- responseData$data
+		}
+		
+		dat <- getFeatureDataMatrix(dataSetName = input$dataset, 
+																dataTypes = input$deDataTypes[1], srcContent = srcContent,
+																responseVec = responseVec, geneSetNames = input$deGeneSets,
+																minValueRange = input$minDiffExpDataValueRange,
+																rmNaCols = FALSE)
+		if (length(input$deDataTypes) > 1) {
+			# Range restriction specified in the interface only applies to the first listed data type.
+			dat <- rbind(dat,
+									 getFeatureDataMatrix(dataSetName = input$dataset, 
+									 										  dataTypes = input$deDataTypes[-1], srcContent = srcContent,
+									 										  responseVec = responseVec, geneSetNames = input$deGeneSets,
+									 										  minValueRange = 0, rmNaCols = FALSE))
+		}
+		shiny::validate(need(nrow(dat) > 0,
+												 "No data (satisfying range criteria) for differential expression analysis."))
+		stopifnot(identical(names(responseVec), colnames(dat)))
+		
+		# Order data matrix columns (cell lines) by decreasing response values.
+		dat <- dat[, order(responseVec, decreasing = TRUE), drop =  FALSE]
+		N <- nrow(dat)
+		numHiLoCols <- min(input$numHiLoResponseLines, floor(ncol(dat)/2))
+		hiResCols <- 1:numHiLoCols
+		loResCols <- (ncol(dat) - numHiLoCols + 1):ncol(dat)
+		
+		deResults <- data.frame(NAME = rownames(dat), PVAL = NA, QVAL = NA,
+														stringsAsFactors = FALSE)
+		
+		progress <- shiny::Progress$new()
+		progress$set(message = "Computing Differential Expression Results: ", value = 0)
+		# Close the progress when this reactive exits (even if there's an error).
+		on.exit(progress$close())
+	
+		for (i in seq_len(N)) {
+			tmp <- wilcox.test(x = dat[i, hiResCols, drop = TRUE], y = dat[i, loResCols, drop = TRUE])
+			deResults[i, "PVAL"] <- tmp$p.value
+			progress$inc(amount = 1/N)
+		}
+		deResults$QVAL <- p.adjust(deResults$PVAL, method = "fdr")
+		deResults <- deResults[order(deResults$QVAL, decreasing = FALSE), , drop = FALSE]
+		
+		return(deResults)
 	})
 	
 	#--------------------------------------------------------------------------------------
@@ -812,30 +880,26 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 									options=list(lengthMenu = c(10, 25, 50, 100), pageLength = 10))
 	})
 	
-	# output$patternCompResults <- DT::renderDataTable({
-	# 	pcResults <- parCorPatternCompResults()
-	# 	pcResults$TOOLTIP <- NA
-	# 	
-	# 	for (i in seq_len(nrow(pcResults))){
-	# 		tooltipStr <- '<div class="tooltip">'
-	# 		noPrefixFeatureName <- rcellminer::removeMolDataType(pcResults[i, "NAME"])
-	# 		tooltipStr <- paste0(tooltipStr, noPrefixFeatureName, '<span class="tooltiptext">')
-	# 		
-	# 		if (noPrefixFeatureName %in% rownames(geneSetPathwayAnalysis::geneAnnotTab)){
-	# 			tooltipStr <- paste0(tooltipStr, 
-	# 													 geneSetPathwayAnalysis::geneAnnotTab[noPrefixFeatureName, "SHORT_ANNOT"])
-	# 		} else{
-	# 			tooltipStr <- paste0(tooltipStr, "NA")
-	# 		}
-	# 		tooltipStr <- paste0(tooltipStr, '</span></div>')
-	# 		
-	# 		pcResults[i, "TOOLTIP"] <- tooltipStr
-	# 	}
-	# 	
-	# 	DT::datatable(pcResults, rownames=FALSE, colnames=colnames(pcResults), filter='top', 
-	# 								style='bootstrap', escape = FALSE,
-	# 								options=list(lengthMenu = c(10, 25, 50, 100), pageLength = 10))
-	# })
+	#----[Show Differential Expression Results in 'Differential Expression' Tab]-------------------
+	output$diffExpResults <- DT::renderDataTable({
+		deResults <- diffExpResultsTab()
+		deResults$ANNOT <- ""
+		
+		for (i in seq_len(nrow(deResults))){
+			name <- rcellminer::removeMolDataType(deResults[i, "NAME"])
+			if (name %in% rownames(geneSetPathwayAnalysis::geneAnnotTab)){
+				deResults[i, "ANNOT"] <-  geneSetPathwayAnalysis::geneAnnotTab[name, "SHORT_ANNOT"]
+			} 
+		}
+		deResults$PVAL <- signif(deResults$PVAL, 3)
+		deResults$QVAL <- signif(deResults$QVAL, 3)
+		
+		DT::datatable(deResults, rownames=FALSE, colnames=colnames(deResults), filter='top', 
+									style='bootstrap', selection = "none",
+									options=list(lengthMenu = c(10, 25, 50, 100), pageLength = 10))
+	})
+	
+  
 	
 	#----[Organize Above Tabs for Display]--------------------------------------------------
 	output$tabsetPanel = renderUI({
@@ -853,6 +917,22 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 																d3heatmapOutput(ns("heatmap")),
 															    p("Select cell line or feature name to highlight heatmap columns or rows, respectively."))
 		techDetailsTabPanel <- tabPanel("Technical Details", verbatimTextOutput(ns("techDetails")))
+		diffExpTabPanel <- tabPanel("Differential Expression", 
+																selectInput(ns("deGeneSets"), "Select Gene Sets",
+																						#choices  = c(names(geneSetPathwayAnalysis::geneSets), "All Genes"),
+																						choices = names(geneSetPathwayAnalysis::geneSets),
+																						selected = "All Gene Sets",
+																						multiple=TRUE),
+																selectInput(ns("deDataTypes"), "Select Data Types",
+																						choices  = srcContentReactive()[[input$dataset]][["featurePrefixes"]],
+																						selected = input$predDataTypes,
+																						multiple=TRUE),
+																sliderInput(ns("minDiffExpDataValueRange"), 
+																						"Minimum Range (First Listed Data Type):", 
+																						min=0, max=5, value=0, step = 0.25),
+																actionButton(ns("computeDiffExp"), "Run"),
+																tags$hr(),
+																DT::dataTableOutput(ns("diffExpResults")))
 		patternCompTabPanel <- tabPanel("Partial Correlation", 
 																		selectInput(ns("pcGeneSets"), "Select Gene Sets",
 																								#choices  = c(names(geneSetPathwayAnalysis::geneSets), "All Genes"),
@@ -870,16 +950,17 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 																		tags$hr(),
 																		DT::dataTableOutput(ns("patternCompResults")))
 		
+		
 		if (require(plotly)){
 			plotTabPanel   <- tabPanel("Plot", 
 																 plotlyOutput(ns("plot"),   width = plotWidth, height = plotHeight))
 			cvPlotTabPanel <- tabPanel("Cross-Validation", 
 																 plotlyOutput(ns("cvPlot"), width = plotWidth, height = plotHeight))
 			tabsetPanel(type = "tabs", heatmapTabPanel, dataTabPanel, plotTabPanel, 
-									cvPlotTabPanel, techDetailsTabPanel, patternCompTabPanel)
+									cvPlotTabPanel, techDetailsTabPanel, diffExpTabPanel, patternCompTabPanel)
 		} else{
 			tabsetPanel(type = "tabs", heatmapTabPanel, dataTabPanel, techDetailsTabPanel, 
-									patternCompTabPanel)	
+									diffExpTabPanel, patternCompTabPanel)	
 		}
 	})
 	

@@ -344,9 +344,6 @@ shinyServer(function(input, output, session) {
 		yValRange <- range(yData$data, na.rm = TRUE)
 		yLimits <- input$yAxisRange
 		
-		
-		
-		
 		# req(FALSE) causes immediate but quiet exit.
 		req(!any(is.null(xValRange)), !any(is.null(xLimits)))
 		req(!any(is.null(yValRange)), !any(is.null(yLimits)))
