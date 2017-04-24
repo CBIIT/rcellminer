@@ -624,7 +624,8 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		return(pcResults)
 	})
 	
-	# Returns a data frame with partial correlation-based pattern comparison results.
+	# Returns a data frame with information on genes that are differentially expressed
+	# between high and low response cell lines.
 	diffExpResultsTab <- eventReactive(input$computeDiffExp, {
 		shiny::validate(need(length(input$deGeneSets) > 0,
 												 "Please select one or more gene sets."))
@@ -690,6 +691,39 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		deResults <- deResults[order(deResults$QVAL, decreasing = FALSE), , drop = FALSE]
 		
 		return(deResults)
+	})
+	
+	
+	# Returns a data frame with gene set enrichment results for genes differentially expressed
+	# between high and low response cell lines.
+	enrichmentResultsTab <- eventReactive(input$computeEnrichment, {
+		diffExpResults <- NULL
+		tryCatch(expr = {
+			# Note: this try/catch construct is needed to allow the error checking
+			# and reporting below. Otherwise, a silent error results when diffExpResultTab()
+			# is called before the differential expression analysis is run.
+			diffExpResults <- diffExpResultsTab()
+		}, error = function(e) { 
+			# Ignore: error will be detected by retained NULL value for diffExpResults.
+		})
+		
+		shiny::validate(need((!is.null(diffExpResults)) && (nrow(diffExpResults) > 0),
+			"Please run the differential expression analysis to derive input for the gene set enrichment analysis."))
+		diffExpFdr <- suppressWarnings(as.numeric(input$enDiffExpFdr))
+		shiny::validate(need((!is.na(diffExpFdr)) && (diffExpFdr > 0) && (diffExpFdr <= 1),
+			"Please enter a number between 0 and 1 for the differential expression analysis FDR threshold."))
+		
+		diffExpResults <- diffExpResults[which(diffExpResults$QVAL < diffExpFdr), , drop = FALSE]
+		
+		enResults <- clusterProfiler::enricher(
+			gene = unique(rcellminer::removeMolDataType(diffExpResults$NAME)),
+			qvalueCutoff = 0.2,
+			TERM2GENE = geneSetPathwayAnalysis::emGmt, 
+			minGSSize = 3, 
+			maxGSSize = 500
+		)@result
+
+		return(enResults)
 	})
 	
 	#--------------------------------------------------------------------------------------
@@ -899,7 +933,13 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 									options=list(lengthMenu = c(10, 25, 50, 100), pageLength = 10))
 	})
 	
-  
+	output$enrichmentResults <- DT::renderDataTable({
+		enResults <- enrichmentResultsTab()
+		
+		DT::datatable(enResults, rownames=FALSE, colnames=colnames(enResults), 
+									filter='top', style='bootstrap', selection = "none",
+									options=list(lengthMenu = c(10, 25, 50, 100), pageLength = 10))
+	})
 	
 	#----[Organize Above Tabs for Display]--------------------------------------------------
 	output$tabsetPanel = renderUI({
@@ -919,8 +959,8 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		techDetailsTabPanel <- tabPanel("Technical Details", verbatimTextOutput(ns("techDetails")))
 		diffExpTabPanel <- tabPanel("Differential Expression", 
 																selectInput(ns("deGeneSets"), "Select Gene Sets",
-																						#choices  = c(names(geneSetPathwayAnalysis::geneSets), "All Genes"),
-																						choices = names(geneSetPathwayAnalysis::geneSets),
+																						choices  = c(names(geneSetPathwayAnalysis::geneSets), "All Genes"),
+																						#choices = names(geneSetPathwayAnalysis::geneSets),
 																						selected = "All Gene Sets",
 																						multiple=TRUE),
 																selectInput(ns("deDataTypes"), "Select Data Types",
@@ -933,10 +973,15 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 																actionButton(ns("computeDiffExp"), "Run"),
 																tags$hr(),
 																DT::dataTableOutput(ns("diffExpResults")))
+		enrichmentTabPanel <- tabPanel("Gene Set Enrichment", 
+																textInput(ns("enDiffExpFdr"), "FDR Level for Differential Expression", value = "0.05"),
+																actionButton(ns("computeEnrichment"), "Run"),
+																tags$hr(),
+																DT::dataTableOutput(ns("enrichmentResults")))
 		patternCompTabPanel <- tabPanel("Partial Correlation", 
 																		selectInput(ns("pcGeneSets"), "Select Gene Sets",
-																								#choices  = c(names(geneSetPathwayAnalysis::geneSets), "All Genes"),
-																								choices = names(geneSetPathwayAnalysis::geneSets),
+																								choices  = c(names(geneSetPathwayAnalysis::geneSets), "All Genes"),
+																								#choices = names(geneSetPathwayAnalysis::geneSets),
 																								selected = "All Gene Sets",
 																								multiple=TRUE),
 																		selectInput(ns("pcDataTypes"), "Select Data Types",
@@ -956,11 +1001,11 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 																 plotlyOutput(ns("plot"),   width = plotWidth, height = plotHeight))
 			cvPlotTabPanel <- tabPanel("Cross-Validation", 
 																 plotlyOutput(ns("cvPlot"), width = plotWidth, height = plotHeight))
-			tabsetPanel(type = "tabs", heatmapTabPanel, dataTabPanel, plotTabPanel, 
-									cvPlotTabPanel, techDetailsTabPanel, diffExpTabPanel, patternCompTabPanel)
+			tabsetPanel(type = "tabs", heatmapTabPanel, dataTabPanel, plotTabPanel, cvPlotTabPanel, 
+									techDetailsTabPanel, diffExpTabPanel, enrichmentTabPanel, patternCompTabPanel)
 		} else{
 			tabsetPanel(type = "tabs", heatmapTabPanel, dataTabPanel, techDetailsTabPanel, 
-									diffExpTabPanel, patternCompTabPanel)	
+									diffExpTabPanel, enrichmentTabPanel, patternCompTabPanel)	
 		}
 	})
 	
