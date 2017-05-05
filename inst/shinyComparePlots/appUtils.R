@@ -131,6 +131,10 @@ getPlotData <- function(xData, yData, showColor, showColorTissues, dataSource=NU
 		if (any(is.na(df$PlotTissueType))){
 			df$PlotTissueType[which(is.na(df$PlotTissueType))] <- "TISSUE_TYPE_NA"
 		}
+		
+		if ("EMT" %in% colnames(srcContent[[dataSource]]$sampleData)) {
+			df$EMT <- srcContent[[dataSource]]$sampleData[rownames(df), "EMT"]
+		}
 	}
 	
 	return(df)

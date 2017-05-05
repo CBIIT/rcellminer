@@ -131,7 +131,7 @@ plotCellMiner2D <- function(df, xCol="x", yCol="y", xLabel=xCol, yLabel=yCol,
 	}
 	
 	if(!showLegend) {
-		p1 <- p1 + theme(legend.position="none", plot.title = element_text(size=16),
+		p1 <- p1 + theme(legend.position="none", plot.title = element_text(size=14),
 										 axis.title.x = element_text(size=20),
 										 axis.title.y = element_text(size=20))
 	}

@@ -385,6 +385,9 @@ shinyServer(function(input, output, session) {
   		showColorTissues = input$showColorTissues, dataSource = input$xDataset, 
   		srcContent = srcContentReactive())
   	dlDataTabCols <- c(colnames(dlDataTab)[1:4], paste0("OncoTree", 1:4))
+  	if ("EMT" %in% colnames(dlDataTab)) {
+  		dlDataTabCols <- c(dlDataTabCols, "EMT")
+  	}
   	dlDataTab <- dlDataTab[, dlDataTabCols]
   	dlDataTab[, 2] <- round(dlDataTab[, 2], 3)
   	dlDataTab[, 3] <- round(dlDataTab[, 3], 3)
@@ -634,6 +637,9 @@ shinyServer(function(input, output, session) {
     	# Column selection below is to restrict to cell line, x, y features,
     	# and tissue type information (source-provided + OncoTree).
     	dfCols <- c(colnames(df)[1:4], paste0("OncoTree", 1:4))
+    	if ("EMT" %in% colnames(df)) {
+    		dfCols <- c(dfCols, "EMT")
+    	}
     	df <- df[, dfCols]
 
     	write.table(df, file, quote=FALSE, row.names=FALSE, sep="\t")
