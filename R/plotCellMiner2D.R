@@ -96,7 +96,7 @@ plotCellMiner2D <- function(df, xCol="x", yCol="y", xLabel=xCol, yLabel=yCol,
 		corResults <- cor.test(df[,xCol], df[,yCol], use="pairwise.complete.obs")
 		title <- paste0(paste(yLabel, '~', xLabel),
 										', r=', round(corResults$estimate, 2),
-										' p=', signif(corResults$p.value, 2))
+										' p=', formatC(signif(corResults$p.value, 2)))
 	}
 
 	# Plot image
