@@ -738,8 +738,14 @@ shinyServer(function(input, output, session) {
   })
 
   output$showColorTissuesUi <- renderUI({
+  	#tissueChoices <- analysisTissueTypes()
+  	tissueChoices <- getSampleSetTissueTypes(
+  		sampleSet = rownames(req(matchedCellLinesTab())), 
+  		dataSource = input$xDataset, 
+  		srcContent = srcContentReactive()
+  		) 
   	selectInput("showColorTissues", "Tissues to Color",
-  							choices=analysisTissueTypes(), multiple=TRUE)
+  							choices = tissueChoices, multiple = TRUE)
 	})
   
   output$ipAddress <- renderText({

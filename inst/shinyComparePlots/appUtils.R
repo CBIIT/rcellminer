@@ -58,11 +58,27 @@ getFeatureData <- function(prefix, id, dataSource, srcContent) {
 	return(results)
 }
 
-getTissueTypeSamples <- function(tissueTypes, dataSource, srcContent){
+getTissueTypeSamples <- function(tissueTypes, dataSource, srcContent) {
 	matchedSamples <- c(lapply(tissueTypes, function(tissue){
 		srcContent[[dataSource]]$tissueToSamplesMap[[tissue]]
 	}), recursive=TRUE)
 	return(unique(matchedSamples))
+}
+
+# Returns all tissue types associated with one or more samples in sampleSet.
+getSampleSetTissueTypes <- function(sampleSet, dataSource, srcContent) {
+	tissueToSamples <- srcContent[[dataSource]]$tissueToSamplesMap
+	
+	isMatchedType <- vapply(names(tissueToSamples), function(tissueType) {
+		length(intersect(sampleSet, tissueToSamples[[tissueType]])) > 0
+	}, logical(1))
+	
+	matchedTypes <- character(0)
+	if (any(isMatchedType)) {
+		matchedTypes <- sort(unique(names(tissueToSamples[isMatchedType])))
+	}
+	
+	return(matchedTypes)
 }
 
 getPlotData <- function(xData, yData, showColor, showColorTissues, dataSource=NULL,
