@@ -1001,11 +1001,15 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 																 plotlyOutput(ns("plot"),   width = plotWidth, height = plotHeight))
 			cvPlotTabPanel <- tabPanel("Cross-Validation", 
 																 plotlyOutput(ns("cvPlot"), width = plotWidth, height = plotHeight))
-			tabsetPanel(type = "tabs", heatmapTabPanel, dataTabPanel, plotTabPanel, cvPlotTabPanel, 
-									techDetailsTabPanel, diffExpTabPanel, enrichmentTabPanel, patternCompTabPanel)
+			tabsetPanel(type = "tabs", 
+									heatmapTabPanel, dataTabPanel, plotTabPanel, cvPlotTabPanel, techDetailsTabPanel, 
+									#diffExpTabPanel, enrichmentTabPanel, 
+									patternCompTabPanel)
 		} else{
-			tabsetPanel(type = "tabs", heatmapTabPanel, dataTabPanel, techDetailsTabPanel, 
-									diffExpTabPanel, enrichmentTabPanel, patternCompTabPanel)	
+			tabsetPanel(type = "tabs", 
+									heatmapTabPanel, dataTabPanel, techDetailsTabPanel, 
+									#diffExpTabPanel, enrichmentTabPanel, 
+									patternCompTabPanel)	
 		}
 	})
 	
