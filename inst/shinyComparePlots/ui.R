@@ -88,12 +88,12 @@ shinyUI(
 	          	id="input_container", 
 	            selectInput("xDataset", "x-Axis Dataset", choices=dataSourceChoices, selected = "nci60"),
 	            uiOutput("xPrefixUi"),
-	            textInput("xId", "ID: (e.g. 94600 or SLFN11)", "SLFN11"),
+	            textInput("xId", "ID: (e.g. Topotecan or SLFN11)", "SLFN11"),
 	          	uiOutput("xAxisRangeUi"),
 	          	
 	            selectInput("yDataset", "y-Axis Dataset", choices=dataSourceChoices, selected = "nci60"),
 	            uiOutput("yPrefixUi"),
-	          	textInput("yId", "ID: (e.g. 94600 or SLFN11)", "94600"),
+	          	textInput("yId", "ID: (e.g. Topotecan or SLFN11)", "Topotecan"),
 	          	uiOutput("yAxisRangeUi"),
 	          	
 	            checkboxInput("showColor", "Show Color?", value=TRUE),
