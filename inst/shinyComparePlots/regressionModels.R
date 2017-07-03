@@ -11,7 +11,7 @@ regressionModelsInput <- function(id, dataSourceChoices) {
 					 				id="rm_input_container", 
 					 				selectInput(ns("dataset"), "Dataset", choices=dataSourceChoices, selected = "nci60"),
 					 				uiOutput(ns("responseDataTypeUi")),
-					 				textInput(ns("responseId"), "Response ID:", "609699"),
+					 				textInput(ns("responseId"), "Response ID:", "topotecan"),
 					 				uiOutput(ns("predDataTypesUi")),
 					 				sliderInput(ns("minPredValueRange"), 
 					 										"Minimum Value Range (First Listed Data Type):", 
