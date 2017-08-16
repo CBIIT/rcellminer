@@ -842,6 +842,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		xAxisFontSize <- "6pt"
 
 		scaledDataMatrix <- scaleDataForHeatmap(dataMatrix, input$useHeatmapRowColorScale)
+		#save(scaledDataMatrix, file = "~/Downloads/scaledDataMatrix.RData")
 		d3heatmap::d3heatmap(x = scaledDataMatrix,  # Used for color scaling.
 												 cellnote = dataMatrix, # Used for tooltip values.
 												 dendrogram = "none", 
