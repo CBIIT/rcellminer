@@ -136,8 +136,8 @@ shinyUI(
 		#-----[NavBar Tab: About]------------------------------------------------------------------------
     tabPanel("About",
     	includeMarkdown("www/files/about.md"),
-    	h1("For testing"),
-    	textOutput("ipAddress")
+    	#h1("For testing"),
+    	#textOutput("ipAddress")
     )
 	)
 )
