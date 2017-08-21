@@ -22,7 +22,8 @@
 #' @importFrom rcdk view.image.2d
 rcdkplot <- function(molecule,width=300,height=300,marg=0,main='') {
 	par(mar=c(marg,marg,2.2,marg)) # set margins to zero since this isn't a real plot; top is 1.5 to accomodate title
-	temp1 <- view.image.2d(molecule,width,height) # get Java representation into an image matrix. set number of pixels you want horiz and vertical
+  depictor <- get.depictor(width=width, height=height) # Necessary as of Summer 2017
+	temp1 <- view.image.2d(molecule,depictor) # get Java representation into an image matrix. set number of pixels you want horiz and vertical
 	plot(NA,NA,xlim=c(1,10),ylim=c(1,10),xaxt='n',yaxt='n',xlab='',ylab='',main=main) # create an empty plot
 	rasterImage(temp1,1,1,10,10) # boundaries of raster: xmin, ymin, xmax, ymax. here i set them equal to plot boundaries
 }
