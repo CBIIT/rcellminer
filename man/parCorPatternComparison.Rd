@@ -17,7 +17,9 @@ specified along the rows, with rownames set appropriately.}
 
 \item{Z}{An N element  pattern specified as a vector or a k x N matrix of
 patterns specified along the rows. These are the patterns whose effect (with respect 
-to a linear model) is to be excluded when comparing x with Y or each row entry of Y.}
+to a linear model) is to be excluded when comparing x with Y or each row entry of Y.
+Note that for the partial correlation to be value, the pattern(s) in Z should 
+not overlap with those in x or Y.}
 
 \item{updateProgress}{A optional function to be invoked with each computed
 partial correlation to indicate progress.}

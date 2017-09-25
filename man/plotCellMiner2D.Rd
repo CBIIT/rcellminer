@@ -8,7 +8,7 @@ plotCellMiner2D(df, xCol = "x", yCol = "y", xLabel = xCol,
   yLabel = yCol, title = NULL, colorPalette = NULL, classCol = NULL,
   tooltipCol = NULL, showLegend = FALSE, showTrendLine = TRUE,
   showTitle = TRUE, singleColor = "#0000FF", alpha = 1,
-  numberColPrefix = "X", xLimVal = NULL, yLimVal = NULL)
+  numberColPrefix = "X", xLimVal = NULL, yLimVal = NULL, pointSize = 3)
 }
 \arguments{
 \item{df}{a data.frame with at least two columns}
@@ -42,6 +42,8 @@ plotCellMiner2D(df, xCol = "x", yCol = "y", xLabel = xCol,
 \item{xLimVal}{a two entry vector (min, max) to set the x-axis}
 
 \item{yLimVal}{a two entry vector (min, max) to set the y-axis}
+
+\item{pointSize}{size of points on plot (DEFAULT: 3)}
 }
 \value{
 a ggplot object
