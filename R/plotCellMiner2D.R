@@ -7,6 +7,7 @@
 #' @param yLabel the y plot label
 #' @param title the plot title, if null the correlation will appear (DEFAULT: NULL)
 #' @param classCol the name of the column with the classes. Values in column of df must be a factor (DEFAULT: NULL)
+#' @param tooltipCol the name of the column used for tooltips when plotted with plotly
 #' @param colorPalette a named vector with the names classes and value colors (DEFAULT: NULL)
 #' @param showLegend boolean, whether to show the legend (DEFAULT: FALSE)
 #' @param showTrendLine boolean, whether to show the trendline 

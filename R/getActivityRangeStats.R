@@ -16,6 +16,8 @@
 #' 
 #' @concept rcellminer
 #' @export
+#' 
+#' @importFrom stats median
 getActivityRangeStats <- function(nscSet, concFormat='NegLogGI50M', onlyCellMinerExps=TRUE){
   if (!is.element(concFormat, c("NegLogGI50M", "IC50MicroM"))){
     stop(paste(concFormat, "is not supported. Select from 'NegLogGI50M' or 'IC50MicroM'."))

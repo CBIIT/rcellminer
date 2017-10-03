@@ -17,24 +17,71 @@ if (!require(rcellminerUtils)){
 	warning("rcellminerUtils package must be installed for full cross-database functionality.")
 }
 
-# Note: The jsonlite package has a validate() function whose name clashes with a
-# validate() function provided by the shiny package.
-# shiny::validate() must be used in the following code.
 
 #--------------------------------------------------------------------------------------------------
-# LOAD CONFIGURATION AND CONSTRUCT APP (MOLECULAR + DRUG) DATA.
+# LOAD CONFIGURATION AND REQUIRED DATA SOURCE PACKAGES.
 #--------------------------------------------------------------------------------------------------
-#config <- jsonlite::fromJSON(system.file("shinyComparePlots", "config.json", package="rcellminer"))
 config <- jsonlite::fromJSON("config.json")
 appConfig <- jsonlite::fromJSON("appConfig.json")
 metaConfig <- jsonlite::fromJSON("configMeta.json")
+source("modal.R")
 source("appUtils.R")
 source("dataLoadingFunctions.R")
+
+#if (!is.null(appConfig$appName)){
+#	appTitle <- appConfig$appName
+#} else{
+#	appTitle <- "CellMiner"
+#}
+
+# Construct named character vector mapping displayed data source names to
+# internally used source identifiers.
+dataSourceChoices <- setNames(names(config),
+															vapply(config, function(x) { x[["displayName"]] }, 
+																		 character(1)))
+
+metaChoices <- setNames(names(metaConfig),
+												vapply(metaConfig, function(x) { x[["displayName"]] }, 
+															 character(1)))
+if(!file.exists("srcContent.rds")) {
+	
+ for (configSrcId in names(config)){
+	srcName <- config[[configSrcId]][["displayName"]]
+	srcPackages <- names(config[[configSrcId]][["packages"]])
+	for (pkgName in srcPackages){
+		 if (!require(pkgName, character.only = TRUE)){
+			  dataSourceChoices[srcName] <- NA
+		  	break
+	  	}
+	 }
+  }
+
+ if (any(is.na(dataSourceChoices))){
+	stop("Check configuration file: one or more required data source packages must be installed.")
+ } 
+	
+} else {
+	srcContent <- readRDS("srcContent.rds")
+}
 #--------------------------------------------------------------------------------------------------
 
-if(file.exists("srcContent.rds")) {
-        srcContent <- readRDS("srcContent.rds")
-}
+#if("rCharts" %in% installed.packages()) {
+#	options(RCHART_LIB='highcharts')	
+#	library(rCharts)
+#	hasRCharts <- TRUE
+#} else {
+#	hasRCharts <- FALSE
+#}
+
+colorSet <- loadNciColorSet(returnDf=TRUE)
+
+###--------
+
+
+
+#--------------------------------------------------------------------------------------------------
+
+
 
 
 shinyServer(function(input, output, session) {

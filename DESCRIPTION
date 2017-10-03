@@ -22,7 +22,10 @@ LazyData: true
 Imports:
     stringr,
     gplots,
+    ggplot2,
     methods,
+    stats,
+    utils,
     shiny
 Depends:
     R (>= 3.2),

@@ -14,7 +14,7 @@
 #' @concept rcellminerData
 #' @export
 #' 
-#' @importFrom methods setGeneric
+#' @importFrom methods setGeneric new as validObject
 setGeneric("DrugData", 
 					 function(act, repeatAct, sampleData, ...) { standardGeneric("DrugData") } )
 
@@ -29,7 +29,7 @@ setGeneric("DrugData",
 #' @concept rcellminerData
 #' @export
 #' 
-#' @importFrom methods setGeneric
+#' @importFrom methods setGeneric new as validObject
 setGeneric("MolData", 
 					 function(eSetList, sampleData, ...) { standardGeneric("MolData") } )
 

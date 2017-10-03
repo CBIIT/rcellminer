@@ -24,15 +24,15 @@
 #' drugAct <- exprs(getAct(rcellminerData::drugData))
 #' molData <- getMolDataMatrices()
 #' plots <- c("mut", "drug", "cop", "xai", "pro")
-#' plotCellMiner(drugAct, molData, plots=plots, nsc="94600", gene="CDK4", verbose=TRUE)
+#' plotCellMiner(drugAct, molData, plots=plots, nsc="94600", gene="CDK4", verbose=FALSE)
 #' 
 #' plots <- c("mut", "xai", "cop", "cop", "cop", "cop")
 #' plotCellMiner(drugAct, molData, plots=plots, nsc="94600", gene=c("CDK4", "TP53", 
-#'   "BRAF", "GAPDH"), verbose=TRUE)
+#'   "BRAF", "GAPDH"), verbose=FALSE)
 #' 
-#' plotCellMiner(drugAct, molData, plots=plots, nsc=NULL, features=c("mutCDK4", 
-#'   "xaiCDK4", "exochr1:101704532_G_T", "mdais_p53_mut", "mirhsa-miR-22", "proTP53_26_GBL00064"), 
-#'   verbose=TRUE)
+#' plotCellMiner(drugAct, molData, plots=NULL, nsc=NULL, features=c("mutCDK4", 
+#'   "xaiCDK4", "exochr1:101704532_G_T", "mdaIS_P53_MUT", "mirhsa-miR-22", "proTP53_26_GBL00064"), 
+#'   verbose=FALSE)
 #' 
 #' @concept rcellminer
 #' @export

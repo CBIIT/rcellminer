@@ -17,6 +17,8 @@
 #' 
 #' @concept rcellminer
 #' @export
+#' 
+#' @importFrom stats cor.test pt
 crossCors <- function(X, Y = NULL, method = "pearson") {
 	if (!(method %in% c("pearson", "spearman"))){
 		stop("Parameter 'method' must be set to either 'pearson' or 'spearman'.")

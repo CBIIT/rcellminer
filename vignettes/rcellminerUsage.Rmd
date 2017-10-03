@@ -453,7 +453,7 @@ nci60GeneMut <- getAllFeatureData(rcellminerData::molData)[["mut"]]
 We then visualize the NCI-60 mutation patterns for a subset of DNA repair
 genes.
 ```{r vizDnarGeneMutations, fig.width=10, fig.height=7}
-dnarGeneSet <- c("APC", "APLF", "ATAD5", "ATM", "CLSPN", "ERCC6", "FANCI", 
+dnarGeneSet <- c("APC", "APLF", "ATM", "CLSPN", "ERCC6", "FANCI", 
                  "FANCM", "GEN1", "HLTF", "MLH1", "POLD1", "POLE", "POLG",
                  "POLQ", "RAD54L", "REV3L", "RMI1", "SLX4", "SMARCA4", "SMC2",
                  "TP53", "WRN")

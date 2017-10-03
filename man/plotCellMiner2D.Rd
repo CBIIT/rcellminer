@@ -27,6 +27,8 @@ plotCellMiner2D(df, xCol = "x", yCol = "y", xLabel = xCol,
 
 \item{classCol}{the name of the column with the classes. Values in column of df must be a factor (DEFAULT: NULL)}
 
+\item{tooltipCol}{the name of the column used for tooltips when plotted with plotly}
+
 \item{showLegend}{boolean, whether to show the legend (DEFAULT: FALSE)}
 
 \item{showTrendLine}{boolean, whether to show the trendline}

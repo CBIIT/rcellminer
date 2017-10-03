@@ -16,32 +16,13 @@ if (!is.null(appConfig$appName)){
 	appTitle <- "CellMiner"
 }
 
-# Construct named character vector mapping displayed data source names to
-# internally used source identifiers.
 dataSourceChoices <- setNames(names(config),
-														  vapply(config, function(x) { x[["displayName"]] }, 
-														  			 character(1)))
+															vapply(config, function(x) { x[["displayName"]] }, 
+																		 character(1)))
 
 metaChoices <- setNames(names(metaConfig),
 												vapply(metaConfig, function(x) { x[["displayName"]] }, 
 															 character(1)))
-
-for (configSrcId in names(config)){
-	srcName <- config[[configSrcId]][["displayName"]]
-	srcPackages <- names(config[[configSrcId]][["packages"]])
-	
-	for (pkgName in srcPackages){
-		if (!require(pkgName, character.only = TRUE)){
-			dataSourceChoices[srcName] <- NA
-			break
-		}
-	}
-}
-
-if (any(is.na(dataSourceChoices))){
-	stop("Check configuration file: one or more required data source packages must be installed.")
-} 
-#--------------------------------------------------------------------------------------------------
 
 if("rCharts" %in% installed.packages()) {
 	options(RCHART_LIB='highcharts')	
@@ -50,10 +31,7 @@ if("rCharts" %in% installed.packages()) {
 } else {
 	hasRCharts <- FALSE
 }
-
-colorSet <- loadNciColorSet(returnDf=TRUE)
-
-
+## ---
 
 shinyUI(
 	navbarPage(appTitle, 

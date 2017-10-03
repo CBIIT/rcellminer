@@ -24,6 +24,7 @@
 #' @export
 #' 
 #' @importFrom fingerprint distance
+#' @importFrom utils setTxtProgressBar str txtProgressBar
 compareFingerprints <- function(ids=NULL, smiles=NULL, fpType="standard", 
 																verbose=TRUE, fingerprint.list=NULL) {
 	found <- NULL 
