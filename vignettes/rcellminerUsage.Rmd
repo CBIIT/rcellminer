@@ -457,6 +457,7 @@ dnarGeneSet <- c("APC", "APLF", "ATM", "CLSPN", "ERCC6", "FANCI",
                  "FANCM", "GEN1", "HLTF", "MLH1", "POLD1", "POLE", "POLG",
                  "POLQ", "RAD54L", "REV3L", "RMI1", "SLX4", "SMARCA4", "SMC2",
                  "TP53", "WRN")
+dnarGeneSet <- intersect(dnarGeneSet, rownames(nci60GeneMut))
 
 dnarGeneMut <- nci60GeneMut[dnarGeneSet, ]
 
@@ -523,7 +524,6 @@ heatmap(dnarGeneAltPlotData, scale="none", Rowv = NA, Colv = NA,
 For any altered gene, we can identify drugs with significantly different 
 activity between altered and non-altered cell lines.
 ```{r checkAplfDrugAssocs, fig.width=10, fig.height=7}
-#geneName <- "SLX4"
 geneName <- "APLF"
 altLineIndices <- which(dnarGeneAlt[geneName, ] != 0)
 nonAltLineIndices <- which(dnarGeneAlt[geneName, ] == 0)
