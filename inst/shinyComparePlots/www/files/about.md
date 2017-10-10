@@ -57,7 +57,7 @@ prediction models and
 ![Screenshot of CellMinerCDB Application](files/rcellminer_screenshot_anno.png)
 
 # About the Data
-For specific information about the data made available for particular sources, please refer to the 'Data Details' navbar tab.
+For specific information about the data made available for particular sources, please refer to the 'Metadata' navbar tab.
 
 Drug mechanism of action details:
 * [NCI60](https://raw.githubusercontent.com/cannin/rcellminer/devel/inst/extdata/Drug_MOA_Key.txt)
