@@ -1,175 +1,209 @@
 {
   "nci60":{
     "displayName":"NCI-60",
-    "fullName": "NCI-60",
+    "fullName": "CellMiner NCI-60",
     "url":"https://discover.nci.nih.gov/cellminer/datasetMetadata.do",
     "packages":{
       "rcellminerData":{
         "MetaData":[
         	{
-        		"dataType":"Drug Activity",
-        		"platform":"Sulforhodamine assay",
-        		"platformInfo":"Negative log10 (GI50) values of assay",
-        		"normalizeMethod":"--"
+        		"dataType":"act",
+        		"description":"drug activity",
+        		"units":"z-score from -log10[GI50(molar)] data across NCI-60",
+        		"platform":"sulforhodamine B total protein cytotoxicity assay, 48hrs post-treatment",
+        		"ref_pmid":"26048278"
         	},
         	{
-        		"dataType":"Expression (Z-Score)",
-        		"platform":"Multiple",
-        		"platformInfo":"Probe intensities combined from four platforms: Agilent Human Genome CGH Microarray 44A, Nimblegen HG19 CGH 385K WG Tiling v2.0, Affymetrix GeneChip Human Mapping 500k Array Set and Illumina Human1Mv1_C Beadchip",
-        		"normalizeMethod":"--"
+        		"dataType":"exp",
+        		"description":"mRNA expression",
+        		"units":"z-score from microarray log2 intensity data across NCI-60",
+        		"platform":"Affymetrix HG-U95, HG-U133, HG-U133 Plus 2.0; GeneChip Human Exon 1.0 ST array; Agilent Whole Human Genome Oligo Microarray",
+        		"ref_pmid":"26048278"
         	},
         	{
-        		"dataType":"Expression (Avg. log2 Int.)",
-        		"platform":"--",
-        		"platformInfo":"--",
-        		"normalizeMethod":"--"
+        		"dataType":"xai",
+        		"description":"mRNA expression",
+        		"units":"multi-platform microarray average log2 intensity",
+        		"platform":"Affymetrix HG-U95, HG-U133, HG-U133 Plus 2.0; GeneChip Human Exon 1.0 ST array; Agilent Whole Human Genome Oligo Microarray",
+        		"ref_pmid":"26048278"
         	},
         	{
-        		"dataType":"Methylation",
-        		"platform":"MassARRAY EpiTYPER",
-        		"platformInfo":"500+ target regions scanned using EpiTYPER",
-        		"normalizeMethod":"Filtering to exclude Primer Dimer formation"
+        		"dataType":"met",
+        		"description":"DNA methylation",
+        		"units":"average of beta values for gene-associated probes; 0 (no methylation), 1 (complete methylation)",
+        		"platform":"Illumina Infinium Human Methylation 450",
+        		"ref_pmid":"27923837"
         	},
         	{
-        		"dataType":"Mutations",
-        		"platform":"ABI 3730 Sequencer",
-        		"platformInfo":"Sequencing for NCI-60 for mutations in known human cancer genes",
-        		"normalizeMethod":"--"
+        		"dataType":"mut",
+        		"description":"DNA mutation",
+        		"units":"probability of homozygous, function-impacting mutation",
+        		"platform":"exome sequencing",
+        		"ref_pmid":"25032700"
         	},
         	{
-        		"dataType":"DNA Copy Number",
-        		"platform":"Human Genome CGH Microarray 44A and 44B",
-        		"platformInfo":"genome wide variation profiling array for coding and non-coding regions",
-        		"normalizeMethod":"Agilent Feature Extraction done with software version 8.1 with default settings for CGH arrays"
+        		"dataType":"cop",
+        		"description":"DNA copy number",
+        		"units":"average log2 probe intensity ratio for the cell line (gene-specific chromosomal segment) DNA relative to normal DNA",
+        		"platform":"Agilent Human Genome CGH Microarray 44A; Roche NimbleGen Systems H19 CGH 385K WG Tiling v2.0 array; Affymetrix GeneChip Human Mapping 500 k Array Set; Illumina Human Human1 Mv1_C Beadchip array",
+        		"ref_pmid":"24670534"
         	},
         	{
-        		"dataType":"Protein Expression (RPPA)",
-        		"platform":"Reverse-phase lysate arrays (RPLA)",
-        		"platformInfo":"Antibodies described in AbMiner at http://discover.nci.nih.gov/abminer/",
-        		"normalizeMethod":"Dose interpolation analysis done using the DI25 algorithm. described previously (Nishizuka et al, PNAS, 2003)"
+        		"dataType":"mir",
+        		"description":"microRNA expression",
+        		"units":"average log2 microarray probe intensity",
+        		"platform":"Agilent Technologies Human miRNA Microarray V2",
+        		"ref_pmid":"20442302"
         	},
         	{
-        		"dataType":"Protein Expression (SWATH-MS)",
-        		"platform":"--",
-        		"platformInfo":"--",
-        		"normalizeMethod":"--"
+        		"dataType":"mda",
+        		"description":"cell line metadata (phenotypic measures)",
+        		"units":"measure-specific",
+        		"platform":"measure-specific",
+        		"ref_pmid":"26048278"
+        	},
+        	{
+        		"dataType":"pro",
+        		"description":"protein expression (RPPA)",
+        		"units":"protein intensities",
+        		"platform":"reverse-phase protein array",
+        		"ref_pmid":"17339364"
         	}
         ]
       }
     }
   },
+  	"gdscDec15":{
+		"displayName":"GDSC",
+		"fullName": "Sanger/MGH Genomics of Drug Sensitivity in Cancer",
+		"url" : "http://www.cancerrxgene.org/help",
+		"packages":{
+	  "gdscDataDec15":{
+	    "MetaData":[
+	    		{
+        		"dataType":"act",
+        		"description":"drug activity",
+        		"units":"-log10[IC50(molar)]",
+        		"platform":"Adherent cells: fluorescent nucleic acid stain (Syto 60); Suspended cells: oxidation-reduction levels (Resazurin); NCI/DTB-submitted compounds: ATP measurements (Cell Titer Glo); all assays at 72 hours post-treatment",
+        		"ref_pmid":"27397505"
+        	},
+	      	{
+        		"dataType":"exp",
+        		"description":"mRNA expression",
+        		"units":"microarray log2 intensity",
+        		"platform":"Affymetrix Human Genome U219",
+        		"ref_pmid":"27397505"
+        	},
+        	{
+        		"dataType":"met",
+        		"description":"DNA methylation",
+        		"units":"average of beta values for gene-associated probes; 0 (no methylation), 1 (complete methylation)",
+        		"platform":"Illumina Infinium Human Methylation 450",
+        		"ref_pmid":"27397505"
+        	}
+	  	 ]
+	  	}
+		}
+  },
   "ccle":{
     "displayName":"CCLE",
-    "fullName": "Cancer Cell Line Encyclopedia",
+    "fullName": "Broad/Novartis Cancer Cell Line Encyclopedia",
     "url":"https://portals.broadinstitute.org/ccle/about",
     "packages":{
       "ccleData":{
         "MetaData":[
         	{
-        		"dataType":"Drug Activity (-log10[IC50M])",
-        		"platform":"Pharmacological Profiling",
-        		"platformInfo":"8-point dose response curves",
-        		"normalizeMethod":"--"
+        		"dataType":"act",
+        		"description":"drug activity",
+        		"units":"-log10[IC50(molar)]",
+        		"platform":"ATP measurements (Cell Titer Glo), 72 hours post-treatment",
+        		"ref_pmid":"22460905"
         	},
         	{
-        		"dataType":"Expression (log2)",
-        		"platform":"Affymetrix U133+2 arrays",
-        		"platformInfo":"--",
-        		"normalizeMethod":"--"
+        		"dataType":"exp",
+        		"description":"mRNA expression",
+        		"units":"microarray log2 intensity",
+        		"platform":"Affymetrix HG-U133 Plus 2.0",
+        		"ref_pmid":"22460905"
         	},
         	{
-        		"dataType":"Mutations",
-        		"platform":"Oncomap 3.0 core",
-        		"platformInfo":"--",
-        		"normalizeMethod":"Quantile normalization"
+        		"dataType":"mut",
+        		"description":"DNA mutation",
+        		"units":"probability of homozygous, function-impacting mutation",
+        		"platform":"exome capture sequencing",
+        		"ref_pmid":"22460905"
         	},
-        		{
-        		"dataType":"DNA Copy Number",
+        	{
+        		"dataType":"cop",
+        		"description":"DNA copy number",
+        		"units":"gene-level copy number estimate",
         		"platform":"Affymetrix SNP6.0 Arrays",
-        		"platformInfo":"Raw Affymetrix CEL files converted to a single value for each probe set representing a SNP allele or a copy number probe",
-        		"normalizeMethod":"Inferred based on estimating probe set specific linear combination curves, followed by most similar HapMap normal samples"
+        		"ref_pmid":"22460905"
         	}
         ]
       }
     }
   },
-	"gdscDec15":{
-		"displayName":"GDSC",
-		"fullName": "Genomics of Drug Sensitivity in Cancer",
-		"url" : "http://www.cancerrxgene.org/help",
-		"packages":{
-	  "gdscDataDec15":{
-	    "MetaData":[
-	      	{
-	        	"dataType":"Drug Activity (-log10[IC50M])",
-        		"platform":"Pharmacological Profiling",
-        		"platformInfo":"Fluroesence intensity data on cell viability assays. Cell viability was determined using either a DNA dye (Syto60) or metabolic assay (Resazurin or CellTitre-Glo)",
-        		"normalizeMethod":"Dose response curve fit using a multi-level fixed effect model"
-	      	},
-	      	{
-	        	"dataType":"Expression (log2)",
-        		"platform":"Affymetrix Human Genome U219 Array",
-        		"platformInfo":"E-MTAB-3610 Transcriptional Profiling (Array Express)",
-        		"normalizeMethod":"Robust Multi-Array Average (RMA) normalised"
-	      	}
-	  	 ]
-	  	}
-		}
-  },
   "ctrp":{
     "displayName":"CTRP",
-    "fullName": "Cancer Therapeutics Response Portal",
+    "fullName": "Broad Cancer Therapeutics Response Portal",
     "url":"http://portals.broadinstitute.org/ctrp/",
     "packages":{
       "ctrpData":{
         "MetaData":[
         	{
-        		"dataType":"Drug Activity (AUC)",
-        		"platform":"CellTiter-Glo with detection on ViewLux Microplate Imager",
-        		"platformInfo":"Measures cellular ATP levels to determine cell number and growth ",
-        		"normalizeMethod":"Percent viability curves fit with an area-under-concecentration (AUC) response curve"
+        		"dataType":"act",
+        		"description":"drug activity",
+        		"units":"activity area (area above 16-pt dose-response curve)",
+        		"platform":"ATP measurements (Cell Titer Glo), 72 hours post-treatment",
+        		"ref_pmid":"26656090"
         	},
         	{
-        		"dataType":"Expression (log2)",
-        		"platform":"Affymetrix U133+2 arrays",
-        		"platformInfo":"--",
-        		"normalizeMethod":"--"
+        		"dataType":"exp",
+        		"description":"mRNA expression",
+        		"units":"microarray log2 intensity",
+        		"platform":"Affymetrix HG-U133 Plus 2.0 (from CCLE)",
+        		"ref_pmid":"26656090"
         	},
         	{
-        		"dataType":"Mutations",
-        		"platform":"Oncomap 3.0 core",
-        		"platformInfo":"--",
-        		"normalizeMethod":"--"
+        		"dataType":"mut",
+        		"description":"DNA mutation",
+        		"units":"probability of homozygous, function-impacting mutation",
+        		"platform":"exome capture sequencing (from CCLE)",
+        		"ref_pmid":"26656090"
         	},
-        		{
-	        	"dataType":"DNA Copy Number",
-        		"platform":"Affymetrix SNP6.0 Arrays",
-        		"platformInfo":"Pharmacological Profiling",
-        		"normalizeMethod":"--"
-	      	}
+        	{
+        		"dataType":"cop",
+        		"description":"DNA copy number",
+        		"units":"gene-level copy number estimate",
+        		"platform":"Affymetrix SNP6.0 Arrays (from CCLE)",
+        		"ref_pmid":"26656090"
+        	}
         ]
       }
     }
   },
   "nciSclc":{
     "displayName":"NCI/DTP SCLC",
-    "fullName": "NCI/DTP Small Cell Lung Cancer Data Set",
+    "fullName": "NCI/DTP Small Cell Lung Cancer Project",
     "url": "--",
     "packages":{
       "nciSclcData":{
         "MetaData":[
         	{
-            "dataType":"Expression (log2)",
-        		"platform":"TBD",
-        		"platformInfo":"TBD",
-        		"normalizeMethod":"--"
-          },
+        		"dataType":"exp",
+        		"description":"mRNA expression",
+        		"units":"microarray log2 intensity",
+        		"platform":"Affymetrix GeneChip Human Exon 1.0 ST array",
+        		"ref_pmid":"27247353"
+        	},
           {
-            "dataType":"Drug Activity (-log10[IC50M])",
-        		"platform":"TBD",
-        		"platformInfo":"TBD",
-        		"normalizeMethod":"--"
-          }
+        		"dataType":"act",
+        		"description":"drug activity",
+        		"units":"-log10[GI50(molar)]",
+        		"platform":"sulforhodamine B total protein cytotoxicity assay, 48hrs post-treatment",
+        		"ref_pmid":"27247353"
+        	}
        	]
       }
     }
