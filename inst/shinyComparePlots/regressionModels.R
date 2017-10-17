@@ -452,6 +452,12 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 				}
 			}
 			
+			# ---- handle edge case: response variable is in candidate predictor set ----
+			# i.e., exclude response variable as a candidate predictor (of itself).
+			responseVarName <- paste0(input$responseDataType, input$responseId)
+			lassoPredData <- lassoPredData[, setdiff(colnames(lassoPredData), responseVarName), drop = FALSE]
+			# ---------------------------------------------------------------------------
+			
 			# Check and update: lines with missing predictor data may have been removed.
 			shiny::validate(need(nrow(lassoPredData) > 10, 
 													 "10 or more cell lines (with NA-free data for candidate predictor set) are required to run LASSO"))
