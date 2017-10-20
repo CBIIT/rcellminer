@@ -9,7 +9,7 @@
         	{
         		"dataType":"act",
         		"description":"drug activity",
-        		"units":"z-score from -log10[GI50(molar)] data across NCI-60",
+        		"units":"z-score from negative log10[GI50(molar)] data across NCI-60",
         		"platform":"sulforhodamine B total protein cytotoxicity assay, 48hrs post-treatment",
         		"ref_pmid":"26048278"
         	},
@@ -83,7 +83,7 @@
 	    		{
         		"dataType":"act",
         		"description":"drug activity",
-        		"units":"-log10[IC50(molar)]",
+        		"units":"negative log10[IC50(molar)]",
         		"platform":"Adherent cells: fluorescent nucleic acid stain (Syto 60); Suspended cells: oxidation-reduction levels (Resazurin); NCI/DTB-submitted compounds: ATP measurements (Cell Titer Glo); all assays at 72 hours post-treatment",
         		"ref_pmid":"27397505"
         	},
@@ -115,7 +115,7 @@
         	{
         		"dataType":"act",
         		"description":"drug activity",
-        		"units":"-log10[IC50(molar)]",
+        		"units":"negative log10[IC50(molar)]",
         		"platform":"ATP measurements (Cell Titer Glo), 72 hours post-treatment",
         		"ref_pmid":"22460905"
         	},
@@ -200,7 +200,7 @@
           {
         		"dataType":"act",
         		"description":"drug activity",
-        		"units":"-log10[GI50(molar)]",
+        		"units":"negative log10[GI50(molar)]",
         		"platform":"sulforhodamine B total protein cytotoxicity assay, 48hrs post-treatment",
         		"ref_pmid":"27247353"
         	}

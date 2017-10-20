@@ -552,7 +552,8 @@ shinyServer(function(input, output, session) {
 		configSelect <- metaConfig[[input$mdataSource]][["packages"]][[1]][["MetaData"]]
 		jsonFrame <- as.data.frame(configSelect)
 		
-		colnames(jsonFrame) <- c("Data Type", "Platform", "Platform Information", "Normalization Method")
+		colnames(jsonFrame) <- c("Data Type", "Description", "Units", 
+														 "Platform/Assay", "PubMed Ref. ID")
 		
 		DT::datatable(jsonFrame, rownames=FALSE, colnames=colnames(jsonFrame),
 									filter='top', style='bootstrap', selection = "none",
