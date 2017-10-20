@@ -186,7 +186,7 @@
   "nciSclc":{
     "displayName":"NCI/DTP SCLC",
     "fullName": "NCI/DTP Small Cell Lung Cancer Project",
-    "url": "--",
+    "url": "https://sclccelllines.cancer.gov/sclc/",
     "packages":{
       "nciSclcData":{
         "MetaData":[
