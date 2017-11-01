@@ -1,5 +1,7 @@
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
+** Note: this current shiny app is limited to NCI60 data analysis. Please visit the more recent web app for pharmacogenomic data exploration across different sources at https://discover.nci.nih.gov/cellminercdb
+
 - [Contact/Feedback](#contactfeedback)
 - [Data Sources](#data-sources)
 - [Usage](#usage)
