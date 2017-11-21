@@ -32,7 +32,7 @@ Depends:
     Biobase,
     rcdk,
     fingerprint,
-    rcellminerData (>= 2.0.0)
+    rcellminerData
 Suggests:
     knitr,
     RColorBrewer,
