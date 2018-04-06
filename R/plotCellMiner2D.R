@@ -97,8 +97,8 @@ plotCellMiner2D <- function(df, xCol="x", yCol="y", xLabel=xCol, yLabel=yCol,
 	if(is.null(title)) {
 		corResults <- cor.test(df[,xCol], df[,yCol], use="pairwise.complete.obs")
 		title <- paste0(paste(yLabel, '~', xLabel),
-										', r=', round(corResults$estimate, 2),
-										' p=', formatC(signif(corResults$p.value, 2)))
+										'\nPearson correlation (r)=', round(corResults$estimate, 2),
+										' p-value=', formatC(signif(corResults$p.value, 2)))
 	}
 
 	# Plot image
