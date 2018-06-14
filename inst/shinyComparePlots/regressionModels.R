@@ -310,7 +310,7 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 		minValueRange <- input$minPredValueRange
 		rangeFilterDataType <- input$predDataTypes[1]
 		
-		if (minValueRange > 0) {
+		if ((minValueRange > 0) && (ncol(dataTab) >= 3)){
 			colsToDrop <- NULL
 			for (j in (3:ncol(dataTab))) {
 				predictorDataType <- rcellminer::getMolDataType(colnames(dataTab)[j])
@@ -421,8 +421,8 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 				responseVec = lassoResponseVec, geneSetNames = input$inputGeneSets,
 				minValueRange = input$minPredValueRange))
 			
-			shiny::validate(need((!is.null(lassoPredData)) && (ncol(lassoPredData) > 0),
-			 "Insufficient admissible predictor data to run lasso algorithm."))
+			#shiny::validate(need((!is.null(lassoPredData)) && (ncol(lassoPredData) > 0),
+			# "Insufficient admissible predictor data to run lasso algorithm."))
 			
 			# Check if user has supplied starting predictors, and add their data if
 			# it isn't already included.
@@ -457,6 +457,9 @@ regressionModels <- function(input, output, session, srcContentReactive, appConf
 			responseVarName <- paste0(input$responseDataType, input$responseId)
 			lassoPredData <- lassoPredData[, setdiff(colnames(lassoPredData), responseVarName), drop = FALSE]
 			# ---------------------------------------------------------------------------
+			
+			shiny::validate(need((!is.null(lassoPredData)) && (ncol(lassoPredData) > 2),
+													 "Insufficient admissible predictor data to run lasso algorithm."))
 			
 			# Check and update: lines with missing predictor data may have been removed.
 			shiny::validate(need(nrow(lassoPredData) > 10, 
