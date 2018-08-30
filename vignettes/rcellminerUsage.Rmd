@@ -28,9 +28,10 @@ The NCI-60 cancer cell line panel has been used over the course of several decad
 ## Installation 
 
 ```{r install, eval=FALSE}
-source("http://bioconductor.org/biocLite.R")
-biocLite("rcellminer")
-biocLite("rcellminerData")
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install("rcellminer")
+BiocManager::install("rcellminerData")
 ```
 
 ## Getting Started 
