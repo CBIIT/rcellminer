@@ -4,9 +4,10 @@ opts_chunk$set(out.extra='style="display:block; margin: auto"',
 							 fig.align="center", fig.width=8, fig.height=8, tidy=FALSE)
 
 ## ----install, eval=FALSE-------------------------------------------------
-## source("http://bioconductor.org/biocLite.R")
-## biocLite("rcellminer")
-## biocLite("rcellminerData")
+## if (!requireNamespace("BiocManager", quietly=TRUE))
+    ## install.packages("BiocManager")
+## BiocManager::install("rcellminer")
+## BiocManager::install("rcellminerData")
 
 ## ----loadLibrary, message=FALSE, warning=FALSE---------------------------
 library(rcellminer)
