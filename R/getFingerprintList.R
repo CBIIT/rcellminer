@@ -27,7 +27,7 @@
 #' @concept rcellminer
 #' @export
 #'
-#' @importFrom rcdk get.fingerprint
+#' @importFrom rcdk get.fingerprint parse.smiles
 getFingerprintList <- function(ids, smiles, fpType="standard", verbose=TRUE) {
 	fingerprint.list <- list()
 
@@ -43,7 +43,7 @@ getFingerprintList <- function(ids, smiles, fpType="standard", verbose=TRUE) {
 		fp <- tryCatch({
 			mol <- parse.smiles(smile)[[1]]
 			get.fingerprint(mol, type=fpType)
-		}, error=function(e) { NULL })
+		}, error=function(e) { cat("ERROR.") })
 
 		if(!is.null(fp)) {
 			fingerprint.list[[as.character(id)]] <- fp

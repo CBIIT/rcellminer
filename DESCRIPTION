@@ -26,12 +26,12 @@ Imports:
     methods,
     stats,
     utils,
-    shiny
+    shiny,
+    rcdk,
+    fingerprint
 Depends:
     R (>= 3.2),
     Biobase,
-    rcdk,
-    fingerprint,
     rcellminerData (>= 2.0.0)
 Suggests:
     knitr,
