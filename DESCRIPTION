@@ -26,9 +26,7 @@ Imports:
     methods,
     stats,
     utils,
-    shiny,
-    rcdk,
-    fingerprint
+    shiny
 Depends:
     R (>= 3.2),
     Biobase,
