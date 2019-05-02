@@ -2,7 +2,7 @@ Package: rcellminer
 Type: Package
 Title: rcellminer: Molecular Profiles and Drug Response for the NCI-60 Cell
     Lines
-Version: 2.5.0
+Version: 2.6.0
 Date: 2016-04-08
 Author: Augustin Luna, Vinodh Rajapakse, Fabricio Sousa
 Maintainer: Augustin Luna <lunaa@cbio.mskcc.org>, Vinodh Rajapakse
