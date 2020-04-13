@@ -96,9 +96,9 @@ plotCellMiner2D <- function(df, xCol="x", yCol="y", xLabel=xCol, yLabel=yCol,
 	# Create title 
 	if(is.null(title)) {
 		corResults <- cor.test(df[,xCol], df[,yCol], use="pairwise.complete.obs")
-		title <- paste0(paste(yLabel, '~', xLabel),
-										', r=', round(corResults$estimate, 2),
-										' p=', formatC(signif(corResults$p.value, 2)))
+		title <- paste0(paste(yLabel, 'vs.', xLabel),
+										'\nPearson correlation (r)=', round(corResults$estimate, 2),
+										', p-value=', formatC(signif(corResults$p.value, 2)))
 	}
 
 	# Plot image
@@ -106,9 +106,11 @@ plotCellMiner2D <- function(df, xCol="x", yCol="y", xLabel=xCol, yLabel=yCol,
 	p1 <- p1 + theme_bw()
 	
 	if(!is.null(colorPalette) && !is.null(classCol)) {
-		p1 <- p1 + suppressWarnings(geom_point(aes_string(color=classCol, text=tooltipCol), alpha=alpha, size = pointSize))
-		p1 <- p1 + scale_colour_manual(name="", values=colorPalette)
-	} else {
+		# p1 <- p1 + suppressWarnings(geom_point(aes_string(color=classCol, text=tooltipCol), alpha=alpha, size = pointSize))
+		# p1 <- p1 + scale_colour_manual(name="", values=colorPalette)
+		p1 <- p1 + suppressWarnings(geom_point(aes_string(fill = classCol, text=tooltipCol), alpha = alpha, size = pointSize, shape=21, stroke=0.15))
+		p1 <- p1 + scale_fill_manual(name = "", values = colorPalette)
+		} else {
 		p1 <- p1 + suppressWarnings(geom_point(aes_string(text=tooltipCol), color=singleColor, alpha=alpha, size = pointSize))
 	}
 
