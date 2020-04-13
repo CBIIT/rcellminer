@@ -1,0 +1,611 @@
+---
+title: "Using rcellminer"
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_depth: 2
+---
+
+<!--
+%\VignetteEngine{knitr::rmarkdown}
+%\VignetteIndexEntry{Using rcellminer}
+%\VignetteKeywords{rcellminer}
+%\VignetteDepends{rcellminer}
+%\VignettePackage{rcellminer}
+-->
+
+```{r knitrSetup, include=FALSE}
+library(knitr)
+opts_chunk$set(out.extra='style="display:block; margin: auto"', 
+							 fig.align="center", fig.width=8, fig.height=8, tidy=FALSE)
+```
+
+# Overview
+The NCI-60 cancer cell line panel has been used over the course of several decades as an anti-cancer drug screen. This panel was developed as part of the Developmental Therapeutics Program (DTP, http://dtp.nci.nih.gov/) of the U.S. National Cancer Institute (NCI). Thousands of compounds have been tested on the NCI-60, which have been extensively characterized by many platforms for gene and protein expression, copy number, mutation, and others (Reinhold, et al., 2012). The purpose of the CellMiner project (http://discover.nci.nih.gov/cellminer) has been to integrate data from multiple platforms used to analyze the NCI-60, and to provide a powerful suite of tools for exploration of NCI-60 data. While CellMiner is an unmatched resource for online exploration of the NCI-60 data, consideration of more specialized scientific questions often requires custom programming. The **rcellminer** R package complements the functionality of CellMiner, providing programmatic data access, together with functions for data visualization and analysis. These functions are approachable for even beginning R users, as illustrated by the initial examples below. The subsequent case studies, inspired by CellMiner-related publications, show how modest amounts of code can script specialized analyses, integrating multiple types of data to yield new scientific insights.   **rcellminer** functions also provide robust building blocks for more extensive tools, as exemplifed by the package's interactive Shiny applications.
+
+# Basics 
+
+## Installation 
+
+```{r install, eval=FALSE}
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install("rcellminer")
+BiocManager::install("rcellminerData")
+```
+
+## Getting Started 
+
+Load **rcellminer** and **rcellminerData** packages: 
+
+```{r loadLibrary, message=FALSE, warning=FALSE}
+library(rcellminer)
+library(rcellminerData)
+```
+
+A list of all accessible vignettes and methods is available with the following command. 
+
+```{r searchHelp, eval=FALSE, tidy=FALSE}
+help.search("rcellminer")
+```
+
+## Searching for Compounds 
+
+The NSC number is a numeric identifier for substances submitted to the National Cancer Institute (NCI) for testing and evaluation. It is a registration number for the Developmental Therapeutics Program (DTP) repository, and it is used as the unique identifier for compounds in the CellMiner database. NSC stands for National Service Center. 
+
+rcellminer allows users to quickly search for NSC IDs by compound name or partial name. For example, many kinase inhibitors end with the suffix "nib". Users can quickly search NSCs for compound names with this suffix; queries are case insensitive and are treated as regular expressions. 
+
+```{r searchForNscs}
+searchForNscs("nib$")  
+```
+
+## Profile Visualization 
+
+Often, it is useful for researchers to plot multiple data profiles next to each other in order to visually identify patterns. Below are examples for the visualization of various profiles: single drugs and multiple drugs, as well as molecular profiles and combinations of drug and molecular profiles. 
+
+```{r plotCellminer}
+# Get Cellminer data
+drugAct <- exprs(getAct(rcellminerData::drugData))
+molData <- getMolDataMatrices()
+
+# One drug
+nsc <- "94600"
+plots <- c("drug") 
+plotCellMiner(drugAct, molData, plots, nsc, NULL)
+
+# One expression
+gene <- "TP53"
+plots <- c("exp") 
+plotCellMiner(drugAct, molData, plots, NULL, gene)
+
+# Two drugs: Irinotecan and topotecan 
+nsc <- c("616348", "609699")
+plots <- c("drug", "drug") 
+plotCellMiner(drugAct, molData, plots, nsc, NULL)
+
+# Two genes 
+# NOTE: subscript out of bounds Errors likely mean the gene is not present for that data type
+gene <- c("TP53", "MDM2")
+plots <- c("exp", "mut", "exp") 
+plotCellMiner(drugAct, molData, plots, NULL, gene)
+
+# Gene and drug to plot 
+nsc <- "609699"
+gene <- "SLFN11"
+plots <- c("exp", "cop", "drug") 
+plotCellMiner(drugAct, molData, plots, nsc, gene)
+```
+
+### Visualizing Drug Sets 
+
+For related drugs, it is often useful to visualize a summary of drug activity. **rcellminer** allows you to easily plot a drug set's average activity z-score pattern over the NCI-60, together with 1 standard deviation error bars to gauge variation in response behavior.
+
+```{r plotDrugSets}
+# Get CellMiner data
+drugAct <- exprs(getAct(rcellminerData::drugData))
+
+drugs <- searchForNscs("camptothecin")
+drugAct <- drugAct[drugs,]
+mainLabel <- paste("Drug Set: Camptothecin Derivatives, Drugs:", length(drugs), sep=" ")
+
+plotDrugSets(drugAct, drugs, mainLabel) 
+```
+
+## Structure Visualization
+
+The structures of CellMiner compounds can be visualized using the **plotStructuresFromNscs** method, which applies functionality provided by the **rcdk** package. 
+
+```{r plotStructures, fig.width=3, fig.height=3}
+plotStructuresFromNscs("609699")
+```
+
+# Working with Additional Drug Information
+
+## Mechanism of action (MOA)
+
+**rcellminer** provides the mechanism of action (MOA) category for compounds for which this information is available. The MOA specifies the biochemical targets or processes that a compound affects.  MOAs are indicated by CellMiner abbreviations, though more detailed descriptions can be obtained as indicated below.
+
+### Get MOA information
+
+Find known MOA drugs and organize their essential information in a table.
+
+```{r makeDrugInfoTable, results='hide', message=FALSE}
+# getFeatureAnnot() returns a named list of data frames with annotation data 
+# for drugs ("drug") and drug activity repeat experiments ("drugRepeat").
+drugAnnot <- getFeatureAnnot(rcellminerData::drugData)[["drug"]]
+
+# Get the names and MOA for compounds with MOA entries
+knownMoaDrugs <- unique(c(getMoaToCompounds(), recursive = TRUE))
+knownMoaDrugInfo <- data.frame(NSC=knownMoaDrugs, stringsAsFactors = FALSE)
+knownMoaDrugInfo$Name <- drugAnnot[knownMoaDrugInfo$NSC, "NAME"]
+
+# Process all NSCs 
+knownMoaDrugInfo$MOA <- sapply(knownMoaDrugInfo$NSC, getMoaStr)
+
+# Order drugs by mechanism of action.
+knownMoaDrugInfo <- knownMoaDrugInfo[order(knownMoaDrugInfo$MOA), ]
+
+# Drug_MOA_Key data frame provides further details on MOA abbrevations.
+Drug_MOA_Key[c("A2", "A7"), ]
+```
+
+## Drug Activity
+
+Additionally, **rcellminer** provides GI50 (50% growth inhibition) values for the compounds in the database. GI50 values are similar to IC50 values, which are the concentrations that cause 50% growth inhibition, but have been renamed to emphasize the correction for the cell count at time zero. Further details on the assay used are available on the [DTP website](http://dtp.nci.nih.gov/docs/compare/compare_methodology.html).
+
+### Get GI50 values
+
+Compute GI50 data matrix for known MOA drugs.
+
+```{r computeGI50Data, results='hide', message=FALSE}
+negLogGI50Data <- getDrugActivityData(nscSet = knownMoaDrugInfo$NSC)
+
+gi50Data <- 10^(-negLogGI50Data)
+```
+
+Construct integrated data table (drug information and NCI-60 GI50 activity).
+
+```{r makeIntegratedTable, results='hide', message=FALSE}
+knownMoaDrugAct <- as.data.frame(cbind(knownMoaDrugInfo, gi50Data), stringsAsFactors = FALSE)
+
+# This table can be written out to a file
+#write.table(knownMoaDrugAct, file="knownMoaDrugAct.txt", quote=FALSE, sep="\t", row.names=FALSE, col.names=TRUE, na="NA")
+```
+
+# Use Cases
+## Finding Structurally Similar Compounds
+
+In this example, we show how to identify compounds that are structurally similar to a compound of interest. Both the matching compound structures and their activity patterns can then be plotted.  For speed and illustrative purposes, the set of compounds searched by pairwise structural comparison is restricted to a subset of compounds with known mechanism of action (MOA). The code can, however, be easily adjusted to screen the entire CellMiner compound database. By examining the activity pattern variation across compounds with related structures, insight can be gained toward understanding of structure-activity relationships.
+
+### Generate drug set
+
+Generate a set of 100 drugs for pairwise structural comparison with Camptothecin (a Topoisomerase I inhibitor). We provide a name "Camptothecin" and the SMILES-based structure [retrieved from PubChem](https://pubchem.ncbi.nlm.nih.gov/compound/24360?from=summary#section=Canonical-SMILES). 
+
+```{r compareFingerPrints, results='hide', message=FALSE, warning=FALSE}
+# Load sqldf
+library(sqldf)
+
+# Set up necessary data
+# getFeatureAnnot() returns a named list of data frames with annotation data 
+# for drugs ("drug") and drug activity repeat experiments ("drugRepeat").
+df <- getFeatureAnnot(rcellminerData::drugData)[["drug"]]
+## Drug activities 
+drugAct <- exprs(getAct(rcellminerData::drugData))
+## Molecular profiling data
+molData <- getMolDataMatrices() 
+
+# Example filter on particular properties of the compounds
+tmpDf <- sqldf("SELECT NSC, SMILES FROM df WHERE SMILES != ''")
+
+# Compare against known MOA compounds demonstration
+knownMoaDrugs <- unique(c(getMoaToCompounds(), recursive=TRUE))
+ids <- tmpDf[tmpDf$NSC %in% knownMoaDrugs, "NSC"]
+smiles <- tmpDf[tmpDf$NSC %in% knownMoaDrugs, "SMILES"]
+
+# All public
+#ids <- tmpDf$nsc
+#smiles <- tmpDf$smiles
+
+drugOfInterest <- "Camptothecin"
+smilesOfInterest <- "CCC1(C2=C(COC1=O)C(=O)N3CC4=CC5=CC=CC=C5N=C4C3=C2)O"
+
+# Make a vector of all the compounds to be pairwise compared 
+ids <- c(drugOfInterest, ids)
+smiles <- c(smilesOfInterest, smiles)
+```
+
+### Run the comparison
+
+```{r runComparison, message=FALSE}
+# Run fingerprint comparison 
+results <- compareFingerprints(ids, smiles, verbose=FALSE)
+
+# Display the top 5 tanimoto similarity coefficient results. The first compound 
+# is a self comparison.
+results[1:5]
+```
+
+### Visualize structures 
+
+View the similar structures. The first drug in the results will be the drug of interest and the subsequent drugs will compounds related by structure with decreasing similarity. 
+
+**NOTE:** All compounds in CellMiner are uniquely identified by **NSC** identifiers. 
+
+```{r plotSimilarStructures, fig.height=2, fig.width=8}
+# Plot top 4 results 
+resultsIdx <- sapply(names(results)[2:5], function(x) { which(tmpDf$NSC == x) })
+resultsIds <- names(results)[2:5]
+resultsSmiles <- tmpDf$SMILES[resultsIdx]
+
+resultsIds <- c(drugOfInterest, resultsIds)
+resultsSmiles <- c(smilesOfInterest, resultsSmiles)
+
+# plotStructures() allows plotting user-included SMILES-based structures
+plotStructures(resultsIds, resultsSmiles, titleCex=0.5, mainLabel="Fingerprint Results")
+```
+
+### Visualize drug activity
+
+Plot the activity of the most structurally similar compounds across the NCI-60
+
+```{r plotSimilarActivities}
+nscs <- names(results)[2:5]
+plotCellMiner(drugAct, molData, rep("drug", length(nscs)), nscs, NULL)
+```
+
+## Pattern Comparison 
+
+In this example, we construct and visualize a composite gene inactivation pattern for the
+widely studied PTEN tumor suppressor gene, integrating gene expression, copy, and mutation data.
+The composite pattern is then used to identify compounds with correlated activity patterns.
+
+```{r reinhold2015}
+# Gene of interest
+gene <- "PTEN"
+
+# Get Data
+drugAct <- exprs(getAct(rcellminerData::drugData))
+molData <- getMolDataMatrices()
+
+# Get the cell lines names for cell lines meeting particular thresholds
+copKnockdown <- names(which(molData[["cop"]][paste0("cop", gene), ] < -1))
+expKnockdown <- names(which(molData[["exp"]][paste0("exp", gene), ] < -1.5))
+mutKnockdown <- names(which(molData[["mut"]][paste0("mut", gene), ] == 1))
+
+# Make composite pattern
+pattern <- rep(0, length(molData[["cop"]][paste0("cop", gene), ]))
+names(pattern) <- names(molData[["cop"]][paste0("cop", gene), ])
+tmp <- Reduce(union, list(copKnockdown, expKnockdown, mutKnockdown))
+pattern[tmp] <- 1
+
+# Composite plot data
+extraPlot <- list()
+extraPlot[["title"]] <- "Composite Pattern"
+extraPlot[["label"]] <- "Knockdown Composite (Binary)"
+extraPlot[["values"]] <- pattern
+
+# Plot data
+plotCellMiner(molData=molData, plots=c("cop", "exp", "mut"), gene=gene, extraPlot=extraPlot)
+
+# Significant drug correlations to FDA-approved/Clinical trial drugs
+# getFeatureAnnot() returns a named list of data frames with annotation data 
+# for drugs ("drug") and drug activity repeat experiments ("drugRepeat").
+drugAnnot <- getFeatureAnnot(rcellminerData::drugData)[["drug"]]
+tmpDA <- drugAnnot[drugAnnot$FDA_STATUS != "-", c("NSC", "FDA_STATUS")]
+
+tmpDrugAct <- drugAct[rownames(drugAct) %in% tmpDA$NSC,]
+
+results <- patternComparison(pattern, tmpDrugAct)
+sigResults <- results[results$PVAL < 0.01, ]
+
+# Get names of drugs that are FDA approved or in clinical trials
+getDrugName(rownames(sigResults))
+```
+
+## Correlating DNA Copy Number Alteration and Gene Expression
+
+We can assess the extent to which a gene's expression may be regulated by copy gain or loss
+by computing the correlation between its NCI-60 transcript expression and DNA copy number 
+alteration pattern. The overall distribution of such correlations can guide consideration of 
+their significance. In this setting, it is insightful to consider the extent to which particular 
+classes of genes may be regulated by copy alteration. This example illustrates the computation and visualization  of the gene copy number vs. expression correlation distribution, while situating 
+the median correlation for a set of oncogenes within the observed distribution.
+
+```{r varma2014, fig.height=7.5, fig.width=6}
+molData <- getMolDataMatrices()
+
+# Get Data
+copGenes <- removeMolDataType(rownames(molData[["cop"]]))
+expGenes <- removeMolDataType(rownames(molData[["exp"]]))
+genes <- intersect(copGenes, expGenes)
+
+# Generate the appropriate rownames 
+expGeneLabels <- paste0("exp", genes)
+copGeneLabels <- paste0("cop", genes)
+
+a <- molData[["exp"]][expGeneLabels,]
+b <- molData[["cop"]][copGeneLabels,]
+allGenes <- rowCors(a, b)
+
+#selectedOncogenes <- c("FZD1", "JAK2", "ALK", "PIK3CG", "RET", "CDC25A", "PDGFB", "PIK3CB", "WNT3")
+selectedOncogenes <- c("ABL1", "ALK", "BRAF", "CCND1", "CCND3", "CCNE1", "CCNE2", 
+											 "CDC25A", "EGFR", "ERBB2", "EZH2", "FOS", "FOXL2", "HRAS", 
+											 "IDH1", "IDH2", "JAK2", "KIT", "KRAS", "MET", "MOS", "MYC", 
+											 "NRAS", "PDGFB", "PDGFRA", "PIK3CA", "PIK3CB", "PIK3CD", 
+											 "PIK3CG", "PIM1", "PML", "RAF1", "REL", "RET", "SRC", "STK11", 
+											 "TP63", "WNT10B", "WNT4", "WNT2B", "WNT9A", "WNT3", "WNT5A", 
+											 "WNT5B", "WNT10A", "WNT11", "WNT2", "WNT1", "WNT7B", "WISP1", 
+											 "WNT8B", "WNT7A", "WNT16", "WISP2", "WISP3", "FZD5", "FZD1")
+selectedOncogenes <- intersect(selectedOncogenes, genes)
+
+# Generate the appropriate rownames 
+expGeneLabels <- paste0("exp", selectedOncogenes)
+copGeneLabels <- paste0("cop", selectedOncogenes)
+
+a <- molData[["exp"]][expGeneLabels,]
+b <- molData[["cop"]][copGeneLabels,]
+selectedOncogenesCor <- rowCors(a, b)
+
+hist(allGenes$cor, main="", xlab="Pearson correlation between expression and copy number", breaks=200, col="lightgray", border="lightgray")
+
+segments(x0=median(allGenes$cor), y0=0, x1=median(allGenes$cor), y1=175, lty=2, lwd=2)
+text(median(allGenes$cor)+0.02, y=175, adj=0, labels="Median Correlation\nAll Genes", cex=0.75)
+
+segments(x0=median(selectedOncogenesCor$cor), y0=0, x1=median(selectedOncogenesCor$cor), y1=140, lty=2, lwd=2, col="red")
+text(median(selectedOncogenesCor$cor)+0.02, y=140, adj=0, labels="Median Correlation\nOncogenes", cex=0.75)
+
+rug(selectedOncogenesCor$cor, col="red") 
+```
+
+## Assessing Correlative Evidence for a Drug MOA Hypothesis
+
+**rcellminer** makes it easy to consider whether the available pharmacogenomic data support 
+a hypothesis relating to drug mechanism of action. For example, higher expression of anti-apoptotic 
+genes could plausibly promote cell survival in the face of DNA damage induced by topoisomerase 
+inhibitors, thereby contributing to drug resistance. To explore this further, we can check 
+if the expression of known anti-apoptotic genes is significantly negatively correlated with 
+the activity of the topoisomerase 1 inhibitor camptothecin.
+
+```{r idTopo1InhCors}
+# Get normalized (Z-score) NCI-60 gene expression and drug activity data.
+nci60DrugActZ <- exprs(getAct(rcellminerData::drugData))
+nci60GeneExpZ <- getAllFeatureData(rcellminerData::molData)[["exp"]]
+
+antiApoptosisGenes <- c("BAG1", "BAG3", "BAG4", "BCL10", "BCL2", 
+												"BCL2A1", "BCL2L1", "BCL2L10", "BCL2L2", 
+												"BFAR", "BIRC3", "BIRC6", "BNIP1", "BNIP2", 
+												"BNIP3", "BNIP3L", "BRAF", "CASP3", "CD27", 
+												"CD40LG", "CFLAR", "CIDEA", "DAPK1", "DFFA",
+												"FAS", "IGF1R", "MCL1", "NOL3", "TMBIM1", 
+												"TP53", "TP73", "XIAP")
+camptothecinNsc <- "94600"
+
+# Compute table of correlations between camptothecin activity and anti-apoptosis gene expression.
+pcResults <- patternComparison(nci60DrugActZ[camptothecinNsc, ], nci60GeneExpZ[antiApoptosisGenes, ])
+
+# Adjust p-values for multiple comparisons, sort with respect to q-values.
+pcResults$QVAL <- p.adjust(pcResults$PVAL, method = "fdr")
+pcResults <- pcResults[order(pcResults$QVAL), ]
+
+# Identify genes with significant negative correlations (FDR < 0.1)
+pcResults[((pcResults$COR < 0) & (pcResults$QVAL < 0.10)), ]
+```
+
+
+Two genes, the BAX-antagonists TMBIM1 and BCL2L2, have NCI-60 expression patterns that are 
+significantly negatively correlated with camptothecin activity. Plots illustrating these
+relationships are constructed below.
+
+```{r plotCptActivityVsGeneExp}
+colorTab <- loadNciColorSet(returnDf = TRUE)
+tissueColorTab <- unique(colorTab[, c("tissues", "colors")])
+
+plotData <- as.data.frame(t(rbind(nci60DrugActZ[camptothecinNsc, , drop=FALSE], 
+																	nci60GeneExpZ[c("TMBIM1", "BCL2L2"), ])))
+colnames(plotData) <- c("Camptothecin", "TMBIM1", "BCL2L2")
+
+plot(x=plotData$TMBIM1, y=plotData$Camptothecin, col=colorTab$colors, pch=16,
+		 xlab="TMBIM1 mRNA exp (Z-score)", ylab="Camptothecin Activity (Z-score)",
+		 main=paste0("Camptothecin Activity vs. TMBIM Expression (r = ", 
+		 						round(pcResults["TMBIM1", "COR"], 2), ")"))
+abline(lm(formula("Camptothecin ~ TMBIM1"), plotData), col="red")
+legend("bottomleft", legend=tissueColorTab$tissues, col=tissueColorTab$colors, 
+			 cex=0.7, pch = 16)
+
+plot(x=plotData$BCL2L2, y=plotData$Camptothecin, col=colorTab$colors, pch=16,
+		 xlab="BCL2L2 mRNA exp (Z-score)", ylab="Camptothecin Activity (Z-score)",
+		 main=paste0("Camptothecin Activity vs. BCL2L2 Expression (r = ", 
+		 						round(pcResults["BCL2L2", "COR"], 2), ")"))
+abline(lm(formula("Camptothecin ~ BCL2L2"), plotData), col="red")
+legend("bottomleft", legend=tissueColorTab$tissues, col=tissueColorTab$colors, 
+			 cex=0.7, pch = 16)
+```
+
+
+## Relating Gene Alteration Patterns to Drug Responses
+
+Alterations of selected DNA repair genes may have predictive value for anticancer
+drug activity. Using **rcellminer**, we can flexibly script analyses to explore
+such gene-drug associations. The analyses below follow elements of the approach
+presented in Sousa et al., though the detailed results may differ somewhat due
+to simplifications made for illustrative purposes. Our aim is to catalogue 
+impaired DNA repair gene function in the NCI-60, due either to deleterious mutation
+or lack of expression. These alteration patterns can then be related to drug response
+behavior by considering differences in drug activity between altered and non-altered
+cell lines. 
+
+We start by obtaining NCI-60 drug activity data (-logGI50) for 158 FDA-approved drugs, 
+together with corresponding gene expression data (log2 intensity), and binary muation data 
+(where a value of one indicates the presence of a deleterious mution, in either 
+the heterozygous or homozygous state).
+
+```{r getCellMinerData}
+# Get Cellminer data
+# getFeatureAnnot() returns a named list of data frames with annotation data 
+# for drugs ("drug") and drug activity repeat experiments ("drugRepeat").
+drugAnnot <- getFeatureAnnot(rcellminerData::drugData)[["drug"]]
+fdaDrugAnnot <- drugAnnot[which(drugAnnot$FDA_STATUS == "FDA approved"), ]
+
+nci60FdaDrugAct <- getDrugActivityData(nscSet = fdaDrugAnnot$NSC)
+nci60GeneExp <- getAllFeatureData(rcellminerData::molData)[["xai"]]
+nci60GeneMut <- getAllFeatureData(rcellminerData::molData)[["mut"]]
+```
+
+We then visualize the NCI-60 mutation patterns for a subset of DNA repair
+genes.
+```{r vizDnarGeneMutations, fig.width=10, fig.height=7}
+dnarGeneSet <- c("APC", "APLF", "ATM", "CLSPN", "ERCC6", "FANCI", 
+                 "FANCM", "GEN1", "HLTF", "MLH1", "POLD1", "POLE", "POLG",
+                 "POLQ", "RAD54L", "REV3L", "RMI1", "SLX4", "SMARCA4", "SMC2",
+                 "TP53", "WRN")
+dnarGeneSet <- intersect(dnarGeneSet, rownames(nci60GeneMut))
+
+dnarGeneMut <- nci60GeneMut[dnarGeneSet, ]
+
+# Identify most frequently mutated genes.
+numMutLines <- apply(dnarGeneMut, MARGIN = 1, FUN = sum)
+sort(numMutLines, decreasing = TRUE)
+
+dnarGeneMutPlotData <- dnarGeneMut[order(numMutLines), ]
+heatmap(dnarGeneMutPlotData, scale="none", Rowv = NA, Colv = NA, col = c("grey", "red"), 
+				main="Deleterious mutations")
+```
+
+A similar plot can be developed to indicate DNA repair genes with little or no
+expression in particular NCI-60 cell lines.
+
+```{r vizDnarGeneExpKnockouts, fig.width=10, fig.height=7}
+dnarGeneExp <- nci60GeneExp[dnarGeneSet, ]
+
+hist(dnarGeneExp, xlab="mRNA expression (log2 intensity)",
+		 main="Distribution of DNA repair gene expression values")
+
+# Set low expression threshold to 1st percentile of expression values.
+lowExpThreshold <- quantile(dnarGeneExp, na.rm = TRUE, probs = c(0.01))
+lowExpThreshold
+
+# Construct binary (potential) expression knockout matrix.
+dnarGeneExpKo <- matrix(0, nrow=nrow(dnarGeneExp), ncol=ncol(dnarGeneExp))
+rownames(dnarGeneExpKo) <- rownames(dnarGeneExp)
+colnames(dnarGeneExpKo) <- colnames(dnarGeneExp)
+dnarGeneExpKo[which(dnarGeneExp < lowExpThreshold)] <- 1
+
+# Restrict to wild type expression knockouts.
+dnarGeneExpKo[which(dnarGeneMut == 1)] <- 0
+
+# Identify genes with most frequent loss of expression.
+numExpKoLines <- apply(dnarGeneExpKo, MARGIN = 1, FUN = sum)
+sort(numExpKoLines, decreasing = TRUE)
+
+dnarGeneExpKoPlotData <- dnarGeneExpKo[order(numExpKoLines), ]
+heatmap(dnarGeneExpKoPlotData, scale="none", Rowv = NA, Colv = NA, 
+				col = c("grey", "blue"), main="Potential expression knockouts")
+```
+
+Finally, we merge the data from the above plots to show DNA repair gene alterations
+by mutation or lack of expression.
+
+```{r vizDnarGeneAlterations, fig.width=10, fig.height=7}
+dnarGeneAlt <- matrix(0, nrow=nrow(dnarGeneExp), ncol=ncol(dnarGeneExp))
+rownames(dnarGeneAlt) <- rownames(dnarGeneExp)
+colnames(dnarGeneAlt) <- colnames(dnarGeneExp)
+dnarGeneAlt[which(dnarGeneMut == 1)] <- 1
+dnarGeneAlt[which(dnarGeneExpKo == 1)] <- 2
+
+# Identify genes with most frequent alterations (by mutation or lack of expression).
+numAltLines <- apply(dnarGeneAlt, MARGIN = 1, FUN = sum)
+sort(numAltLines, decreasing = TRUE)
+
+dnarGeneAltPlotData <- dnarGeneAlt[order(numAltLines), ]
+heatmap(dnarGeneAltPlotData, scale="none", Rowv = NA, Colv = NA, 
+				col = c("grey", "red", "blue"), 
+				main="Altered genes by mutation (red) or low expression (blue)")
+```
+
+For any altered gene, we can identify drugs with significantly different 
+activity between altered and non-altered cell lines.
+```{r checkAplfDrugAssocs, fig.width=10, fig.height=7}
+geneName <- "APLF"
+altLineIndices <- which(dnarGeneAlt[geneName, ] != 0)
+nonAltLineIndices <- which(dnarGeneAlt[geneName, ] == 0)
+
+drugAssocTab <- data.frame(GENE=geneName, DRUG_NAME=fdaDrugAnnot$NAME, 
+													 DRUG_NSC=fdaDrugAnnot$NSC, TTEST_PVAL=NA, 
+													 ADJ_PVAL=NA, MEAN_ACT_DIFF=NA, 
+													 stringsAsFactors = FALSE)
+rownames(drugAssocTab) <- drugAssocTab$DRUG_NSC
+for (drugNsc in drugAssocTab$DRUG_NSC){
+	ttestResult <- t.test(x=nci60FdaDrugAct[drugNsc, altLineIndices], 
+												y=nci60FdaDrugAct[drugNsc, nonAltLineIndices])
+	drugAssocTab[drugNsc, "TTEST_PVAL"] <- ttestResult$p.value
+	drugAssocTab[drugNsc, "MEAN_ACT_DIFF"] <- 
+		ttestResult$estimate[1] - ttestResult$estimate[2]
+}
+
+drugAssocTab$ADJ_PVAL <- p.adjust(drugAssocTab$TTEST_PVAL, method = "bonferroni")
+drugAssocTab <- drugAssocTab[order(drugAssocTab$ADJ_PVAL), ]
+
+drugAssocTab[drugAssocTab$ADJ_PVAL < 0.05, 
+						 c("GENE", "DRUG_NAME", "DRUG_NSC", "ADJ_PVAL", "MEAN_ACT_DIFF")]
+
+meanActDiff <- drugAssocTab$MEAN_ACT_DIFF
+negLog10Pval <- -log10(drugAssocTab$TTEST_PVAL)
+plot(x=meanActDiff, y=negLog10Pval, xlim = c((min(meanActDiff)-1), (max(meanActDiff)+1)),
+		 xlab="Difference between -logGI50 means (altered vs. non-altered lines)",
+		 ylab="-log10(p-value)", main=(paste0(geneName, " Drug Response Associations")))
+
+ptLabels <- character(length(drugAssocTab$DRUG_NAME))
+numLabeledPts <- 7 # label the k most significant drug associations
+ptLabels[1:numLabeledPts] <- drugAssocTab$DRUG_NAME[1:numLabeledPts]
+text(x=meanActDiff, negLog10Pval, ptLabels, cex=0.9, pos=4, col="red")
+```
+
+
+# Accessing rcellminer Shiny Apps 
+
+Several [Shiny-based](http://shiny.rstudio.com/) applications have been embedded into **rcellminer** to simplify exploration of the CellMiner data. 
+
+## Comparison Plot Application 
+
+The "Comparison Plot" application allows users to plot any two variables from the CellMiner data against each other. It additionally allows users to search for compound NSC IDs using names and mechanisms of action. Pattern comparisons, which correlate the variable plotted on the x-axis with all other variables (drug activity patterns, gene expression profiles, etc.), can be computed to obtain a ranked table of results.  The latter can suggest additional 2D plots for visual exploration.  Tooltips provide information about plotted points (cell line name and tissue of origin).
+
+```{r comparePlots, eval=FALSE}
+runShinyApp("shinyComparePlots")
+```
+
+![shinyComparePlots](shinyComparePlots.png)
+
+## Compound Browser Application
+
+The "Compound Browser" application allows users to see information about each compound, including its structure and plots of repeat activity assays over the NCI-60. 
+
+```{r compoundBrowser, eval=FALSE}
+runShinyApp("shinyReprodPlots")
+```
+
+![shinyReprodPlots](shinyReprodPlots.png)
+
+## Structure Comparison Application
+
+The "Structure Comparison" application allows users to identify structurally similar compounds within the dataset, with input compounds specified either by NSC ID or SMILES string. 
+
+```{r compareStructures, eval=FALSE}
+runShinyApp("shinyCompareStructures")
+```
+
+![shinyCompareStructures](shinyCompareStructures.png)
+
+# Session Information
+
+```{r sessionInfo}
+sessionInfo()
+```
+
+# References
+
+* Reinhold, W.C., et al. (2012) CellMiner: a web-based suite of genomic and pharmacologic tools to explore transcript and drug patterns in the NCI-60 cell line set. Cancer Research, 72, 3499-3511.
+
+* Sousa, F.G., et al. (2015) Alterations of DNA repair genes in the NCi-60 cell lines and their predictive value for anticancer drug activity. DNA Repair 28 (2015) 107-115.
+
+* Varma, S., et al. (2014) High Resolution Copy Number Variation Data in the NCI-60 Cancer Cell Lines from Whole Genome Microarrays Accessible through CellMiner. PLoS ONE 9(3): e92047.
+

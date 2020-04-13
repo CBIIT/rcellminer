@@ -13,13 +13,14 @@ This R package provide access to the data and functions to analyze data from [Ce
 
     if (!require("devtools")) install.packages("devtools")
 
-    source("http://bioconductor.org/biocLite.R")
+    if (!requireNamespace("BiocManager", quietly=TRUE))
+        install.packages("BiocManager")
 
     if (!require("Biobase")) {
-        biocLite()
+        BiocManager::install()
     }
 
-    biocLite("BiocStyle")
+    BiocManager::install("BiocStyle")
 
     library(devtools)
 
