@@ -23,6 +23,4 @@ nscSet <- c("123528", "339316")
 repExpCorTab <- getMinDrugActivityRepeatCor(nscSet)
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

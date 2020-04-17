@@ -17,6 +17,4 @@ A list of eSet objects.
 \description{
 Returns a list of eSet objects.
 }
-\concept{
-rcellminerData
-}
+\concept{rcellminerData}

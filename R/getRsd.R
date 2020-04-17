@@ -12,6 +12,8 @@
 #' 
 #' @concept rcellminer
 #' @export
+#' 
+#' @importFrom stats sd
 getRsd <- function(dat, onlyReturnMedian=TRUE){
   rsdVals <- abs(apply(dat, MARGIN=2, FUN=sd, na.rm=TRUE) / apply(dat, MARGIN=2, FUN=mean, na.rm=TRUE))
   

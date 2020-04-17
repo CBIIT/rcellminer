@@ -24,6 +24,4 @@ nscSet <- c("141540", "123127") # Etoposide, Doxorubicin.
 actData <- getDrugActivityData(nscSet)
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

@@ -28,6 +28,4 @@ restrictFeatureMat(geneSet = c("B", "C"), X)
 \description{
 Restricts a feature matrix to only include features associated with a specified gene set.
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

@@ -25,6 +25,4 @@ each matrix prefixed with a data type abbreviation.
 molDataMats <- getMolDataMatrices()
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

@@ -17,6 +17,4 @@ An eSet object with drug activity data.
 \description{
 Returns an eSet object with drug activity data.
 }
-\concept{
-rcellminerData
-}
+\concept{rcellminerData}

@@ -26,6 +26,4 @@ c <- rowCors(a, b)
 \author{
 Sudhir Varma, NCI-LMP
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

@@ -5,8 +5,12 @@
 \title{Returns a vector of median sensitive cell line activity (-logGI50) values
 for a set of compounds.}
 \usage{
-getMedSenLineActivity(idSet, senLineActZThreshold = 0.5,
-  onlyCellMinerExps = TRUE, dataSource = "NCI60")
+getMedSenLineActivity(
+  idSet,
+  senLineActZThreshold = 0.5,
+  onlyCellMinerExps = TRUE,
+  dataSource = "NCI60"
+)
 }
 \arguments{
 \item{idSet}{a character vector specifying identifier(s) for compound(s) of interest.}
@@ -32,6 +36,4 @@ idSet <- c("609699", "740")
 getMedSenLineActivity(idSet)
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

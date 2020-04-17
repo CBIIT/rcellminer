@@ -49,6 +49,9 @@
 #' 
 #' @concept rcellminer
 #' @export
+#' 
+#' @importFrom ggplot2 scale_fill_manual element_text xlim ylim 
+#' @importFrom grDevices pdf dev.off 
 plotCellMiner2D <- function(df, xCol="x", yCol="y", xLabel=xCol, yLabel=yCol, 
 														title=NULL, colorPalette=NULL, classCol=NULL, tooltipCol=NULL, 
 														showLegend=FALSE, showTrendLine=TRUE, showTitle=TRUE, singleColor="#0000FF",

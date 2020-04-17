@@ -23,6 +23,4 @@ nscSet <- c("609699", "94600")
 getDrugName(nscSet)
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

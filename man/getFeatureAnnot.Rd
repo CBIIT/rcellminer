@@ -17,6 +17,4 @@ A list of data frames with feature information.
 \description{
 Returns a list of data frames with feature information.
 }
-\concept{
-rcellminerData
-}
+\concept{rcellminerData}

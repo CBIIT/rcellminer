@@ -19,6 +19,4 @@ Check if NSC has Mechanism of Action (MOA) Annotation
 hasMoa("754365")
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

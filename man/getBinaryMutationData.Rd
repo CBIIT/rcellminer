@@ -5,9 +5,14 @@
 \title{Compute a binary gene mutation data matrix from SNP and other mutation
 event-level data.}
 \usage{
-getBinaryMutationData(mutInfo, mutData, maxVariantFreq = 0.2,
-  maxNormalPopulationFreq = 0.005, maxSiftScore = 0.05,
-  minPolyPhenScore = 0.85)
+getBinaryMutationData(
+  mutInfo,
+  mutData,
+  maxVariantFreq = 0.2,
+  maxNormalPopulationFreq = 0.005,
+  maxSiftScore = 0.05,
+  minPolyPhenScore = 0.85
+)
 }
 \arguments{
 \item{mutInfo}{A data frame with the following named columns:
@@ -48,6 +53,4 @@ along columns, and 1s indicating deleterious mutations.
 Compute a binary gene mutation data matrix from SNP and other mutation
 event-level data.
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

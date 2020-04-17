@@ -19,6 +19,4 @@ A MolData object.
 \description{
 Returns a MolData object.
 }
-\concept{
-rcellminerData
-}
+\concept{rcellminerData}

@@ -113,10 +113,11 @@ plotDrugSets(drugAct, drugs, mainLabel)
 
 ## Structure Visualization
 
-The structures of CellMiner compounds can be visualized using the **plotStructuresFromNscs** method, which applies functionality provided by the **rcdk** package. 
+Drug compound structures are provided as annotations for drug compounds. The structures of CellMiner compounds can be visualized and compared using the **rcdk** package. 
 
 ```{r plotStructures, fig.width=3, fig.height=3}
-plotStructuresFromNscs("609699")
+drugAnnot <- getFeatureAnnot(rcellminerData::drugData)[["drug"]]
+drugAnnot[1:5, "SMILES"]
 ```
 
 # Working with Additional Drug Information
@@ -173,86 +174,6 @@ knownMoaDrugAct <- as.data.frame(cbind(knownMoaDrugInfo, gi50Data), stringsAsFac
 ```
 
 # Use Cases
-## Finding Structurally Similar Compounds
-
-In this example, we show how to identify compounds that are structurally similar to a compound of interest. Both the matching compound structures and their activity patterns can then be plotted.  For speed and illustrative purposes, the set of compounds searched by pairwise structural comparison is restricted to a subset of compounds with known mechanism of action (MOA). The code can, however, be easily adjusted to screen the entire CellMiner compound database. By examining the activity pattern variation across compounds with related structures, insight can be gained toward understanding of structure-activity relationships.
-
-### Generate drug set
-
-Generate a set of 100 drugs for pairwise structural comparison with Camptothecin (a Topoisomerase I inhibitor). We provide a name "Camptothecin" and the SMILES-based structure [retrieved from PubChem](https://pubchem.ncbi.nlm.nih.gov/compound/24360?from=summary#section=Canonical-SMILES). 
-
-```{r compareFingerPrints, results='hide', message=FALSE, warning=FALSE}
-# Load sqldf
-library(sqldf)
-
-# Set up necessary data
-# getFeatureAnnot() returns a named list of data frames with annotation data 
-# for drugs ("drug") and drug activity repeat experiments ("drugRepeat").
-df <- getFeatureAnnot(rcellminerData::drugData)[["drug"]]
-## Drug activities 
-drugAct <- exprs(getAct(rcellminerData::drugData))
-## Molecular profiling data
-molData <- getMolDataMatrices() 
-
-# Example filter on particular properties of the compounds
-tmpDf <- sqldf("SELECT NSC, SMILES FROM df WHERE SMILES != ''")
-
-# Compare against known MOA compounds demonstration
-knownMoaDrugs <- unique(c(getMoaToCompounds(), recursive=TRUE))
-ids <- tmpDf[tmpDf$NSC %in% knownMoaDrugs, "NSC"]
-smiles <- tmpDf[tmpDf$NSC %in% knownMoaDrugs, "SMILES"]
-
-# All public
-#ids <- tmpDf$nsc
-#smiles <- tmpDf$smiles
-
-drugOfInterest <- "Camptothecin"
-smilesOfInterest <- "CCC1(C2=C(COC1=O)C(=O)N3CC4=CC5=CC=CC=C5N=C4C3=C2)O"
-
-# Make a vector of all the compounds to be pairwise compared 
-ids <- c(drugOfInterest, ids)
-smiles <- c(smilesOfInterest, smiles)
-```
-
-### Run the comparison
-
-```{r runComparison, message=FALSE}
-# Run fingerprint comparison 
-results <- compareFingerprints(ids, smiles, verbose=FALSE)
-
-# Display the top 5 tanimoto similarity coefficient results. The first compound 
-# is a self comparison.
-results[1:5]
-```
-
-### Visualize structures 
-
-View the similar structures. The first drug in the results will be the drug of interest and the subsequent drugs will compounds related by structure with decreasing similarity. 
-
-**NOTE:** All compounds in CellMiner are uniquely identified by **NSC** identifiers. 
-
-```{r plotSimilarStructures, fig.height=2, fig.width=8}
-# Plot top 4 results 
-resultsIdx <- sapply(names(results)[2:5], function(x) { which(tmpDf$NSC == x) })
-resultsIds <- names(results)[2:5]
-resultsSmiles <- tmpDf$SMILES[resultsIdx]
-
-resultsIds <- c(drugOfInterest, resultsIds)
-resultsSmiles <- c(smilesOfInterest, resultsSmiles)
-
-# plotStructures() allows plotting user-included SMILES-based structures
-plotStructures(resultsIds, resultsSmiles, titleCex=0.5, mainLabel="Fingerprint Results")
-```
-
-### Visualize drug activity
-
-Plot the activity of the most structurally similar compounds across the NCI-60
-
-```{r plotSimilarActivities}
-nscs <- names(results)[2:5]
-plotCellMiner(drugAct, molData, rep("drug", length(nscs)), nscs, NULL)
-```
-
 ## Pattern Comparison 
 
 In this example, we construct and visualize a composite gene inactivation pattern for the

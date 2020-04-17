@@ -23,6 +23,4 @@ getMoaStr("94600")
 getMoaStr(c("94600", "609699"))
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

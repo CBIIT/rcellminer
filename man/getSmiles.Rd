@@ -21,6 +21,4 @@ nscSet <- c("609699", "94600")
 getSmiles(nscSet)
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

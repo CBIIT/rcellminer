@@ -23,6 +23,4 @@ port <- 3838
 #runShinyCompareStructures(port=port)
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

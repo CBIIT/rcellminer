@@ -4,8 +4,11 @@
 \alias{getDrugActivityRepeatData}
 \title{Returns a matrix containing repeat activity experiment data for a compound.}
 \usage{
-getDrugActivityRepeatData(nscStr, concFormat = "NegLogGI50M",
-  onlyCellMinerExps = TRUE)
+getDrugActivityRepeatData(
+  nscStr,
+  concFormat = "NegLogGI50M",
+  onlyCellMinerExps = TRUE
+)
 }
 \arguments{
 \item{nscStr}{a string specifying the NSC identifier for the compound.}
@@ -31,6 +34,4 @@ actData <- getDrugActivityRepeatData(nscStr, concFormat='NegLogGI50M')
 actData <- getDrugActivityRepeatData(nscStr, concFormat='IC50MicroM')
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

@@ -23,6 +23,4 @@ http://discover.nci.nih.gov/
 loadNciColorSet()  
   
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

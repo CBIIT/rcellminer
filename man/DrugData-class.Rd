@@ -24,6 +24,4 @@ respect to the same samples associated with act.}
 \item{\code{sampleData}}{A MIAxE object capturing sample and other data set information.}
 }}
 
-\concept{
-rcellminerData
-}
+\concept{rcellminerData}

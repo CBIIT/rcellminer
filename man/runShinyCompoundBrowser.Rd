@@ -23,6 +23,4 @@ port <- 3838
 #runShinyCompoundBrowser(port=port)
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

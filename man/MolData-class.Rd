@@ -19,6 +19,4 @@ An S4 class to represent molecular data recorded for a set of biological samples
 \item{\code{sampleData}}{A MIAxE object capturing sample and other data set information.}
 }}
 
-\concept{
-rcellminerData
-}
+\concept{rcellminerData}

@@ -1,9 +1,9 @@
 Package: rcellminer
 Type: Package
-Title: rcellminer: Molecular Profiles and Drug Response for the NCI-60 Cell
-    Lines
-Version: 2.9.1
-Date: 2016-04-08
+Title: rcellminer: Molecular Profiles, Drug Response, and Chemical Structures for 
+    the NCI-60 Cell Lines
+Version: 2.9.2
+Date: 2016-04-17
 Author: Augustin Luna, Vinodh Rajapakse, Fabricio Sousa
 Maintainer: Augustin Luna <lunaa@cbio.mskcc.org>, Vinodh Rajapakse
     <vinodh.rajapakse@nih.gov>, Fathi Elloumi <fathi.elloumi@nih.gov>
@@ -49,4 +49,5 @@ VignetteBuilder: knitr
 biocViews: aCGH, CellBasedAssays, CopyNumberVariation, GeneExpression,
     Pharmacogenomics, Pharmacogenetics, miRNA, Cheminformatics, Visualization,
     Software, SystemsBiology
-RoxygenNote: 6.0.1
+RoxygenNote: 7.0.2
+Encoding: UTF-8

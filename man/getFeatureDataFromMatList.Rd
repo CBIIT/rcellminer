@@ -4,8 +4,11 @@
 \alias{getFeatureDataFromMatList}
 \title{Extract from a list of matrices the data associated with a set of features.}
 \usage{
-getFeatureDataFromMatList(featureSet, dataMatList,
-  excludeMissingFeatures = TRUE)
+getFeatureDataFromMatList(
+  featureSet,
+  dataMatList,
+  excludeMissingFeatures = TRUE
+)
 }
 \arguments{
 \item{featureSet}{a character vector of feature names.}
@@ -29,6 +32,4 @@ molDataMats <- getMolDataMatrices()
 featureData <- getFeatureDataFromMatList(featureSet, molDataMats)
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

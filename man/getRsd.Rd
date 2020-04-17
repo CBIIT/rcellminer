@@ -23,6 +23,4 @@ getRsd(A)
 getRsd(A, onlyReturnMedian=FALSE)
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

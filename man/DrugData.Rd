@@ -22,6 +22,4 @@ A DrugData object.
 \description{
 Returns a DrugData object.
 }
-\concept{
-rcellminerData
-}
+\concept{rcellminerData}

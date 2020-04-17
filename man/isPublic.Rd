@@ -20,6 +20,4 @@ isPublic("-1")
 isPublic(c("-1", "609699"))
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

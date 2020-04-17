@@ -17,6 +17,10 @@
 #' 
 #' @concept rcellminer
 #' @export
+#' 
+#' @importFrom stats sd 
+#' @importFrom grDevices pdf dev.off 
+# @importFrom graphics axis segments 
 plotDrugSets <- function(drugAct, drugs, mainLabel="", pdfFilename=NULL, statistic="mean") {	
 	if (!is.data.frame(drugAct)){
 		drugAct <- as.data.frame(drugAct)

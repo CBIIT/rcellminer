@@ -38,6 +38,4 @@ Run Shiny App
 #runShinyApp()
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

@@ -5,8 +5,12 @@
 \title{Select features that are correlated with a given feature (or one or more features
 from a set of features), merging results from multiple candidate feature matrices.}
 \usage{
-selectCorrelatedRowsFromMatrices(Y, XList, corThreshold = 0.1,
-  useAbsCor = TRUE)
+selectCorrelatedRowsFromMatrices(
+  Y,
+  XList,
+  corThreshold = 0.1,
+  useAbsCor = TRUE
+)
 }
 \arguments{
 \item{Y}{a vector or matrix; rows from each matrix element of X will be correlated with 
@@ -40,6 +44,4 @@ colnames(matList$X2) <- paste0("X2_col_", 1:10)
 selectCorrelatedRowsFromMatrices(vec, matList)
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

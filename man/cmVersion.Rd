@@ -16,7 +16,5 @@ The version of CellMiner used
 \author{
 Vinodh Rajapakse \email{vinodh.rajapakse AT nih.gov}
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}
 \keyword{data}

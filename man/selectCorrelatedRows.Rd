@@ -32,6 +32,4 @@ mat <- matrix(runif(100), 10, 10)
 selectCorrelatedRows(vec, mat)
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

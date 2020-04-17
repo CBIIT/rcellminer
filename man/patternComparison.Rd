@@ -36,6 +36,4 @@ pcResults <- patternComparison(drugAct["609699", ], molDataMats, method="spearma
 pcResults <- patternComparison(drugAct["609699", ], molDataMats$exp, method="spearman")
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

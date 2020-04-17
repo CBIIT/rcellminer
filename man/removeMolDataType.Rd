@@ -25,6 +25,4 @@ This function is primarily used to remove prefixes from elastic
 removeMolDataType(c("expTP53", "copMDM2", "mutCHEK2", "mutBRAF"))
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

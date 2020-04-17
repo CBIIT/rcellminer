@@ -17,6 +17,4 @@ A list of feature data matrices.
 \description{
 Returns a list of feature data matrices.
 }
-\concept{
-rcellminerData
-}
+\concept{rcellminerData}

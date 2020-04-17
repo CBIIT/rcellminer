@@ -4,8 +4,11 @@
 \alias{getActivityRangeStats}
 \title{Returns a table of activity range statistics for a set of compounds.}
 \usage{
-getActivityRangeStats(nscSet, concFormat = "NegLogGI50M",
-  onlyCellMinerExps = TRUE)
+getActivityRangeStats(
+  nscSet,
+  concFormat = "NegLogGI50M",
+  onlyCellMinerExps = TRUE
+)
 }
 \arguments{
 \item{nscSet}{a character vector specifying NSC identifier(s) for compound(s) of interest.}
@@ -30,6 +33,4 @@ getActivityRangeStats(nscSet)
 getActivityRangeStats(nscSet, concFormat="IC50MicroM")
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

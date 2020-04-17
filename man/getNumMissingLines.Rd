@@ -23,6 +23,4 @@ nscSet <- c("1", "17", "89", "609699")
 getNumMissingLines(nscSet)
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

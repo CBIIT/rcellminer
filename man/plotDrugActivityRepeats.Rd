@@ -4,8 +4,14 @@
 \alias{plotDrugActivityRepeats}
 \title{Plot NCI-60 drug activity profiles for repeat experiments.}
 \usage{
-plotDrugActivityRepeats(nscStr, useZScore = FALSE, maxRepNum = 5,
-  pdfFilename = NULL, pdfWidth = 12, pdfHeight = 6)
+plotDrugActivityRepeats(
+  nscStr,
+  useZScore = FALSE,
+  maxRepNum = 5,
+  pdfFilename = NULL,
+  pdfWidth = 12,
+  pdfHeight = 6
+)
 }
 \arguments{
 \item{nscStr}{a string specifying the NSC identifier for a compound.}
@@ -32,6 +38,4 @@ plotDrugActivityRepeats("609699")
 plotDrugActivityRepeats("609699", useZScore=TRUE, maxRepNum=3)
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

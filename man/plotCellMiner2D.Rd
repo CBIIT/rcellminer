@@ -4,11 +4,26 @@
 \alias{plotCellMiner2D}
 \title{Make a simple 2d plot using two variables with ggplot2}
 \usage{
-plotCellMiner2D(df, xCol = "x", yCol = "y", xLabel = xCol,
-  yLabel = yCol, title = NULL, colorPalette = NULL, classCol = NULL,
-  tooltipCol = NULL, showLegend = FALSE, showTrendLine = TRUE,
-  showTitle = TRUE, singleColor = "#0000FF", alpha = 1,
-  numberColPrefix = "X", xLimVal = NULL, yLimVal = NULL, pointSize = 3)
+plotCellMiner2D(
+  df,
+  xCol = "x",
+  yCol = "y",
+  xLabel = xCol,
+  yLabel = yCol,
+  title = NULL,
+  colorPalette = NULL,
+  classCol = NULL,
+  tooltipCol = NULL,
+  showLegend = FALSE,
+  showTrendLine = TRUE,
+  showTitle = TRUE,
+  singleColor = "#0000FF",
+  alpha = 1,
+  numberColPrefix = "X",
+  xLimVal = NULL,
+  yLimVal = NULL,
+  pointSize = 3
+)
 }
 \arguments{
 \item{df}{a data.frame with at least two columns}
@@ -80,6 +95,4 @@ plotCellMiner2D(df, xCol="x", yCol="y", showTrendLine = FALSE, showLegend = FALS
 \author{
 Augustin Luna <augustin AT mail.nih.gov>
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

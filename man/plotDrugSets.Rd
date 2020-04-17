@@ -4,8 +4,13 @@
 \alias{plotDrugSets}
 \title{Produces a barplot of the average values for a set of NSCs with a error bar (one standard deviation)}
 \usage{
-plotDrugSets(drugAct, drugs, mainLabel = "", pdfFilename = NULL,
-  statistic = "mean")
+plotDrugSets(
+  drugAct,
+  drugs,
+  mainLabel = "",
+  pdfFilename = NULL,
+  statistic = "mean"
+)
 }
 \arguments{
 \item{drugAct}{a matrix of drug activity values (cell lines as columns, drug entries as rows)}
@@ -30,6 +35,4 @@ drugs <- rownames(drugAct)[1:8]
 plotDrugSets(drugAct, drugs, "Test")
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

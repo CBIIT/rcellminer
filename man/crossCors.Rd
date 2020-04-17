@@ -31,6 +31,4 @@ crossCors(drugActData[c("94600"), ], drugActData[c("727625", "670655"), ], metho
 Sudhir Varma, NCI-LMP, with input checks, support for Spearman's correlation
 added by VNR.
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

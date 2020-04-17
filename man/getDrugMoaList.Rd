@@ -26,6 +26,4 @@ LINK TO MOAs?
 getDrugMoaList("754365")
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

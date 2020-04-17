@@ -4,9 +4,19 @@
 \alias{plotCellMiner}
 \title{Description: Produces CellMiner-like plots in R}
 \usage{
-plotCellMiner(drugAct, molData, plots, nsc = NULL, gene = NULL,
-  features = NULL, sub = NULL, xLimits = NULL, xLabel = NULL,
-  extraPlot = NULL, verbose = FALSE)
+plotCellMiner(
+  drugAct,
+  molData,
+  plots,
+  nsc = NULL,
+  gene = NULL,
+  features = NULL,
+  sub = NULL,
+  xLimits = NULL,
+  xLabel = NULL,
+  extraPlot = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{drugAct}{a matrix of drug activity values (cell lines as columns, drug entries as rows)}
@@ -58,6 +68,4 @@ plotCellMiner(drugAct, molData, plots=NULL, nsc=NULL, features=c("mutCDK4",
 \author{
 Augustin Luna <augustin AT mail.nih.gov>
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

@@ -9,7 +9,5 @@ abbreviations used in CellMiner.}
 A data frame with descriptive information for all compound mechanism of action (MOA)
 abbreviations used in CellMiner.
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}
 \keyword{data}

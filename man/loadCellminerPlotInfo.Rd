@@ -19,6 +19,4 @@ Returns data to plot CellMiner plots
 loadCellminerPlotInfo()  
   
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

@@ -26,6 +26,4 @@ nscSet <- c("1", "17", "89", "609699")
 getNumDrugActivityRepeats(nscSet)
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

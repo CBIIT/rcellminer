@@ -17,6 +17,4 @@ Get a named list mapping MOA classes to associated compound sets.
 moaToCompounds <- getMoaToCompounds()
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

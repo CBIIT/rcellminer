@@ -24,6 +24,4 @@ nscSet <- c("609699", "740")
 getDrugActivityRange(nscSet)
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

@@ -30,6 +30,8 @@
 #' 
 #' @concept rcellminer
 #' @export
+#' 
+#' @importFrom stats residuals lm na.exclude 
 parCorPatternComparison <- function(x, Y, Z, updateProgress = NULL){
 	if (!is.vector(x)){
 		x <- as.numeric(x)

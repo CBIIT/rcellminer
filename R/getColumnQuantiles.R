@@ -11,6 +11,8 @@
 #' 
 #' @concept rcellminer
 #' @export
+#' 
+#' @importFrom stats quantile
 getColumnQuantiles <- function(X, prob, naRm=FALSE, onlyNonzeroVals=FALSE){
 	colQuantiles <- vector(mode="numeric", length=ncol(X))
 	for (j in seq(colQuantiles)){

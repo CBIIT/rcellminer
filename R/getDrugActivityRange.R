@@ -12,6 +12,8 @@
 #' 
 #' @concept rcellminer
 #' @export
+#' 
+#' @importFrom stats IQR
 getDrugActivityRange <- function(nscSet, computeIQR=FALSE){
 	drugRepeatAnnot <- as(featureData(getRepeatAct(rcellminerData::drugData)), "data.frame")
   

@@ -44,6 +44,4 @@ Z <- rcellminer::getAllFeatureData(rcellminerData::molData)[["exp"]]["SLFN11", ,
 results <- parCorPatternComparison(x, Y, Z)
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}

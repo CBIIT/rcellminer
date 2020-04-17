@@ -36,6 +36,9 @@
 #' 
 #' @concept rcellminer
 #' @export
+#' 
+# @importFrom graphics par layout lcm graphics
+#' @importFrom utils str  
 plotCellMiner <- function(drugAct, molData, plots, nsc=NULL, gene=NULL, 
 													features=NULL, sub=NULL, xLimits=NULL, xLabel=NULL, 
 													extraPlot=NULL, verbose=FALSE) {

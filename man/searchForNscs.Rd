@@ -24,6 +24,4 @@ Use this function with caution. Not all compounds have names and
 searchForNscs("nib$")  
 
 }
-\concept{
-rcellminer
-}
+\concept{rcellminer}
