@@ -94,4 +94,14 @@ NULL
 #' @concept rcellminer 
 NULL
 
+#' Molecular Fingerprint List
+#' 
+#' @name fingerprintList
+#' @docType data
+#' @author Augustin Luna \email{augustin AT mail.nih.gov}
+#' @references \url{http://discover.nci.nih.gov/cellminer}
+#' @keywords data
+#' @concept rcellminer 
+NULL
+
 
