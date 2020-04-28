@@ -12,7 +12,7 @@
 #' @export
 #' @note Seems to be required for definition of a constructor.
 #' 
-#' @importFrom methods setMethod
+#' @importFrom methods setMethod initialize
 setMethod(f="initialize",
 					signature="DrugData",
 					definition=function(.Object, act, repeatAct, sampleData){

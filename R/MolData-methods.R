@@ -9,7 +9,7 @@
 #' @concept rcellminerData
 #' @export
 #' 
-#' @importFrom methods setMethod
+#' @importFrom methods setMethod initialize
 setMethod(f="initialize",
 					signature="MolData",
 					definition=function(.Object,
