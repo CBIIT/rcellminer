@@ -16,9 +16,9 @@ warnings_are_errors: false
 
 before_install:
   - R -e "r_package <- c('devtools', 'roxygen2', 'testthat', 'rmarkdown', 'BiocManager', 'covr'); lapply(r_package, function(x) {if (!(x %in% .packages(T))) install.packages(x)})"
-  - R -e 'devtools::install_github("rstudio/d3heatmap")'
   - R -e 'BiocManager::install(version = "devel", ask=FALSE)'
   - R -e 'BiocManager::valid()'
+  - R -e 'devtools::install_github("rstudio/d3heatmap")'
   
 install:
   - R -e 'devtools::install_deps(dep = TRUE, upgrade = FALSE)'
