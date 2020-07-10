@@ -1,7 +1,9 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 language: r
+
+# Either bioc-devel/bioc-release
 r: 
-  - bioc-release
+  - bioc-devel
 
 cache: packages
 
@@ -18,10 +20,18 @@ r_packages:
 # On CRAN all warnings are treated as errors; this is not true on Bioconductor.
 warnings_are_errors: false
 
-before_script:
+before_install:
   - R -e 'install_github("rstudio/d3heatmap")'
   - R -e 'BiocManager::install(version = "devel", ask=FALSE)'
   - R -e 'BiocManager::valid()'
+  
+install:
+  - R -e 'devtools::install_deps(dep = TRUE, upgrade = FALSE)'
+  
+script:
+  - R -e 'devtools::document()'
+  - R CMD build .
+  - R -e "if (dir.exists('tests/testthat')) devtools::test()"
 
 after_success:
   - Rscript -e 'covr::codecov()'
