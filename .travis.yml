@@ -11,16 +11,11 @@ cache: packages
 bioc_required: true
 bioc_check: true
 
-r_packages:
-  - devtools
-  - rmarkdown
-  - BiocManager
-  - covr
-
 # On CRAN all warnings are treated as errors; this is not true on Bioconductor.
 warnings_are_errors: false
 
 before_install:
+  - R -e "r_package <- c('devtools', 'roxygen2', 'testthat', 'rmarkdown', 'BiocManager', 'covr'); lapply(r_package, function(x) {if (!(x %in% .packages(T))) install.packages(x)})"
   - R -e 'devtools::install_github("rstudio/d3heatmap")'
   - R -e 'BiocManager::install(version = "devel", ask=FALSE)'
   - R -e 'BiocManager::valid()'
