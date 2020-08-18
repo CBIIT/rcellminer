@@ -1,6 +1,9 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
-language: R
-r: bioc-devel
+language: r
+
+# Either bioc-devel/bioc-release
+r: 
+  - bioc-devel
 
 cache: packages
 
@@ -8,18 +11,22 @@ cache: packages
 bioc_required: true
 bioc_check: true
 
-r_packages:
-  - rmarkdown
-  - BiocManager
-  - covr
-
 # On CRAN all warnings are treated as errors; this is not true on Bioconductor.
 warnings_are_errors: false
 
-before_script:
-  # ensure bioc-devel is being used
+before_install:
+  - R -e "r_package <- c('devtools', 'roxygen2', 'testthat', 'rmarkdown', 'BiocManager', 'covr'); lapply(r_package, function(x) {if (!(x %in% .packages(T))) install.packages(x)})"
   - R -e 'BiocManager::install(version = "devel", ask=FALSE)'
   - R -e 'BiocManager::valid()'
+  - R -e 'devtools::install_github("rstudio/d3heatmap")'
+  
+install:
+  - R -e 'devtools::install_deps(dep = TRUE, upgrade = FALSE)'
+  
+script:
+  - R -e 'devtools::document()'
+  - R CMD build .
+  - R -e "if (dir.exists('tests/testthat')) devtools::test()"
 
 after_success:
   - Rscript -e 'covr::codecov()'
