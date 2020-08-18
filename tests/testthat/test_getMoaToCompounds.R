@@ -4,7 +4,8 @@ test_that("getMoaToCompounds() returns correct information", {
 	
 	moaToCmpds <- getMoaToCompounds()
 	
-	knownMoaDrugs <- drugAnnot[!is.na(drugAnnot$MOA), "NSC"]
+	# knownMoaDrugs <- drugAnnot[!is.na(drugAnnot$MOA), "NSC"]
+	knownMoaDrugs <- drugAnnot[which(drugAnnot$MOA!=""), "NSC"]
 	testResults <- logical(length(knownMoaDrugs))
 	names(testResults) <- knownMoaDrugs
 	

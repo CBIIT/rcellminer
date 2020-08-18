@@ -13,7 +13,7 @@
 #' @importFrom Biobase featureData
 getMoaToCompounds <- function(){
 	drugAnnot <- as(featureData(getAct(rcellminerData::drugData)), "data.frame")
-	knownMoaDrugAnnot <- drugAnnot[(drugAnnot$MOA != "-"), ]
+	knownMoaDrugAnnot <- drugAnnot[(drugAnnot$MOA != ""), ]
 	
 	nscToMoaClasses <- str_split(knownMoaDrugAnnot$MOA, pattern = "[|]")
 	names(nscToMoaClasses) <- knownMoaDrugAnnot$NSC
