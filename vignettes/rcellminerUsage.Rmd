@@ -481,41 +481,6 @@ ptLabels[1:numLabeledPts] <- drugAssocTab$DRUG_NAME[1:numLabeledPts]
 text(x=meanActDiff, negLog10Pval, ptLabels, cex=0.9, pos=4, col="red")
 ```
 
-
-# Accessing rcellminer Shiny Apps 
-
-Several [Shiny-based](http://shiny.rstudio.com/) applications have been embedded into **rcellminer** to simplify exploration of the CellMiner data. 
-
-## Comparison Plot Application 
-
-The "Comparison Plot" application allows users to plot any two variables from the CellMiner data against each other. It additionally allows users to search for compound NSC IDs using names and mechanisms of action. Pattern comparisons, which correlate the variable plotted on the x-axis with all other variables (drug activity patterns, gene expression profiles, etc.), can be computed to obtain a ranked table of results.  The latter can suggest additional 2D plots for visual exploration.  Tooltips provide information about plotted points (cell line name and tissue of origin).
-
-```{r comparePlots, eval=FALSE}
-runShinyApp("shinyComparePlots")
-```
-
-![shinyComparePlots](shinyComparePlots.png)
-
-## Compound Browser Application
-
-The "Compound Browser" application allows users to see information about each compound, including its structure and plots of repeat activity assays over the NCI-60. 
-
-```{r compoundBrowser, eval=FALSE}
-runShinyApp("shinyReprodPlots")
-```
-
-![shinyReprodPlots](shinyReprodPlots.png)
-
-## Structure Comparison Application
-
-The "Structure Comparison" application allows users to identify structurally similar compounds within the dataset, with input compounds specified either by NSC ID or SMILES string. 
-
-```{r compareStructures, eval=FALSE}
-runShinyApp("shinyCompareStructures")
-```
-
-![shinyCompareStructures](shinyCompareStructures.png)
-
 # Session Information
 
 ```{r sessionInfo}
