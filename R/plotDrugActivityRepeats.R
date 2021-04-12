@@ -25,8 +25,8 @@ plotDrugActivityRepeats <- function(nscStr, useZScore=FALSE, maxRepNum=5,
 	drugRepeatAnnot <- as(featureData(getRepeatAct(rcellminerData::drugData)), "data.frame")
 	
   #load(file.path(.pri, "RData", "lmpdb.Rdata"))
-  iNsc <- which(drugRepeatAnnot$nsc == nscStr)
-  iNsc <- iNsc[ drugRepeatAnnot$used_in_zscore[iNsc] ]
+  iNsc <- which(as.character(drugRepeatAnnot$NSC) == nscStr)
+  iNsc <- iNsc[ drugRepeatAnnot$USED_IN_ZSCORE[iNsc] ]
   stopifnot(length(iNsc) > 0)
   
   repActData <- drugRepeatAct[iNsc, , drop=FALSE]

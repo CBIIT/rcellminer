@@ -20,7 +20,7 @@
 #' 
 #' @importFrom stats sd 
 #' @importFrom grDevices pdf dev.off 
-# @importFrom graphics axis segments 
+#' @importFrom graphics axis segments layout lcm par
 plotDrugSets <- function(drugAct, drugs, mainLabel="", pdfFilename=NULL, statistic="mean") {	
 	if (!is.data.frame(drugAct)){
 		drugAct <- as.data.frame(drugAct)

@@ -1,6 +1,6 @@
 test_that("getDrugName() returns correct information", {
 	drugAnnot <- as(featureData(getAct(rcellminerData::drugData)), "data.frame")
-	expect_identical(rownames(drugAnnot), drugAnnot$NSC)
+	expect_identical(rownames(drugAnnot), as.character(drugAnnot$NSC))
 	drugAnnotNamed <- drugAnnot[!is.na(drugAnnot$NAME), ]
 	drugAnnotUnamed <- drugAnnot[is.na(drugAnnot$NAME), ]
 	

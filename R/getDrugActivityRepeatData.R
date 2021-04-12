@@ -26,14 +26,14 @@ getDrugActivityRepeatData <- function(nscStr, concFormat = 'NegLogGI50M', onlyCe
   drugRepeatAct <- exprs(getRepeatAct(rcellminerData::drugData))
   drugRepeatAnnot <- as(featureData(getRepeatAct(rcellminerData::drugData)), "data.frame")
   
-  iNsc <- which(drugRepeatAnnot$nsc == nscStr)
+  iNsc <- which(as.character(drugRepeatAnnot$NSC) == nscStr)
   if (length(iNsc) == 0){
     warning(paste("No -logGI50 activity available for compound ", nscStr, ".", sep = ""))
     return(NULL)
   }
   
   if (onlyCellMinerExps){
-    iNsc <- iNsc[ drugRepeatAnnot$used_in_zscore[iNsc] ]
+    iNsc <- iNsc[ drugRepeatAnnot$USED_IN_ZSCORE[iNsc] ]
   }
   
   actExpData <- drugRepeatAct[iNsc, , drop=FALSE]

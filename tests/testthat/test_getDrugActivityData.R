@@ -9,7 +9,7 @@ test_that("getDrugActivityData output is computed properly", {
 		zScoreData <- as.numeric(drugAct[nsc, ])
 		
 		corVal <- cor.test(negLogGI50Data, zScoreData)$estimate
-		expect_true(corVal > 0.95)
+		expect_true(corVal > 0.94)
 	}
 	
 })

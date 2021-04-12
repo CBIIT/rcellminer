@@ -24,8 +24,8 @@ getMinDrugActivityRepeatCor <- function(nscSet){
   repExpCorTab$pval <- rep(NA, nrow(repExpCorTab))
   
   for (nscStr in nscSet){
-    iNsc <- which(drugRepeatAnnot$nsc == nscStr)
-    iNsc <- iNsc[ drugRepeatAnnot$used_in_zscore[iNsc] ]
+    iNsc <- which(as.character(drugRepeatAnnot$NSC) == nscStr)
+    iNsc <- iNsc[ drugRepeatAnnot$USED_IN_ZSCORE[iNsc] ]
     if (length(iNsc) == 0){
     	warning(paste0("Data for NSC ", nscStr, " is not available in CellMiner."))
     	next

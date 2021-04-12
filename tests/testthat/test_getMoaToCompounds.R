@@ -1,11 +1,11 @@
 test_that("getMoaToCompounds() returns correct information", {
 	drugAnnot <- as(featureData(getAct(rcellminerData::drugData)), "data.frame")
-	expect_identical(rownames(drugAnnot), drugAnnot$NSC)
+	expect_identical(rownames(drugAnnot), as.character(drugAnnot$NSC))
 	
 	moaToCmpds <- getMoaToCompounds()
 	
 	# knownMoaDrugs <- drugAnnot[!is.na(drugAnnot$MOA), "NSC"]
-	knownMoaDrugs <- drugAnnot[which(drugAnnot$MOA!=""), "NSC"]
+	knownMoaDrugs <- as.character(drugAnnot[which(drugAnnot$MOA!=""), "NSC"])
 	testResults <- logical(length(knownMoaDrugs))
 	names(testResults) <- knownMoaDrugs
 	

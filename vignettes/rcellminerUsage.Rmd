@@ -104,7 +104,7 @@ For related drugs, it is often useful to visualize a summary of drug activity. *
 # Get CellMiner data
 drugAct <- exprs(getAct(rcellminerData::drugData))
 
-drugs <- searchForNscs("camptothecin")
+drugs <- as.character(searchForNscs("camptothecin"))
 drugAct <- drugAct[drugs,]
 mainLabel <- paste("Drug Set: Camptothecin Derivatives, Drugs:", length(drugs), sep=" ")
 
@@ -454,8 +454,8 @@ drugAssocTab <- data.frame(GENE=geneName, DRUG_NAME=fdaDrugAnnot$NAME,
 													 DRUG_NSC=fdaDrugAnnot$NSC, TTEST_PVAL=NA, 
 													 ADJ_PVAL=NA, MEAN_ACT_DIFF=NA, 
 													 stringsAsFactors = FALSE)
-rownames(drugAssocTab) <- drugAssocTab$DRUG_NSC
-for (drugNsc in drugAssocTab$DRUG_NSC){
+rownames(drugAssocTab) <- as.character(drugAssocTab$DRUG_NSC)
+for (drugNsc in as.character(drugAssocTab$DRUG_NSC)){
 	ttestResult <- t.test(x=nci60FdaDrugAct[drugNsc, altLineIndices], 
 												y=nci60FdaDrugAct[drugNsc, nonAltLineIndices])
 	drugAssocTab[drugNsc, "TTEST_PVAL"] <- ttestResult$p.value

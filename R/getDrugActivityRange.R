@@ -22,7 +22,7 @@ getDrugActivityRange <- function(nscSet, computeIQR=FALSE){
   names(actRangeVals) <- nscSet
   
   for (nscStr in nscSet){
-    iNsc <- which(drugRepeatAnnot$nsc == nscStr)
+    iNsc <- which(as.character(drugRepeatAnnot$NSC) == nscStr)
     if (length(iNsc) == 0){
       warning(paste("No -logGI50 activity available for compound ", nscStr, ".", sep = ""))
       actRangeVals[nscStr] <- NA_real_

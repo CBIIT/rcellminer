@@ -21,7 +21,7 @@ getNumDrugActivityRepeats <- function(nscSet, onlyCellMinerExps=TRUE){
   names(numExps) <- nscSet
   
   for (nscStr in nscSet){
-    iNsc <- which(drugRepeatAnnot$nsc == nscStr)
+    iNsc <- which(as.character(drugRepeatAnnot$NSC) == nscStr)
     if (length(iNsc) == 0){
       warning(paste("No replicate experiment data available for compound ", nscStr, ".", sep = ""))
       numExps[nscStr] <- NA_real_
@@ -29,7 +29,7 @@ getNumDrugActivityRepeats <- function(nscSet, onlyCellMinerExps=TRUE){
     }
     
     if (onlyCellMinerExps){
-      numExps[nscStr] <- sum(drugRepeatAnnot$used_in_zscore[iNsc])
+      numExps[nscStr] <- sum(drugRepeatAnnot$USED_IN_ZSCORE[iNsc])
     } else{
       numExps[nscStr] <- length(iNsc)
     }

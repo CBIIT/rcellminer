@@ -6,12 +6,12 @@ test_that("getDrugActivityRepeatData returns the correct output", {
 	actData <- getDrugActivityRepeatData(nsc, onlyCellMinerExps = FALSE)
 	actDataCm <- getDrugActivityRepeatData(nsc)
 	
-	iNsc <- which(drugRepeatAnnot$nsc == nsc)
+	iNsc <- which(as.character(drugRepeatAnnot$NSC) == nsc)
 	tmp <- drugRepeatAct[iNsc, ]
 	rownames(tmp) <- paste0(nsc, "_", seq(nrow(tmp)))
 	expect_identical(tmp, actData)
 	
-	iNsc <- iNsc[drugRepeatAnnot$used_in_zscore[iNsc]]
+	iNsc <- iNsc[drugRepeatAnnot$USED_IN_ZSCORE[iNsc]]
 	tmp <- drugRepeatAct[iNsc, ]
 	rownames(tmp) <- paste0(nsc, "_", seq(nrow(tmp)))
 	expect_identical(tmp, actDataCm)

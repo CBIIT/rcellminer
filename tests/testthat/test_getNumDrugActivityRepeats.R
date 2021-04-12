@@ -11,10 +11,10 @@ test_that("getNumDrugActivityRepeats returns the correct output", {
 	names(numRepsCm) <- nscSet
 	
 	for (nsc in names(numReps)){
-		iNsc <- which(drugRepeatAnnot$nsc == nsc)
+		iNsc <- which(as.character(drugRepeatAnnot$NSC) == nsc)
 		numReps[nsc] <- length(iNsc)
 		
-		iNsc <- iNsc[drugRepeatAnnot$used_in_zscore[iNsc]]
+		iNsc <- iNsc[drugRepeatAnnot$USED_IN_ZSCORE[iNsc]]
 		numRepsCm[nsc] <- length(iNsc)
 	}
 	

@@ -6,11 +6,11 @@ test_that("getSmiles() returns correct information", {
 	expect_identical(unname(getSmiles("94600")), 
 									 "CC[C@@]1(O)C(=O)OCC2=C1C=C3N(Cc4cc5ccccc5nc34)C2=O")
 	expect_identical(unname(getSmiles("778665")), 
-									 "C1(=Cc2c(cc(c3ccc[nH]3)[nH]2)OC)C(=C(C(=N1)C)C(=O)CCCCCCCCC(=O)OC1C2(C(C3CCc4cc(ccc4C3CC2)O)CC1)C)C.Cl")
+									 "COc1cc([nH]c1\\C=C\\2/N=C(C)C(=C2C)C(=O)CCCCCCCCC(=O)O[C@H]3CC[C@H]4C5CCc6cc(O)ccc6C5CC[C@]34C)c7ccc[nH]7")
 	expect_true(is.na(getSmiles("NOT_IN_DB")))
 	
 	drugAnnot <- as(featureData(getAct(rcellminerData::drugData)), "data.frame")
-	expect_identical(rownames(drugAnnot), drugAnnot$NSC)
+	expect_identical(rownames(drugAnnot), as.character(drugAnnot$NSC))
 	nscToSmiles <- getSmiles(rownames(drugAnnot[20000:20861, ]))
 	expect_identical(names(nscToSmiles), rownames(drugAnnot[20000:20861, ]))
 	expect_identical(unname(nscToSmiles), as.character(drugAnnot[20000:20861, "SMILES"]))
