@@ -8,7 +8,8 @@ test_that("getDrugName() returns correct information", {
 	expect_identical(names(nscToDrugName), rownames(drugAnnotNamed))
 	expect_identical(unname(nscToDrugName), drugAnnotNamed$NAME)
 	expect_identical(unname(nscToDrugName["609699"]), "Topotecan")
-	expect_identical(unname(nscToDrugName["94600"]), "CAMPTOTHECIN")
+	## expect_identical(unname(nscToDrugName["94600"]), "CAMPTOTHECIN")
+	expect_identical(unname(nscToDrugName["94600"]), "Camptothecin")
 	
 	nscToDrugName <- getDrugName(rownames(drugAnnotUnamed))
 	expect_identical(names(nscToDrugName), rownames(drugAnnotUnamed))
